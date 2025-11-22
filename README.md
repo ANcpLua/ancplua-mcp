@@ -1,112 +1,8 @@
-# ancplua-mcp
-
-Family of C#/.NET Model Context Protocol (MCP) servers for dev workflows. Stdio + ASP.NET Core servers expose tools for filesystem, git, CI and diagnostics to Claude, IDEs and other agents. Designed as small, well-tested building blocks for AI-assisted development stacks.
-
-## Overview
-
-This repository provides two MCP server implementations:
-
-1. **WorkstationServer** - A stdio-based MCP server for direct integration with Claude Desktop and other MCP clients
-2. **HttpServer** - An ASP.NET Core-based HTTP MCP server for web-based integrations
-
-Both servers expose the same set of tools:
-- **FileSystemTools** - Read, write, list, and manage files and directories
-- **GitTools** - Git operations including status, log, diff, branch management
-- **CiTools** - Build, test, restore, and run commands for CI/CD workflows
-
-## Quick Start
-
-### Building the Project
-
-```bash
-dotnet build
-```
-
-### Running Tests
-
-```bash
-dotnet test
-```
-
-### Running WorkstationServer
-
-```bash
-dotnet run --project src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj
-```
-
-### Running HttpServer
-
-```bash
-dotnet run --project src/Ancplua.Mcp.HttpServer/Ancplua.Mcp.HttpServer.csproj
-```
-
-The HTTP server will start on https://localhost:5001 (or http://localhost:5000).
-
-## Configuration
-
-See the `docs/examples/` directory for MCP configuration examples:
-- `claude-workstation.mcp.json` - Claude Desktop configuration for WorkstationServer
-- `claude-http.mcp.json` - Claude Desktop configuration for HttpServer
-- `rider-workstation.mcp.json` - JetBrains Rider configuration
-
-## Architecture
-
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed architecture documentation.
-
-## Project Structure
-
-```
-ancplua-mcp/
-├── src/
-│   ├── Ancplua.Mcp.WorkstationServer/  # Stdio MCP server
-│   │   ├── Program.cs
-│   │   └── Tools/                      # Tool implementations
-│   │       ├── FileSystemTools.cs
-│   │       ├── GitTools.cs
-│   │       └── CiTools.cs
-│   └── Ancplua.Mcp.HttpServer/         # HTTP MCP server
-│       ├── Program.cs
-│       └── Tools/                      # Tool implementations
-├── tests/
-│   ├── Ancplua.Mcp.WorkstationServer.Tests/
-│   └── Ancplua.Mcp.HttpServer.Tests/
-├── docs/                               # Documentation
-│   ├── ARCHITECTURE.md
-│   ├── specs/                          # Specifications
-│   ├── decisions/                      # Architecture Decision Records (ADRs)
-│   └── examples/                       # Configuration examples
-└── tooling/
-    └── scripts/                        # Build and validation scripts
-```
-
-## Development
-
-### Prerequisites
-
-- .NET 9.0 SDK or later
-- Git
-
-### Local Validation
-
-Run the local validation script before committing:
-
-```bash
-./tooling/scripts/local-validate.sh
-```
-
-## Contributing
-
-Contributions are welcome! Please read the contributing guidelines before submitting PRs.
-
-## License
-
-MIT License - see [LICENSE](LICENSE) file for details.
-=======
 # ancplua-mcp (working name)
 
 **C# MCP servers for development workflows and tools.**
 
-This repository hosts one or more **Model Context Protocol (MCP)** servers implemented in C#.  
+This repository hosts one or more **Model Context Protocol (MCP)** servers implemented in C#.
 They expose local and remote tools (filesystem, repositories, CI, etc.) to LLM clients such as Claude, IDEs, and other agents.
 
 The focus is:
@@ -139,6 +35,60 @@ This repo is **not**:
   - Each server is focused and versioned.
 
 Other repositories connect to these servers using `.mcp.json` and MCP-aware clients.
+
+---
+
+## 2. Repository layout (target)
+
+The repository is converging toward:
+
+```text
+ancplua-mcp/
+├── README.md
+├── CLAUDE.md
+├── CHANGELOG.md
+├── .gitignore
+│
+├── src/
+│   ├── Ancplua.Mcp.WorkstationServer/
+│   │   ├── Ancplua.Mcp.WorkstationServer.csproj
+│   │   ├── Program.cs
+│   │   └── Tools/
+│   │       ├── FileSystemTools.cs
+│   │       ├── GitTools.cs
+│   │       └── CiTools.cs
+│   │
+│   └── Ancplua.Mcp.HttpServer/           # Optional HTTP-based MCP server
+│       ├── Ancplua.Mcp.HttpServer.csproj
+│       ├── Program.cs
+│       └── Tools/
+│
+├── tests/
+│   ├── Ancplua.Mcp.WorkstationServer.Tests/
+│   └── Ancplua.Mcp.HttpServer.Tests/
+│
+├── docs/
+│   ├── specs/
+│   │   ├── spec-template.md
+│   │   └── spec-*.md
+│   └── decisions/
+│       ├── adr-template.md
+│       └── adr-*.md
+│
+└── .github/
+    └── workflows/
+        ├── ci.yml
+        └── dependabot.yml
+```
+
+The actual structure may be simpler at the beginning. The important points:
+
+* **`src/`**: one project per MCP server.
+* **`tests/`**: corresponding test projects.
+* **`docs/specs/`**: feature-level specifications.
+* **`docs/decisions/`**: architecture decision records (ADRs).
+* **`CLAUDE.md`**: operational spec for Claude Code in this repo.
+* **`CHANGELOG.md`**: user-visible history.
 
 ---
 
@@ -261,7 +211,27 @@ The server will:
 
 Client configurations (for example, Claude or IDEs) will typically reside in a **different repo or local config directory**.
 
-See the `docs/examples/` directory for complete MCP configuration examples.
+Example `.mcp.json` a client might use:
+
+```json
+{
+  "mcpServers": {
+    "ancplua-workstation": {
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "src/Ancplua.Mcp.WorkstationServer"
+      ],
+      "env": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
+```
+
+This file is not required to live in this repo, but a `docs/specs` entry should describe the expected configuration pattern for each server.
 
 ---
 
@@ -269,7 +239,7 @@ See the `docs/examples/` directory for complete MCP configuration examples.
 
 ### 6.1 For Claude Code
 
-Claude’s behavior in this repo is defined in `CLAUDE.md` and includes:
+Claude's behavior in this repo is defined in `CLAUDE.md` and includes:
 
 * Full local permissions when explicitly launched with the appropriate flags.
 * No commits / pushes.
@@ -294,7 +264,7 @@ Typical workflow:
 4. For feature work:
 
    * Draft or update a spec in `docs/specs/`.
-   * If it’s an architectural choice, draft or update an ADR in `docs/decisions/`.
+   * If it's an architectural choice, draft or update an ADR in `docs/decisions/`.
 
 5. Implement tools in `src/` projects.
 
@@ -358,6 +328,8 @@ Changes that affect those contracts must be documented clearly so clients can ad
 
 ---
 
-## License
+## 9. License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+The repository is intended to use a permissive open-source license (for example, MIT).
+
+The exact terms must be defined in a `LICENSE` file at the root. Until this file exists, treat the repository as private and do not redistribute content without explicit permission.

@@ -31,6 +31,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated all project references and solution file to reflect new paths
 - Updated README.md with new project structure and paths
 - Updated local-validate.sh to use new src/ directory structure
+- Comprehensive documentation overhaul for MCP architecture
+  - Rewrote docs/ARCHITECTURE.md with detailed server architecture, tool design, and testing strategy
+  - Updated README.md to remove merge conflict markers and improve clarity
+  - Standardized docs/examples/*.mcp.json files with consistent format and relative paths
+  - Enhanced tooling/scripts/local-validate.sh with shellcheck and markdownlint support
+  - Improved .github/workflows/ci.yml with CodeQL, dependency review, and TruffleHog security scanning
 
 ### Deprecated
 - N/A

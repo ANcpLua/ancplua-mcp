@@ -1,85 +1,43 @@
-#!/bin/bash
-# Local validation script for ancplua-mcp
-# Run this before committing to ensure everything works
+#!/usr/bin/env bash
+set -euo pipefail
 
-set -e  # Exit on any error
+echo "🔍 Running ancplua-mcp local validation..."
 
-echo "========================================"
-echo "ancplua-mcp Local Validation"
-echo "========================================"
-echo ""
+# Restore and build all projects
+echo "➡️  dotnet restore"
+dotnet restore
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+echo "➡️  dotnet build (Release)"
+dotnet build --configuration Release --no-restore
 
-# Function to print success
-success() {
-    echo -e "${GREEN}✓${NC} $1"
-}
-
-# Function to print error
-error() {
-    echo -e "${RED}✗${NC} $1"
-}
-
-# Function to print info
-info() {
-    echo -e "${YELLOW}→${NC} $1"
-}
-
-# Check if dotnet is installed
-info "Checking for .NET SDK..."
-if ! command -v dotnet &> /dev/null; then
-    error ".NET SDK is not installed"
-    exit 1
-fi
-success ".NET SDK found: $(dotnet --version)"
-echo ""
-
-# Restore dependencies
-info "Restoring dependencies..."
-if dotnet restore; then
-    success "Dependencies restored"
+# Run tests if any test projects exist
+if ls tests/*.sln tests/*/*.csproj >/dev/null 2>&1; then
+  echo "➡️  dotnet test (Release)"
+  dotnet test --configuration Release --no-build
 else
-    error "Failed to restore dependencies"
-    exit 1
+  echo "ℹ️  No test projects found under tests/. Skipping dotnet test."
 fi
-echo ""
 
-# Build the solution
-info "Building solution..."
-if dotnet build --no-restore; then
-    success "Build succeeded"
+# Optional: lint shell scripts if shellcheck is available
+if command -v shellcheck >/dev/null 2>&1; then
+  echo "➡️  shellcheck on tooling/scripts/*.sh"
+  shopt -s nullglob || true
+  SCRIPTS=(tooling/scripts/*.sh)
+  if [ "${#SCRIPTS[@]}" -gt 0 ]; then
+    shellcheck "${SCRIPTS[@]}"
+  else
+    echo "ℹ️  No shell scripts found under tooling/scripts/. Skipping shellcheck."
+  fi
 else
-    error "Build failed"
-    exit 1
+  echo "⚠️  'shellcheck' not found. Skipping shell script checks."
 fi
-echo ""
 
-# Run tests
-info "Running tests..."
-if dotnet test --no-build --verbosity normal; then
-    success "All tests passed"
+# Optional: lint markdown if markdownlint is available
+if command -v markdownlint >/dev/null 2>&1; then
+  echo "➡️  markdownlint on docs/**/*.md and root *.md"
+  markdownlint "docs/**/*.md" "*.md" || true
 else
-    error "Tests failed"
-    exit 1
-fi
-echo ""
-
-# Check for common issues
-info "Checking for common issues..."
-
-# Check for TODO or FIXME comments
-if grep -r "TODO\|FIXME" --include="*.cs" src/ tests/ 2>/dev/null | grep -v "Binary file"; then
-    echo -e "${YELLOW}⚠${NC} Found TODO/FIXME comments (review before release)"
-else
-    success "No TODO/FIXME comments found"
+  echo "⚠️  'markdownlint' not found. Skipping markdown checks."
 fi
 
-echo ""
-echo "========================================"
-echo -e "${GREEN}All validations passed!${NC}"
-echo "========================================"
+echo "✅ ancplua-mcp local validation completed."
