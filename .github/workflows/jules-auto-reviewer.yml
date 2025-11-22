@@ -10,9 +10,13 @@
 
 name: Jules Code Review (Safe Mode)
 
+# DISABLED: BeksOmega/jules-action@v1 does not exist
+# Jules should be used via API, not as a GitHub Action
+# See: https://developers.google.com/jules/api
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_dispatch:  # Manual trigger only
+  # pull_request:
+  #   types: [opened, synchronize, reopened]
 
 permissions:
   contents: read  # Read-only, no write permissions
