@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - ModelContextProtocol.AspNetCore 0.3.0-preview.4 package for HttpServer
   - MCP attributes ([McpServerToolType], [McpServerTool], [Description]) on all tools
 - Test projects for both servers
+- Ancplua.Mcp.Testing shared test helpers project
+  - McpTestHost for in-process MCP server testing
+  - Test extension methods and utilities
 - Documentation (README, CLAUDE integration guide, ARCHITECTURE)
 - Example configuration files for Claude Desktop and JetBrains Rider
 - Local validation script
@@ -24,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dependabot configuration
 - GitHub Copilot instructions file (.github/copilot-instructions.md)
 - global.json for .NET SDK version pinning (9.0)
+- .editorconfig for consistent C# code style
+- Directory.Packages.props for centralized package version management
 
 ### Changed
 - Reorganized project structure to follow target architecture
