@@ -49,6 +49,22 @@ See the `docs/examples/` directory for MCP configuration examples:
 - `claude-http.mcp.json` - Claude Desktop configuration for HttpServer
 - `rider-workstation.mcp.json` - JetBrains Rider configuration
 
+## GitHub Actions & Code Review
+
+This repository includes automated PR reviews powered by **Gemini 3.0 Pro**:
+
+- **Automatic Review**: AI reviews are automatically triggered when PRs are opened, updated, or reopened
+- **On-Demand Review**: Comment `/gemini-review` on any PR to request an immediate review
+- **Smart Filtering**: Excludes documentation, configs, and generated files from review
+
+### Setup
+
+1. Get a Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey)
+2. Add it as a repository secret named `GEMINI_API_KEY`
+3. Open a PR and watch Gemini provide automated feedback
+
+For detailed setup instructions, see [docs/gemini-pr-review-setup.md](docs/gemini-pr-review-setup.md).
+
 ## Architecture
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed architecture documentation.
