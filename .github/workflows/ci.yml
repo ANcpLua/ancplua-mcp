@@ -2,21 +2,67 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+
+    - name: Test
+      run: dotnet test --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=test-results.trx"
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: '**/test-results.trx'
+
   lint-and-validate:
     name: Lint & Local Validation
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Format check
+        run: dotnet format --verify-no-changes --verbosity diagnostic
+        continue-on-error: true
 
       - name: Install shellcheck
         run: |
@@ -27,14 +73,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "npm"
 
-      - name: Install markdownlint-cli and actionlint
-        run: |
-          npm install -g markdownlint-cli
-          curl -sSLo /usr/local/bin/actionlint \
-            https://github.com/rhysd/actionlint/releases/latest/download/actionlint_Linux_x86_64
-          chmod +x /usr/local/bin/actionlint
+      - name: Install markdownlint-cli
+        run: npm install -g markdownlint-cli
 
       - name: Run local validation
         run: |
@@ -54,7 +95,7 @@ jobs:
         language: [ "javascript-typescript", "csharp" ]
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Initialize CodeQL
@@ -77,18 +118,18 @@ jobs:
       pull-requests: read
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Dependency review
         uses: actions/dependency-review-action@v4
 
   trufflehog:
-    name: Secret scan (TruffleHog)
+    name: Secret Scan (TruffleHog)
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Run TruffleHog

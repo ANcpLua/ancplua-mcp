@@ -1,12 +1,14 @@
+using System.ComponentModel;
 using System.Diagnostics;
-using System.Text;
+using ModelContextProtocol;
 
-namespace HttpServer.Tools;
+namespace Ancplua.Mcp.HttpServer.Tools;
 
 /// <summary>
 /// Provides MCP tools for Git operations including status, log, diff, and branch management.
 /// </summary>
-public class GitTools
+[McpServerToolType]
+public static class GitTools
 {
     /// <summary>
     /// Executes a git command and returns the output.
@@ -65,7 +67,10 @@ public class GitTools
     /// </summary>
     /// <param name="repositoryPath">The path to the git repository.</param>
     /// <returns>The git status output.</returns>
-    public static async Task<string> GetStatusAsync(string? repositoryPath = null)
+    [McpServerTool]
+    [Description("Gets the status of the git repository")]
+    public static async Task<string> GetStatusAsync(
+        [Description("The path to the git repository (optional)")] string? repositoryPath = null)
     {
         return await ExecuteGitCommandAsync("status --porcelain", repositoryPath);
     }
@@ -76,7 +81,11 @@ public class GitTools
     /// <param name="repositoryPath">The path to the git repository.</param>
     /// <param name="maxCount">Maximum number of commits to return.</param>
     /// <returns>The git log output.</returns>
-    public static async Task<string> GetLogAsync(string? repositoryPath = null, int maxCount = 10)
+    [McpServerTool]
+    [Description("Gets the git log for the repository")]
+    public static async Task<string> GetLogAsync(
+        [Description("The path to the git repository (optional)")] string? repositoryPath = null,
+        [Description("Maximum number of commits to return")] int maxCount = 10)
     {
         return await ExecuteGitCommandAsync($"log --oneline --max-count={maxCount}", repositoryPath);
     }
@@ -86,7 +95,10 @@ public class GitTools
     /// </summary>
     /// <param name="repositoryPath">The path to the git repository.</param>
     /// <returns>The git diff output.</returns>
-    public static async Task<string> GetDiffAsync(string? repositoryPath = null)
+    [McpServerTool]
+    [Description("Gets the diff for the repository")]
+    public static async Task<string> GetDiffAsync(
+        [Description("The path to the git repository (optional)")] string? repositoryPath = null)
     {
         return await ExecuteGitCommandAsync("diff", repositoryPath);
     }
@@ -96,7 +108,10 @@ public class GitTools
     /// </summary>
     /// <param name="repositoryPath">The path to the git repository.</param>
     /// <returns>The list of branches.</returns>
-    public static async Task<string> ListBranchesAsync(string? repositoryPath = null)
+    [McpServerTool]
+    [Description("Lists branches in the repository")]
+    public static async Task<string> ListBranchesAsync(
+        [Description("The path to the git repository (optional)")] string? repositoryPath = null)
     {
         return await ExecuteGitCommandAsync("branch -a", repositoryPath);
     }
@@ -106,7 +121,10 @@ public class GitTools
     /// </summary>
     /// <param name="repositoryPath">The path to the git repository.</param>
     /// <returns>The current branch name.</returns>
-    public static async Task<string> GetCurrentBranchAsync(string? repositoryPath = null)
+    [McpServerTool]
+    [Description("Gets the current branch name")]
+    public static async Task<string> GetCurrentBranchAsync(
+        [Description("The path to the git repository (optional)")] string? repositoryPath = null)
     {
         var output = await ExecuteGitCommandAsync("rev-parse --abbrev-ref HEAD", repositoryPath);
         return output.Trim();
@@ -117,7 +135,11 @@ public class GitTools
     /// </summary>
     /// <param name="files">The files to add (e.g., "." for all files).</param>
     /// <param name="repositoryPath">The path to the git repository.</param>
-    public static async Task AddAsync(string files, string? repositoryPath = null)
+    [McpServerTool]
+    [Description("Adds files to the staging area")]
+    public static async Task AddAsync(
+        [Description("The files to add (e.g., '.' for all files)")] string files,
+        [Description("The path to the git repository (optional)")] string? repositoryPath = null)
     {
         await ExecuteGitCommandAsync(new[] { "add", files }, repositoryPath);
     }
@@ -127,7 +149,11 @@ public class GitTools
     /// </summary>
     /// <param name="message">The commit message.</param>
     /// <param name="repositoryPath">The path to the git repository.</param>
-    public static async Task CommitAsync(string message, string? repositoryPath = null)
+    [McpServerTool]
+    [Description("Commits staged changes with a message")]
+    public static async Task CommitAsync(
+        [Description("The commit message")] string message,
+        [Description("The path to the git repository (optional)")] string? repositoryPath = null)
     {
         await ExecuteGitCommandAsync(new[] { "commit", "-m", message }, repositoryPath);
     }

@@ -115,7 +115,7 @@ LLM client abstractions (optional):
 
 Target framework:
 
-* Intended for modern .NET (for example, .NET 8/9/10).
+* Intended for modern .NET (for example, .NET 10).
 * Exact `TargetFramework` and package versions are managed in project files and/or shared props.
 
 ---
@@ -251,7 +251,7 @@ Typical workflow:
 
 1. Clone the repo.
 
-2. Ensure .NET SDK is installed.
+2. Ensure .NET 10.0 SDK or later is installed.
 
 3. Run:
 

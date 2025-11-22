@@ -1,11 +1,14 @@
+using System.ComponentModel;
 using System.Diagnostics;
+using ModelContextProtocol;
 
-namespace WorkstationServer.Tools;
+namespace Ancplua.Mcp.WorkstationServer.Tools;
 
 /// <summary>
 /// Provides MCP tools for CI/CD operations including running builds, tests, and diagnostics.
 /// </summary>
-public class CiTools
+[McpServerToolType]
+public static class CiTools
 {
     /// <summary>
     /// Executes a command with arguments and returns the output.
@@ -68,7 +71,10 @@ public class CiTools
     /// </summary>
     /// <param name="projectPath">The path to the project or solution.</param>
     /// <returns>The build output.</returns>
-    public static async Task<string> BuildAsync(string? projectPath = null)
+    [McpServerTool]
+    [Description("Runs the build command for the project")]
+    public static async Task<string> BuildAsync(
+        [Description("The path to the project or solution (optional)")] string? projectPath = null)
     {
         var path = projectPath ?? ".";
         return await ExecuteCommandAsync("dotnet", new[] { "build", path }, Path.GetDirectoryName(path));
@@ -79,7 +85,10 @@ public class CiTools
     /// </summary>
     /// <param name="projectPath">The path to the test project.</param>
     /// <returns>The test output.</returns>
-    public static async Task<string> RunTestsAsync(string? projectPath = null)
+    [McpServerTool]
+    [Description("Runs tests for the project")]
+    public static async Task<string> RunTestsAsync(
+        [Description("The path to the test project (optional)")] string? projectPath = null)
     {
         var path = projectPath ?? ".";
         return await ExecuteCommandAsync("dotnet", new[] { "test", path }, Path.GetDirectoryName(path));
@@ -90,7 +99,10 @@ public class CiTools
     /// </summary>
     /// <param name="projectPath">The path to the project or solution.</param>
     /// <returns>The restore output.</returns>
-    public static async Task<string> RestoreAsync(string? projectPath = null)
+    [McpServerTool]
+    [Description("Restores dependencies for the project")]
+    public static async Task<string> RestoreAsync(
+        [Description("The path to the project or solution (optional)")] string? projectPath = null)
     {
         var path = projectPath ?? ".";
         return await ExecuteCommandAsync("dotnet", new[] { "restore", path }, Path.GetDirectoryName(path));
@@ -102,7 +114,11 @@ public class CiTools
     /// <param name="command">The command to run.</param>
     /// <param name="workingDirectory">The working directory.</param>
     /// <returns>The command output.</returns>
-    public static async Task<string> RunCommandAsync(string command, string? workingDirectory = null)
+    [McpServerTool]
+    [Description("Runs a custom command in the specified directory")]
+    public static async Task<string> RunCommandAsync(
+        [Description("The command to run")] string command,
+        [Description("The working directory (optional)")] string? workingDirectory = null)
     {
         return await ExecuteCommandAsync(command, workingDirectory);
     }
@@ -111,6 +127,8 @@ public class CiTools
     /// Gets system diagnostics information.
     /// </summary>
     /// <returns>System diagnostics information.</returns>
+    [McpServerTool]
+    [Description("Gets system diagnostics information")]
     public static string GetDiagnostics()
     {
         var diagnostics = new System.Text.StringBuilder();
