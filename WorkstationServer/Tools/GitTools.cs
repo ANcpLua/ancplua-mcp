@@ -11,21 +11,25 @@ public class GitTools
     /// <summary>
     /// Executes a git command and returns the output.
     /// </summary>
-    /// <param name="arguments">The git command arguments.</param>
+    /// <param name="arguments">The git command arguments as a list.</param>
     /// <param name="workingDirectory">The working directory for the git command.</param>
     /// <returns>The output of the git command.</returns>
-    private static async Task<string> ExecuteGitCommandAsync(string arguments, string? workingDirectory = null)
+    private static async Task<string> ExecuteGitCommandAsync(IEnumerable<string> arguments, string? workingDirectory = null)
     {
         var processStartInfo = new ProcessStartInfo
         {
             FileName = "git",
-            Arguments = arguments,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
             CreateNoWindow = true,
             WorkingDirectory = workingDirectory ?? Directory.GetCurrentDirectory()
         };
+
+        foreach (var arg in arguments)
+        {
+            processStartInfo.ArgumentList.Add(arg);
+        }
 
         using var process = Process.Start(processStartInfo);
         if (process == null)
@@ -43,6 +47,17 @@ public class GitTools
         }
 
         return output;
+    }
+
+    /// <summary>
+    /// Executes a git command with string arguments and returns the output.
+    /// </summary>
+    /// <param name="arguments">The git command arguments as a string.</param>
+    /// <param name="workingDirectory">The working directory for the git command.</param>
+    /// <returns>The output of the git command.</returns>
+    private static async Task<string> ExecuteGitCommandAsync(string arguments, string? workingDirectory = null)
+    {
+        return await ExecuteGitCommandAsync(arguments.Split(' ', StringSplitOptions.RemoveEmptyEntries), workingDirectory);
     }
 
     /// <summary>
@@ -114,7 +129,6 @@ public class GitTools
     /// <param name="repositoryPath">The path to the git repository.</param>
     public static async Task CommitAsync(string message, string? repositoryPath = null)
     {
-        var escapedMessage = message.Replace("\"", "\\\"");
-        await ExecuteGitCommandAsync($"commit -m \"{escapedMessage}\"", repositoryPath);
+        await ExecuteGitCommandAsync(new[] { "commit", "-m", message }, repositoryPath);
     }
 }

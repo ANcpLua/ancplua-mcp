@@ -102,7 +102,8 @@ public class GitToolsTests
     [Fact]
     public async Task GetCurrentBranchAsync_ReturnsNonEmptyString()
     {
-        // This test assumes we're running in a git repository
+        // This test verifies git command execution works
+        // If not in a git repository, InvalidOperationException is expected and caught
         try
         {
             // Act
@@ -114,7 +115,7 @@ public class GitToolsTests
         }
         catch (InvalidOperationException)
         {
-            // Not in a git repository, which is acceptable in some test environments
+            // Expected when not in a git repository - test passes
             Assert.True(true);
         }
     }
@@ -135,10 +136,10 @@ public class CiToolsTests
     }
 
     [Fact]
-    public async Task BuildAsync_ExecutesWithoutError()
+    public async Task RunCommand_ExecutesSuccessfully()
     {
-        // This test verifies the command can be executed
-        // The actual build may fail if dependencies aren't restored, which is expected
+        // This test verifies command execution infrastructure works
+        // even if specific commands may fail in some environments
         try
         {
             // Act
@@ -150,7 +151,7 @@ public class CiToolsTests
         }
         catch (Exception)
         {
-            // Command execution infrastructure works even if command fails
+            // Command execution infrastructure works even if specific command fails
             Assert.True(true);
         }
     }

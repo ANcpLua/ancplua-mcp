@@ -15,23 +15,21 @@ public class CiTools
     /// <returns>The output of the command.</returns>
     private static async Task<string> ExecuteCommandAsync(string command, string? workingDirectory = null)
     {
+        // Parse command into executable and arguments
+        var parts = command.Split(' ', 2);
+        var executable = parts[0];
+        var arguments = parts.Length > 1 ? parts[1] : string.Empty;
+
         var processStartInfo = new ProcessStartInfo
         {
-            FileName = "/bin/bash",
-            Arguments = $"-c \"{command.Replace("\"", "\\\"")}\"",
+            FileName = executable,
+            Arguments = arguments,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
             CreateNoWindow = true,
             WorkingDirectory = workingDirectory ?? Directory.GetCurrentDirectory()
         };
-
-        // For Windows compatibility
-        if (OperatingSystem.IsWindows())
-        {
-            processStartInfo.FileName = "cmd.exe";
-            processStartInfo.Arguments = $"/c {command}";
-        }
 
         using var process = Process.Start(processStartInfo);
         if (process == null)
