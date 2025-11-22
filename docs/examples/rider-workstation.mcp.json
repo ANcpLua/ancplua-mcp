@@ -7,7 +7,7 @@
   "args": [
     "run",
     "--project",
-    "${workspaceFolder}/WorkstationServer/WorkstationServer.csproj"
+    "${workspaceFolder}/src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj"
   ],
   "env": {
     "DOTNET_ENVIRONMENT": "Development"
