@@ -7,15 +7,87 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  statuses: read
 
 jobs:
   review-and-merge:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+    concurrency:
+      group: jules-auto-merge-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Wait for required checks
+        id: wait-for-checks
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const requiredChecks = [
+              "Build and Test",
+              "Code Quality",
+              "CodeQL Analysis"
+            ];
+
+            const { owner, repo } = context.repo;
+            const ref = context.payload.pull_request.head.sha;
+            const timeoutAt = Date.now() + 30 * 60 * 1000; // 30 minutes
+
+            async function loadCheckRuns() {
+              const response = await github.rest.checks.listForRef({
+                owner,
+                repo,
+                ref,
+                per_page: 100,
+              });
+              return response.data.check_runs;
+            }
+
+            async function waitForChecks() {
+              while (true) {
+                const runs = await loadCheckRuns();
+                const results = requiredChecks.map((name) => {
+                  const match = runs.find((run) => run.name === name);
+                  return {
+                    name,
+                    status: match?.status,
+                    conclusion: match?.conclusion,
+                  };
+                });
+
+                const pending = results.filter((r) => r.status !== "completed");
+                if (pending.length === 0) {
+                  const failed = results.filter((r) => r.conclusion !== "success");
+                  if (failed.length === 0) {
+                    core.info("All required checks succeeded.");
+                    return;
+                  }
+
+                  const details = failed
+                    .map((f) => `${f.name}: ${f.conclusion ?? "unknown"}`)
+                    .join(", ");
+                  throw new Error(`Required checks failed: ${details}`);
+                }
+
+                if (Date.now() > timeoutAt) {
+                  throw new Error("Timed out waiting for required status checks to complete.");
+                }
+
+                core.info(
+                  `Waiting for checks to complete: ${pending
+                    .map((p) => `${p.name} (${p.status ?? "missing"})`)
+                    .join(", ")}`
+                );
+                await new Promise((resolve) => setTimeout(resolve, 15000));
+              }
+            }
+
+            await waitForChecks();
 
       - name: Jules Review
         uses: BeksOmega/jules-action@v1
@@ -34,6 +106,7 @@ jobs:
           commit_message: "refactor: Jules auto-fixes"
 
       - name: Auto-merge PR
+        if: steps.wait-for-checks.outcome == 'success'
         run: gh pr merge ${{ github.event.pull_request.number }} --auto --merge --delete-branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
