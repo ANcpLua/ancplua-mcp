@@ -39,6 +39,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - User-defined compound assignment operators
   - Null-conditional assignment
   - Best practices and usage examples for ancplua-mcp
+- GitHub Actions workflow for automated PR reviews with Gemini 3.0 Pro
+  - Automatic review on PR open/update/reopen
+  - On-demand review via `/gemini-review` comment
+  - Configurable file exclusions (docs, configs, lock files)
+  - Comprehensive setup guide in docs/gemini-pr-review-setup.md
 
 ### Changed
 - Reorganized project structure to follow target architecture
@@ -56,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Tool discovery now automatic via WithToolsFromAssembly()
 - Comprehensive documentation overhaul for MCP architecture
   - Rewrote docs/ARCHITECTURE.md with detailed server architecture, tool design, and testing strategy
-  - Updated README.md to remove merge conflict markers and improve clarity
+  - Updated README.md with comprehensive architectural documentation and conventions
   - Standardized docs/examples/*.mcp.json files with consistent format and relative paths
   - Enhanced tooling/scripts/local-validate.sh with shellcheck and markdownlint support
   - Improved .github/workflows/ci.yml with CodeQL, dependency review, and TruffleHog security scanning
