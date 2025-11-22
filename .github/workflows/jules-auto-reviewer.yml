@@ -1,0 +1,93 @@
+# SAFE VERSION - Jules Code Review (Review Only, No Auto-Merge)
+#
+# This is a SAFE version of Jules automation that:
+# - Provides review comments only
+# - Does NOT auto-commit fixes
+# - Does NOT auto-merge PRs
+# - Requires human approval before merge
+#
+# To activate: Rename to jules-auto-reviewer.yml
+
+name: Jules Code Review (Safe Mode)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read  # Read-only, no write permissions
+  pull-requests: write  # Can comment on PRs
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+
+    # Only run for PRs not created by bots to avoid infinite loops
+    if: |
+      github.event.pull_request.user.type != 'Bot' &&
+      !startsWith(github.event.pull_request.head.ref, 'jules/')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # IMPORTANT: Verify this action exists before using!
+      # As of 2025-11-22, BeksOmega/jules-action@v1 returns 404
+      # Check: https://github.com/BeksOmega/jules-action
+      - name: Jules Review
+        uses: BeksOmega/jules-action@v1
+        with:
+          prompt: |
+            Review this pull request for:
+
+            1. **Code Quality**
+               - Best practices for C# and .NET
+               - SOLID principles
+               - Design patterns appropriateness
+
+            2. **Security**
+               - Potential vulnerabilities
+               - Unsafe code patterns
+               - Secrets or credentials
+
+            3. **Performance**
+               - Inefficient algorithms
+               - Resource leaks
+               - Database query optimization
+
+            4. **Maintainability**
+               - Code clarity and readability
+               - Documentation completeness
+               - Test coverage
+
+            **IMPORTANT:**
+            - Provide suggestions as REVIEW COMMENTS only
+            - DO NOT auto-fix issues
+            - DO NOT commit changes
+            - Let humans decide what to change
+
+            Focus on C# and .NET code. Skip:
+            - Documentation files (*.md)
+            - Configuration files (*.json, *.yml)
+            - Generated code (bin/, obj/)
+
+          jules_api_key: ${{ secrets.JULES_API_KEY }}
+          include_last_commit: true
+          include_commit_log: true
+
+      # NO AUTO-COMMIT STEP
+      # NO AUTO-MERGE STEP
+      # Humans review Jules' comments and decide what to do
+
+      - name: Comment with review status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ Jules has completed the review. Please check the review comments above.'
+            })

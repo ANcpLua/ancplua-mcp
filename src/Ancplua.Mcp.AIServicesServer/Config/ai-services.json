@@ -1,0 +1,106 @@
+{
+  "services": {
+    "claude": {
+      "type": "anthropic",
+      "apiKey": "${ANTHROPIC_API_KEY}",
+      "model": "claude-sonnet-4.5",
+      "enabled": true,
+      "capabilities": [
+        "code-review",
+        "generation",
+        "refactoring",
+        "analysis"
+      ]
+    },
+    "jules": {
+      "type": "google-jules",
+      "apiKey": "${JULES_API_KEY}",
+      "enabled": true,
+      "capabilities": [
+        "pr-review",
+        "code-fixes",
+        "cleanup",
+        "refactoring"
+      ]
+    },
+    "gemini": {
+      "type": "google-gemini",
+      "apiKey": "${GEMINI_API_KEY}",
+      "model": "gemini-3.0-pro",
+      "enabled": true,
+      "capabilities": [
+        "code-review",
+        "generation",
+        "analysis"
+      ]
+    },
+    "chatgpt": {
+      "type": "openai",
+      "apiKey": "${OPENAI_API_KEY}",
+      "model": "gpt-4-turbo",
+      "enabled": false,
+      "capabilities": [
+        "code-review",
+        "generation",
+        "explanation"
+      ]
+    },
+    "copilot": {
+      "type": "github-copilot",
+      "authentication": "github-app",
+      "enabled": true,
+      "capabilities": [
+        "code-completion",
+        "generation",
+        "chat"
+      ]
+    },
+    "coderabbit": {
+      "type": "github-app",
+      "installation": "repository",
+      "enabled": true,
+      "capabilities": [
+        "pr-review",
+        "code-quality",
+        "security"
+      ]
+    },
+    "codecov": {
+      "type": "codecov",
+      "apiKey": "${CODECOV_API_KEY}",
+      "enabled": true,
+      "capabilities": [
+        "coverage-analysis",
+        "test-quality"
+      ]
+    }
+  },
+  "defaultWorkflows": {
+    "comprehensive-pr-review": {
+      "description": "Multi-service PR review with architecture, quality, security, and coverage analysis",
+      "services": [
+        "claude",
+        "coderabbit",
+        "codecov"
+      ],
+      "parallel": true
+    },
+    "code-generation-pipeline": {
+      "description": "Generate, review, and validate code using multiple AI services",
+      "steps": [
+        {
+          "service": "copilot",
+          "action": "generate"
+        },
+        {
+          "service": "claude",
+          "action": "review"
+        },
+        {
+          "service": "jules",
+          "action": "apply-fixes"
+        }
+      ]
+    }
+  }
+}

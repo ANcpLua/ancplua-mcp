@@ -1,0 +1,52 @@
+codecov:
+  require_ci_to_pass: yes
+  notify:
+    wait_for_ci: yes
+
+coverage:
+  precision: 2
+  round: down
+  range: 70..90
+
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 2%
+        if_ci_failed: error
+        informational: false
+        only_pulls: false
+
+    patch:
+      default:
+        target: 70%
+        threshold: 5%
+        if_ci_failed: error
+        informational: false
+        only_pulls: true
+
+  changes:
+    default:
+      if_ci_failed: error
+
+comment:
+  layout: "diff, flags, files"
+  behavior: default
+  require_changes: false
+  require_base: no
+  require_head: yes
+
+flags:
+  unittests:
+    paths:
+      - "tests/"
+    carryforward: true
+
+ignore:
+  - "**/*.Designer.cs"
+  - "**/obj/**"
+  - "**/bin/**"
+  - "**/*.g.cs"
+  - "docs/**"
+  - "tooling/**"
+  - "**/*Tests.cs"

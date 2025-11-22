@@ -40,8 +40,18 @@ jobs:
     - name: Build
       run: dotnet build --no-restore --configuration Release
 
-    - name: Test
-      run: dotnet test --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=test-results.trx"
+    - name: Test with Coverage
+      run: dotnet test --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage --logger "trx;LogFileName=test-results.trx"
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: './coverage/**/coverage.cobertura.xml'
+        fail_ci_if_error: true
+        verbose: true
+        flags: unittests
+        name: ancplua-mcp-coverage
 
     - name: Upload test results
       uses: actions/upload-artifact@v5

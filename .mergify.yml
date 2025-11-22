@@ -1,0 +1,129 @@
+queue_rules:
+  - name: default
+    conditions:
+      - check-success=Build and Test
+      - check-success=CodeQL Analysis
+      - check-success=Code Quality
+    speculative_checks: 5
+    batch_size: 3
+    batch_max_wait_time: 30min
+
+pull_request_rules:
+  # Auto-merge for Renovate dependency PRs (minor/patch)
+  - name: Auto-merge Renovate minor/patch updates
+    conditions:
+      - author=renovate[bot]
+      - check-success=Build and Test
+      - check-success=CodeQL Analysis
+      - check-success=Code Quality
+      - or:
+        - title~=^fix\(deps\):
+        - title~=^chore\(deps\):
+      - -title~=major
+      - label=dependencies
+    actions:
+      queue:
+        name: default
+        method: squash
+        commit_message_template: |
+          {{ title }} (#{{ number }})
+
+          {{ body }}
+
+  # Auto-approve Renovate PRs for faster merging
+  - name: Auto-approve Renovate PRs
+    conditions:
+      - author=renovate[bot]
+      - label=dependencies
+      - -label=security
+      - -label=requires-review
+    actions:
+      review:
+        type: APPROVE
+        message: "Auto-approving dependency update after CI passes"
+
+  # Security updates need manual review
+  - name: Request review for security updates
+    conditions:
+      - author=renovate[bot]
+      - label=security
+    actions:
+      review:
+        type: REQUEST_CHANGES
+        message: "Security update detected. Please review manually before merging."
+      request_reviews:
+        users:
+          - ANcpLua
+
+  # MCP SDK updates need manual review (preview versions)
+  - name: Request review for MCP SDK updates
+    conditions:
+      - author=renovate[bot]
+      - label=mcp-sdk
+    actions:
+      comment:
+        message: |
+          MCP SDK update detected. Please review carefully:
+          - Check for breaking changes in release notes
+          - Verify tool signatures remain compatible
+          - Test with Claude Desktop and other MCP clients
+      request_reviews:
+        users:
+          - ANcpLua
+
+  # Auto-label PRs based on files changed
+  - name: Label .NET code changes
+    conditions:
+      - files~=\.cs$
+    actions:
+      label:
+        add:
+          - dotnet
+
+  - name: Label documentation changes
+    conditions:
+      - files~=^docs/
+      - files~=\.md$
+    actions:
+      label:
+        add:
+          - documentation
+
+  - name: Label CI/workflow changes
+    conditions:
+      - files~=^\.github/workflows/
+    actions:
+      label:
+        add:
+          - ci
+
+  # Keep PRs up to date with main
+  - name: Auto-update PRs with main branch
+    conditions:
+      - -draft
+      - -conflict
+      - -closed
+    actions:
+      update:
+        method: merge
+
+  # Close stale PRs
+  - name: Close stale PRs after 90 days
+    conditions:
+      - -closed
+      - updated-at<90 days ago
+    actions:
+      close:
+        message: "Closing due to inactivity. Please reopen if still relevant."
+
+  # Warn about large PRs
+  - name: Warn on large PRs
+    conditions:
+      - files>20
+    actions:
+      comment:
+        message: |
+          ⚠️ This PR changes more than 20 files. Consider:
+          - Breaking it into smaller, focused PRs
+          - Ensuring adequate test coverage
+          - Updating documentation and specs
