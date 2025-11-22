@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Architecture Decision Record: ADR-0001 for initial server architecture
 - Proper `src/` directory structure for projects
 - Formal namespacing convention: `Ancplua.Mcp.<ServerName>`
+- `Microsoft.Extensions.Hosting` and `Microsoft.Extensions.Logging.Console` to WorkstationServer
 
 ### Changed
 - Reorganized repository structure: moved projects to `src/` directory
@@ -28,6 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - Removed `CLAUDE.md` (replaced with `.github/copilot-instructions.md`)
+
+### Notes
+- MCP SDK packages (`ModelContextProtocol`, `ModelContextProtocol.AspNetCore`) integration pending availability on NuGet
+- Program.cs files contain placeholder implementations until MCP SDK is integrated
 
 ## [0.1.0] - 2025-11-22
 
