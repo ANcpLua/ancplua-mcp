@@ -1,26 +1,37 @@
+# Mergify Configuration
+# Safe auto-merge rules for ancplua-mcp repository
+# Documentation: https://docs.mergify.com
+
 queue_rules:
   - name: default
     conditions:
-      - check-success=Build and Test
-      - check-success=CodeQL Analysis
-      - check-success=Code Quality
-    speculative_checks: 5
-    batch_size: 3
-    batch_max_wait_time: 30min
+      # All CI checks must pass
+      - check-success=build-and-test
+      - check-success=code-quality
+      - check-success=codeql / Analyze (csharp)
+      - check-success=secret-scan
+      - check-success=security-scan
+
+      # Require 2 approvals (matches GitHub ruleset)
+      - "#approved-reviews-by>=2"
+
+      # No unresolved conversations
+      - "#changes-requested-reviews-by=0"
+
+      # Branch must be up to date
+      - base=main
+      - -draft
 
 pull_request_rules:
-  # Auto-merge for Renovate dependency PRs (minor/patch)
+  # Auto-merge for Renovate dependency updates (minor/patch only)
   - name: Auto-merge Renovate minor/patch updates
     conditions:
       - author=renovate[bot]
-      - check-success=Build and Test
-      - check-success=CodeQL Analysis
-      - check-success=Code Quality
-      - or:
-        - title~=^fix\(deps\):
-        - title~=^chore\(deps\):
+      - check-success=build-and-test
+      - check-success=code-quality
+      - check-success=codeql / Analyze (csharp)
       - -title~=major
-      - label=dependencies
+      - -label~=breaking
     actions:
       queue:
         name: default
@@ -30,100 +41,47 @@ pull_request_rules:
 
           {{ body }}
 
-  # Auto-approve Renovate PRs for faster merging
-  - name: Auto-approve Renovate PRs
+  # Auto-merge for approved PRs from trusted contributors
+  - name: Auto-merge approved PRs
     conditions:
-      - author=renovate[bot]
-      - label=dependencies
-      - -label=security
-      - -label=requires-review
+      - "#approved-reviews-by>=2"
+      - check-success=build-and-test
+      - check-success=code-quality
+      - check-success=codeql / Analyze (csharp)
+      - check-success=secret-scan
+      - check-success=security-scan
+      - -draft
+      - -label~=do-not-merge
+      - -label~=work-in-progress
     actions:
-      review:
-        type: APPROVE
-        message: "Auto-approving dependency update after CI passes"
+      queue:
+        name: default
+        method: merge
 
-  # Security updates need manual review
-  - name: Request review for security updates
-    conditions:
-      - author=renovate[bot]
-      - label=security
-    actions:
-      review:
-        type: REQUEST_CHANGES
-        message: "Security update detected. Please review manually before merging."
-      request_reviews:
-        users:
-          - ANcpLua
-
-  # MCP SDK updates need manual review (preview versions)
-  - name: Request review for MCP SDK updates
-    conditions:
-      - author=renovate[bot]
-      - label=mcp-sdk
-    actions:
-      comment:
-        message: |
-          MCP SDK update detected. Please review carefully:
-          - Check for breaking changes in release notes
-          - Verify tool signatures remain compatible
-          - Test with Claude Desktop and other MCP clients
-      request_reviews:
-        users:
-          - ANcpLua
-
-  # Auto-label PRs based on files changed
-  - name: Label .NET code changes
+  # Auto-label based on file changes
+  - name: Label .NET changes
     conditions:
       - files~=\.cs$
+      - files~=\.csproj$
     actions:
       label:
         add:
           - dotnet
+          - csharp
 
-  - name: Label documentation changes
-    conditions:
-      - files~=^docs/
-      - files~=\.md$
-    actions:
-      label:
-        add:
-          - documentation
-
-  - name: Label CI/workflow changes
+  - name: Label workflow changes
     conditions:
       - files~=^\.github/workflows/
     actions:
       label:
         add:
-          - ci
+          - ci-cd
+          - github-actions
 
-  # Keep PRs up to date with main
-  - name: Auto-update PRs with main branch
+  - name: Label documentation changes
     conditions:
-      - -draft
-      - -conflict
-      - -closed
+      - files~=\.md$
     actions:
-      update:
-        method: merge
-
-  # Close stale PRs
-  - name: Close stale PRs after 90 days
-    conditions:
-      - -closed
-      - updated-at<90 days ago
-    actions:
-      close:
-        message: "Closing due to inactivity. Please reopen if still relevant."
-
-  # Warn about large PRs
-  - name: Warn on large PRs
-    conditions:
-      - files>20
-    actions:
-      comment:
-        message: |
-          ⚠️ This PR changes more than 20 files. Consider:
-          - Breaking it into smaller, focused PRs
-          - Ensuring adequate test coverage
-          - Updating documentation and specs
+      label:
+        add:
+          - documentation

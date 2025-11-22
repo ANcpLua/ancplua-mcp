@@ -4,15 +4,26 @@ Family of C#/.NET Model Context Protocol (MCP) servers for dev workflows. Stdio 
 
 ## Overview
 
-This repository provides two MCP server implementations:
+This repository provides four MCP server implementations:
 
-1. **WorkstationServer** - A stdio-based MCP server for direct integration with Claude Desktop and other MCP clients
-2. **HttpServer** - An ASP.NET Core-based HTTP MCP server for web-based integrations
+1. **WorkstationServer** - Stdio-based MCP server for local dev tools (filesystem, git, CI)
+2. **HttpServer** - ASP.NET Core HTTP MCP server for web-based integrations
+3. **AIServicesServer** ⭐ NEW - Orchestrates multiple AI services (Claude, Jules, Gemini, ChatGPT, Copilot, CodeRabbit, Codecov)
+4. **GitHubAppsServer** - Direct integration with GitHub Apps and AI code review services
 
-Both servers expose the same set of tools:
+### Core Servers (WorkstationServer & HttpServer)
 - **FileSystemTools** - Read, write, list, and manage files and directories
 - **GitTools** - Git operations including status, log, diff, branch management
 - **CiTools** - Build, test, restore, and run commands for CI/CD workflows
+
+### AI Services Server ⭐ NEW
+- **ServiceDiscoveryTools** - List and query available AI services
+- **InterServiceTools** - Send requests between AI services
+- **WorkflowTools** - Create and execute multi-service AI workflows
+- **ContextTools** - Shared context management across services
+- **AggregationTools** - Combine results from multiple AI services
+
+Enables Claude to talk to Jules, Gemini to talk to Copilot, and all AI services to collaborate!
 
 ## Quick Start
 
