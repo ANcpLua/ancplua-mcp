@@ -1,0 +1,37 @@
+# CODEOWNERS
+#
+# This file defines code ownership for automatic review assignment
+# Read more: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+# These owners will be requested for review when someone opens a PR
+* @ANcpLua
+
+# MCP Server Core
+/src/Ancplua.Mcp.WorkstationServer/ @ANcpLua
+/src/Ancplua.Mcp.HttpServer/ @ANcpLua
+
+# Documentation
+/docs/ @ANcpLua
+/README.md @ANcpLua
+/CLAUDE.md @ANcpLua
+/CHANGELOG.md @ANcpLua
+
+# CI/CD and GitHub configuration
+/.github/ @ANcpLua
+/.github/workflows/ @ANcpLua
+
+# Tests
+/tests/ @ANcpLua
+
+# Configuration files
+*.csproj @ANcpLua
+*.props @ANcpLua
+*.targets @ANcpLua
+global.json @ANcpLua
+Directory.Build.props @ANcpLua
+Directory.Packages.props @ANcpLua
+
+# Security and sensitive configurations
+/.github/workflows/ci.yml @ANcpLua
+/.github/workflows/pr-review.yml @ANcpLua
