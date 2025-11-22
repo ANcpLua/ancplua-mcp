@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "ancplua-workstation": {
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "/absolute/path/to/ancplua-mcp/WorkstationServer/WorkstationServer.csproj"
+      ],
+      "env": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
