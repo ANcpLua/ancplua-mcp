@@ -1,11 +1,14 @@
+using ModelContextProtocol.Server;
+using System.ComponentModel;
 using System.Diagnostics;
 
-namespace WorkstationServer.Tools;
+namespace Ancplua.Mcp.WorkstationServer.Tools;
 
 /// <summary>
 /// Provides MCP tools for CI/CD operations including running builds, tests, and diagnostics.
 /// </summary>
-public class CiTools
+[McpServerToolType]
+public static class CiTools
 {
     /// <summary>
     /// Executes a command with arguments and returns the output.

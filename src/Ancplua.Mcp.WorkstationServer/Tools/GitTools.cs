@@ -1,12 +1,15 @@
+using ModelContextProtocol.Server;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
 
-namespace WorkstationServer.Tools;
+namespace Ancplua.Mcp.WorkstationServer.Tools;
 
 /// <summary>
 /// Provides MCP tools for Git operations including status, log, diff, and branch management.
 /// </summary>
-public class GitTools
+[McpServerToolType]
+public static class GitTools
 {
     /// <summary>
     /// Executes a git command and returns the output.

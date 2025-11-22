@@ -1,6 +1,6 @@
-﻿using WorkstationServer.Tools;
+﻿using Ancplua.Mcp.WorkstationServer.Tools;
 
-namespace WorkstationServer.Tests;
+namespace Ancplua.Mcp.WorkstationServer.Tests;
 
 public class FileSystemToolsTests
 {

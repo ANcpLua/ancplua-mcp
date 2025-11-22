@@ -1,6 +1,6 @@
-# CLAUDE.md
+# GitHub Copilot Instructions
 
-This file defines how you (Claude Code) work in this repository.
+This file defines how you (GitHub Copilot) work in this repository.
 
 > **Repository role:** C# Model Context Protocol (MCP) servers for development workflows and tools.
 
@@ -14,7 +14,7 @@ This repo is about **MCP servers only**. It does not contain Claude Code plugins
 
 You are the **architect and maintainer** of a family of .NET MCP servers:
 
-- Each server exposes one or more **MCP tools** for LLM clients (Claude, IDEs, other agents).
+- Each server exposes one or more **MCP tools** for LLM clients (GitHub Copilot, Claude, IDEs, other agents).
 - Servers are **independent processes**, typically:
   - stdio-based console apps for local use.
   - optional HTTP-based apps for remote use.
@@ -34,7 +34,7 @@ You MAY:
 You MUST NOT:
 
 - Run `git commit` or `git push`.
-- Store or handle secrets outside of this repo’s documented configuration.
+- Store or handle secrets outside of this repo's documented configuration.
 
 ---
 
@@ -45,7 +45,6 @@ This repo is converging toward a structure like:
 ```text
 ancplua-mcp/
 ├── README.md
-├── CLAUDE.md
 ├── CHANGELOG.md
 ├── .gitignore
 │
@@ -76,7 +75,7 @@ ancplua-mcp/
     └── workflows/
         ├── ci.yml
         └── dependabot.yml
-````
+```
 
 When the real structure differs, treat this as the **north star** and move the repo incrementally toward it.
 
@@ -84,35 +83,14 @@ When the real structure differs, treat this as the **north star** and move the r
 
 ## 3. Tools and permissions
 
-Assumptions:
-
-* You run with full local permissions (for example: `claude --dangerously-skip-permissions`).
-* You MAY:
-
-  * Edit, move, and delete files in this repo.
-  * Run shell commands (`dotnet`, `bash`, etc.).
-* You MUST NOT:
-
-  * Commit or push changes.
-  * Access secrets outside any documented configuration (e.g. `appsettings.*.json`, user-provided env vars).
-
 Recommended tools:
 
 * **Shell / filesystem**
-
-  * `Read`, `Write`, `Edit`, `MultiEdit`, `Glob`, `Grep`
-  * `bash` shell commands (`ls`, `tree`, `dotnet`, etc.)
-* **Planning / orchestration**
-
-  * `TodoWrite` for task breakdown.
+  * File operations, bash commands (`ls`, `tree`, `dotnet`, etc.)
 * **Web**
-
-  * `WebFetch`, `WebSearch` for:
-
-    * `https://modelcontextprotocol.io/`
-    * `https://github.com/modelcontextprotocol/csharp-sdk`
+  * `https://modelcontextprotocol.io/`
+  * `https://github.com/modelcontextprotocol/csharp-sdk`
 * **Diagnostics**
-
   * Any MCP inspector or test client available (e.g. CLI, IDE integrations).
 
 Always show failing commands and how you handled them.
@@ -138,21 +116,20 @@ For any non-trivial task:
 
 2. **Load context**
 
-   * Read this file (`CLAUDE.md`).
+   * Read this file (`copilot-instructions.md`).
    * Read `README.md`.
    * If present and relevant:
-
      * `docs/specs/*.md`
      * `docs/decisions/adr-*.md`
 
 3. **Plan**
 
-   * Use `TodoWrite` to create a short todo list.
-   * For larger work, write a brief plan in the chat before changing files.
+   * Create a short todo list.
+   * For larger work, write a brief plan before changing files.
 
 4. **Execute**
 
-   * Use `Glob` and `Read` to understand existing servers and tools.
+   * Understand existing servers and tools.
    * Make focused, coherent changes.
    * Keep related changes grouped and small enough to understand.
 
@@ -166,12 +143,11 @@ For any non-trivial task:
      dotnet test
      ```
 
-   * If a CI-like script exists (for example, `.github/workflows/ci.yml` mirrored locally), reuse those steps in a local script (for example, `eng/local-validate.sh`).
+   * If a CI-like script exists (for example, `tooling/scripts/local-validate.sh`), run it to mirror CI.
 
 6. **Document**
 
    * Update:
-
      * `CHANGELOG.md` for user-visible changes.
      * Specs and ADRs if behavior or architecture changed.
      * `README.md` sections that describe usage or server layout.
@@ -179,7 +155,6 @@ For any non-trivial task:
 7. **Report**
 
    * Summarize:
-
      * What changed.
      * What commands you ran.
      * Any remaining TODOs.
@@ -193,23 +168,18 @@ For any non-trivial task:
 Servers in this repo SHOULD be built on the official C# SDK:
 
 * `ModelContextProtocol`
-
   * Hosting and DI.
   * `AddMcpServer()`, `WithStdioServerTransport()`, `WithToolsFromAssembly()`.
 * `ModelContextProtocol.AspNetCore` (optional)
-
   * For HTTP-based MCP servers (`WithHttpTransport`, `MapMcp`, etc.).
 * `ModelContextProtocol.Core` (optional)
-
   * For low-level client libraries or shared abstractions.
 
 Rules:
 
 * **Workstation/local servers**
-
   * Prefer stdio servers using `ModelContextProtocol` only.
 * **Remote/HTTP servers**
-
   * Use `ModelContextProtocol` + `ModelContextProtocol.AspNetCore`.
 * Only add `ModelContextProtocol.Core` if you are building shared libraries or custom clients.
 
@@ -218,11 +188,10 @@ Rules:
 If a server itself calls LLMs:
 
 * Use `Microsoft.Extensions.AI*` packages where appropriate.
-* Keep that logic **inside** the server project, not in this repo’s infrastructure.
+* Keep that logic **inside** the server project, not in this repo's infrastructure.
 * Document any external model dependencies in:
-
   * The relevant spec.
-  * The server’s README section (if present).
+  * The server's README section (if present).
 
 Do not add LLM dependencies unless the server clearly needs them.
 
@@ -235,7 +204,6 @@ Tools in this repo SHOULD follow the C# SDK patterns:
 * Use `[McpServerToolType]` on static classes that group related tools.
 * Use `[McpServerTool]` on individual tool methods.
 * Use `[Description]` attributes or XML comments to describe:
-
   * The tool.
   * Each parameter.
 
@@ -260,18 +228,15 @@ For **any change that affects external behavior** (new tools, changed contracts,
 
    * Add an entry to `CHANGELOG.md`.
    * Include:
-
      * Added / Changed / Fixed sections.
      * Server and tool names affected.
 
 2. **Specs**
 
    * If the change introduces or modifies a feature:
-
      * Update an existing spec in `docs/specs/`.
      * Or create a new one based on `spec-template.md`.
    * Specs should describe:
-
      * Problem and value.
      * Tool signatures (inputs/outputs).
      * Expected usage patterns.
@@ -279,10 +244,8 @@ For **any change that affects external behavior** (new tools, changed contracts,
 3. **ADRs**
 
    * If the change is architectural (for example, a new server type, major design choice):
-
      * Add or update an ADR in `docs/decisions/` based on `adr-template.md`.
    * Include:
-
      * Status (`proposed`, `accepted`, `rejected`, `deprecated`, `superseded`).
      * Decision drivers.
      * Considered options.
@@ -291,14 +254,12 @@ For **any change that affects external behavior** (new tools, changed contracts,
 4. **README**
 
    * Update `README.md` when:
-
      * New servers are added.
      * Supported tool categories or usage instructions change.
 
-5. **This file (`CLAUDE.md`)**
+5. **This file (`copilot-instructions.md`)**
 
    * Update this file when:
-
      * The target layout changes.
      * The development workflow meaningfully changes.
      * New mandatory rules are added.
@@ -316,14 +277,13 @@ Expected checks include:
 * `dotnet build` on all server and test projects.
 * `dotnet test` on all test projects.
 * Optional:
-
   * `dotnet format` or equivalent for style.
   * Additional analyzers or code quality tools.
 
 Locally:
 
 * Run the same steps as CI before claiming success.
-* If there is a dedicated script (for example, `eng/local-validate.sh`), keep it in sync with CI.
+* If there is a dedicated script (for example, `tooling/scripts/local-validate.sh`), keep it in sync with CI.
 
 If tests or builds fail:
 
@@ -337,16 +297,14 @@ If tests or builds fail:
 
 This repo is **independent**:
 
-* It does not contain Claude plugins.
-* Other repos (such as a Claude plugin marketplace) may:
-
+* It does not contain GitHub Copilot plugins.
+* Other repos (such as a plugin marketplace) may:
   * Reference these servers via `.mcp.json`.
   * Treat these servers as external tools.
 
 When adding or changing tools that are intended to be used by another repo:
 
 * Clearly document:
-
   * Server name and startup command.
   * The MCP tools exposed and their contracts.
 * Avoid introducing tight coupling to any one client repository.
@@ -358,9 +316,9 @@ When adding or changing tools that are intended to be used by another repo:
 When asked to work in this repo:
 
 1. Confirm location (`pwd`, `ls`).
-2. Read `CLAUDE.md` and `README.md`.
+2. Read `copilot-instructions.md` and `README.md`.
 3. Inspect structure (`tree -L 3 || ls -R`).
-4. Plan with `TodoWrite`.
+4. Plan your changes.
 5. Make minimal, coherent changes.
 6. Run `dotnet restore`, `dotnet build`, `dotnet test`.
 7. Update `CHANGELOG.md`, specs, ADRs, and `README.md` as required.

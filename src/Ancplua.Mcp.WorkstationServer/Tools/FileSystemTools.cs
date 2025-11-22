@@ -1,16 +1,23 @@
-namespace WorkstationServer.Tools;
+using ModelContextProtocol.Server;
+using System.ComponentModel;
+
+namespace Ancplua.Mcp.WorkstationServer.Tools;
 
 /// <summary>
 /// Provides MCP tools for filesystem operations including reading, writing, and listing files.
 /// </summary>
-public class FileSystemTools
+[McpServerToolType]
+public static class FileSystemTools
 {
     /// <summary>
     /// Reads the contents of a file at the specified path.
     /// </summary>
     /// <param name="path">The absolute or relative path to the file.</param>
     /// <returns>The contents of the file as a string.</returns>
-    public static async Task<string> ReadFileAsync(string path)
+    [McpServerTool, Description("Reads the contents of a file at the specified path.")]
+    public static async Task<string> ReadFileAsync(
+        [Description("The absolute or relative path to the file.")]
+        string path)
     {
         if (!File.Exists(path))
         {

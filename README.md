@@ -1,106 +1,3 @@
-# ancplua-mcp
-
-Family of C#/.NET Model Context Protocol (MCP) servers for dev workflows. Stdio + ASP.NET Core servers expose tools for filesystem, git, CI and diagnostics to Claude, IDEs and other agents. Designed as small, well-tested building blocks for AI-assisted development stacks.
-
-## Overview
-
-This repository provides two MCP server implementations:
-
-1. **WorkstationServer** - A stdio-based MCP server for direct integration with Claude Desktop and other MCP clients
-2. **HttpServer** - An ASP.NET Core-based HTTP MCP server for web-based integrations
-
-Both servers expose the same set of tools:
-- **FileSystemTools** - Read, write, list, and manage files and directories
-- **GitTools** - Git operations including status, log, diff, branch management
-- **CiTools** - Build, test, restore, and run commands for CI/CD workflows
-
-## Quick Start
-
-### Building the Project
-
-```bash
-dotnet build
-```
-
-### Running Tests
-
-```bash
-dotnet test
-```
-
-### Running WorkstationServer
-
-```bash
-dotnet run --project WorkstationServer/WorkstationServer.csproj
-```
-
-### Running HttpServer
-
-```bash
-dotnet run --project HttpServer/HttpServer.csproj
-```
-
-The HTTP server will start on https://localhost:5001 (or http://localhost:5000).
-
-## Configuration
-
-See the `docs/examples/` directory for MCP configuration examples:
-- `claude-workstation.mcp.json` - Claude Desktop configuration for WorkstationServer
-- `claude-http.mcp.json` - Claude Desktop configuration for HttpServer
-- `rider-workstation.mcp.json` - JetBrains Rider configuration
-
-## Architecture
-
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed architecture documentation.
-
-## Project Structure
-
-```
-ancplua-mcp/
-├── WorkstationServer/          # Stdio MCP server
-│   ├── Program.cs
-│   └── Tools/                  # Tool implementations
-│       ├── FileSystemTools.cs
-│       ├── GitTools.cs
-│       └── CiTools.cs
-├── HttpServer/                 # HTTP MCP server
-│   ├── Program.cs
-│   └── Tools/                  # Tool implementations
-├── tests/
-│   ├── WorkstationServer.Tests/
-│   └── HttpServer.Tests/
-├── docs/                       # Documentation
-│   ├── ARCHITECTURE.md
-│   ├── specs/                  # Specifications
-│   ├── decisions/              # Architecture Decision Records (ADRs)
-│   └── examples/               # Configuration examples
-└── tooling/
-    └── scripts/                # Build and validation scripts
-```
-
-## Development
-
-### Prerequisites
-
-- .NET 9.0 SDK or later
-- Git
-
-### Local Validation
-
-Run the local validation script before committing:
-
-```bash
-./tooling/scripts/local-validate.sh
-```
-
-## Contributing
-
-Contributions are welcome! Please read the contributing guidelines before submitting PRs.
-
-## License
-
-MIT License - see [LICENSE](LICENSE) file for details.
-=======
 # ancplua-mcp (working name)
 
 **C# MCP servers for development workflows and tools.**
@@ -190,7 +87,7 @@ The actual structure may be simpler at the beginning. The important points:
 * **`tests/`**: corresponding test projects.
 * **`docs/specs/`**: feature-level specifications.
 * **`docs/decisions/`**: architecture decision records (ADRs).
-* **`CLAUDE.md`**: operational spec for Claude Code in this repo.
+* **`.github/copilot-instructions.md`**: operational spec for GitHub Copilot in this repo.
 * **`CHANGELOG.md`**: user-visible history.
 
 ---
@@ -340,9 +237,9 @@ This file is not required to live in this repo, but a `docs/specs` entry should 
 
 ## 6. Development workflow
 
-### 6.1 For Claude Code
+### 6.1 For GitHub Copilot
 
-Claude’s behavior in this repo is defined in `CLAUDE.md` and includes:
+GitHub Copilot behavior in this repo is defined in `.github/copilot-instructions.md` and includes:
 
 * Full local permissions when explicitly launched with the appropriate flags.
 * No commits / pushes.
@@ -385,9 +282,9 @@ Typical workflow:
 
 Documentation is split into:
 
-* `CLAUDE.md`
+* `.github/copilot-instructions.md`
 
-  * Operational spec for Claude Code in this repo.
+  * Operational spec for GitHub Copilot in this repo.
 * `CHANGELOG.md`
 
   * Versioned history of visible changes.
