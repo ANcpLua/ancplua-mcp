@@ -1,6 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
-using ModelContextProtocol;
+using ModelContextProtocol.Server;
 
 namespace Ancplua.Mcp.HttpServer.Tools;
 
