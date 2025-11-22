@@ -12,7 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - FileSystemTools for file and directory operations
 - GitTools for git repository operations
 - CiTools for CI/CD and build operations
-- Basic MCP protocol scaffolding
+- Official MCP SDK integration
+  - ModelContextProtocol 0.4.0-preview.3 package for WorkstationServer
+  - ModelContextProtocol.AspNetCore 0.3.0-preview.4 package for HttpServer
+  - MCP attributes ([McpServerToolType], [McpServerTool], [Description]) on all tools
 - Test projects for both servers
 - Documentation (README, CLAUDE integration guide, ARCHITECTURE)
 - Example configuration files for Claude Desktop and JetBrains Rider
@@ -31,6 +34,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated all project references and solution file to reflect new paths
 - Updated README.md with new project structure and paths
 - Updated local-validate.sh to use new src/ directory structure
+- Implemented official MCP SDK for both servers
+  - WorkstationServer now uses stdio transport with Host.CreateApplicationBuilder
+  - HttpServer now uses HTTP transport with MapMcp() endpoint
+  - All tool classes updated to use proper MCP attributes and namespaces
+  - Tool discovery now automatic via WithToolsFromAssembly()
 
 ### Deprecated
 - N/A
