@@ -98,6 +98,40 @@ Run the local validation script before committing:
 
 Contributions are welcome! Please read the contributing guidelines before submitting PRs.
 
+## Versioning & Stability
+
+### Version Strategy
+
+This repository follows semantic versioning principles:
+
+* **Major versions** (1.0, 2.0): Breaking changes to tool signatures, removal of tools, or incompatible MCP protocol changes
+* **Minor versions** (1.1, 1.2): New tools, new optional parameters, or backward-compatible enhancements
+* **Patch versions** (1.0.1, 1.0.2): Bug fixes, performance improvements, documentation updates
+
+### Tool Stability
+
+**Stable Tools**: Tools marked in specs as "Implemented" are considered stable. Changes to these tools follow semantic versioning.
+
+**Experimental Tools**: Tools marked "Experimental" in specs may change without major version bumps. Use with caution in production.
+
+### MCP SDK Preview Notice
+
+⚠️ **Important**: The Model Context Protocol C# SDK is currently in preview (0.4.0-preview.3). Breaking changes may occur in the SDK itself:
+
+* We will update to new MCP SDK versions as they release
+* Breaking SDK changes will be documented in `CHANGELOG.md`
+* Where possible, we maintain backward compatibility at the tool level even when the SDK changes
+
+### Deprecation Policy
+
+When tools need to be removed or changed incompatibly:
+
+1. Tool is marked **deprecated** in specs and `CHANGELOG.md`
+2. Deprecation notice remains for at least one minor version
+3. Tool is removed or changed in the next major version
+
+Deprecated tools will log warnings when called but continue to function until removal.
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
