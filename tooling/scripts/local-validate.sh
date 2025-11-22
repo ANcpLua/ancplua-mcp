@@ -73,7 +73,7 @@ echo ""
 info "Checking for common issues..."
 
 # Check for TODO or FIXME comments
-if grep -r "TODO\|FIXME" --include="*.cs" WorkstationServer/ HttpServer/ tests/ 2>/dev/null | grep -v "Binary file"; then
+if grep -r "TODO\|FIXME" --include="*.cs" src/ tests/ 2>/dev/null | grep -v "Binary file"; then
     echo -e "${YELLOW}⚠${NC} Found TODO/FIXME comments (review before release)"
 else
     success "No TODO/FIXME comments found"

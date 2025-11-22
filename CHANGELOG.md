@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial project structure with WorkstationServer and HttpServer
+- Initial project structure with Ancplua.Mcp.WorkstationServer and Ancplua.Mcp.HttpServer
 - FileSystemTools for file and directory operations
 - GitTools for git repository operations
 - CiTools for CI/CD and build operations
@@ -19,9 +19,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Local validation script
 - GitHub Actions CI workflow
 - Dependabot configuration
+- GitHub Copilot instructions file (.github/copilot-instructions.md)
+- global.json for .NET SDK version pinning (9.0)
 
 ### Changed
-- N/A
+- Reorganized project structure to follow target architecture
+  - Moved servers from root to src/ directory
+  - Renamed WorkstationServer to Ancplua.Mcp.WorkstationServer
+  - Renamed HttpServer to Ancplua.Mcp.HttpServer
+  - Renamed test projects to match new server names
+- Updated all project references and solution file to reflect new paths
+- Updated README.md with new project structure and paths
+- Updated local-validate.sh to use new src/ directory structure
 
 ### Deprecated
 - N/A

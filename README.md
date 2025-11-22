@@ -31,13 +31,13 @@ dotnet test
 ### Running WorkstationServer
 
 ```bash
-dotnet run --project WorkstationServer/WorkstationServer.csproj
+dotnet run --project src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj
 ```
 
 ### Running HttpServer
 
 ```bash
-dotnet run --project HttpServer/HttpServer.csproj
+dotnet run --project src/Ancplua.Mcp.HttpServer/Ancplua.Mcp.HttpServer.csproj
 ```
 
 The HTTP server will start on https://localhost:5001 (or http://localhost:5000).
@@ -57,25 +57,26 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed architecture docum
 
 ```
 ancplua-mcp/
-├── WorkstationServer/          # Stdio MCP server
-│   ├── Program.cs
-│   └── Tools/                  # Tool implementations
-│       ├── FileSystemTools.cs
-│       ├── GitTools.cs
-│       └── CiTools.cs
-├── HttpServer/                 # HTTP MCP server
-│   ├── Program.cs
-│   └── Tools/                  # Tool implementations
+├── src/
+│   ├── Ancplua.Mcp.WorkstationServer/  # Stdio MCP server
+│   │   ├── Program.cs
+│   │   └── Tools/                      # Tool implementations
+│   │       ├── FileSystemTools.cs
+│   │       ├── GitTools.cs
+│   │       └── CiTools.cs
+│   └── Ancplua.Mcp.HttpServer/         # HTTP MCP server
+│       ├── Program.cs
+│       └── Tools/                      # Tool implementations
 ├── tests/
-│   ├── WorkstationServer.Tests/
-│   └── HttpServer.Tests/
-├── docs/                       # Documentation
+│   ├── Ancplua.Mcp.WorkstationServer.Tests/
+│   └── Ancplua.Mcp.HttpServer.Tests/
+├── docs/                               # Documentation
 │   ├── ARCHITECTURE.md
-│   ├── specs/                  # Specifications
-│   ├── decisions/              # Architecture Decision Records (ADRs)
-│   └── examples/               # Configuration examples
+│   ├── specs/                          # Specifications
+│   ├── decisions/                      # Architecture Decision Records (ADRs)
+│   └── examples/                       # Configuration examples
 └── tooling/
-    └── scripts/                # Build and validation scripts
+    └── scripts/                        # Build and validation scripts
 ```
 
 ## Development
@@ -138,60 +139,6 @@ This repo is **not**:
   - Each server is focused and versioned.
 
 Other repositories connect to these servers using `.mcp.json` and MCP-aware clients.
-
----
-
-## 2. Repository layout (target)
-
-The repository is converging toward:
-
-```text
-ancplua-mcp/
-├── README.md
-├── CLAUDE.md
-├── CHANGELOG.md
-├── .gitignore
-│
-├── src/
-│   ├── Ancplua.Mcp.WorkstationServer/
-│   │   ├── Ancplua.Mcp.WorkstationServer.csproj
-│   │   ├── Program.cs
-│   │   └── Tools/
-│   │       ├── FileSystemTools.cs
-│   │       ├── GitTools.cs
-│   │       └── CiTools.cs
-│   │
-│   └── Ancplua.Mcp.HttpServer/           # Optional HTTP-based MCP server
-│       ├── Ancplua.Mcp.HttpServer.csproj
-│       ├── Program.cs
-│       └── Tools/
-│
-├── tests/
-│   ├── Ancplua.Mcp.WorkstationServer.Tests/
-│   └── Ancplua.Mcp.HttpServer.Tests/
-│
-├── docs/
-│   ├── specs/
-│   │   ├── spec-template.md
-│   │   └── spec-*.md
-│   └── decisions/
-│       ├── adr-template.md
-│       └── adr-*.md
-│
-└── .github/
-    └── workflows/
-        ├── ci.yml
-        └── dependabot.yml
-````
-
-The actual structure may be simpler at the beginning. The important points:
-
-* **`src/`**: one project per MCP server.
-* **`tests/`**: corresponding test projects.
-* **`docs/specs/`**: feature-level specifications.
-* **`docs/decisions/`**: architecture decision records (ADRs).
-* **`CLAUDE.md`**: operational spec for Claude Code in this repo.
-* **`CHANGELOG.md`**: user-visible history.
 
 ---
 
@@ -314,27 +261,7 @@ The server will:
 
 Client configurations (for example, Claude or IDEs) will typically reside in a **different repo or local config directory**.
 
-Example `.mcp.json` a client might use:
-
-```json
-{
-  "mcpServers": {
-    "ancplua-workstation": {
-      "command": "dotnet",
-      "args": [
-        "run",
-        "--project",
-        "src/Ancplua.Mcp.WorkstationServer"
-      ],
-      "env": {
-        "DOTNET_ENVIRONMENT": "Development"
-      }
-    }
-  }
-}
-```
-
-This file is not required to live in this repo, but a `docs/specs` entry should describe the expected configuration pattern for each server.
+See the `docs/examples/` directory for complete MCP configuration examples.
 
 ---
 

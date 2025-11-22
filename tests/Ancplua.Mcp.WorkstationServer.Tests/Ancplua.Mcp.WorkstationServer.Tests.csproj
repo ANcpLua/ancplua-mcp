@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\WorkstationServer\WorkstationServer.csproj" />
+    <ProjectReference Include="..\..\src\Ancplua.Mcp.WorkstationServer\Ancplua.Mcp.WorkstationServer.csproj" />
   </ItemGroup>
 
 </Project>
