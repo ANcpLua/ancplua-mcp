@@ -1,29 +1,15 @@
 {
-  "name": "ancplua-workstation",
-  "description": "Model Context Protocol server for development tools",
-  "version": "0.1.0",
-  "type": "stdio",
-  "command": "dotnet",
-  "args": [
-    "run",
-    "--project",
-    "${workspaceFolder}/src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj"
-  ],
-  "env": {
-    "DOTNET_ENVIRONMENT": "Development"
-  },
-  "tools": [
-    {
-      "name": "filesystem",
-      "description": "Filesystem operations including read, write, list, and delete"
-    },
-    {
-      "name": "git",
-      "description": "Git repository operations including status, log, diff, and branch management"
-    },
-    {
-      "name": "ci",
-      "description": "CI/CD operations including build, test, and restore"
+  "mcpServers": {
+    "ancplua-workstation": {
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj"
+      ],
+      "env": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
     }
-  ]
+  }
 }

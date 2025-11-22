@@ -54,6 +54,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - HttpServer now uses HTTP transport with MapMcp() endpoint
   - All tool classes updated to use proper MCP attributes and namespaces
   - Tool discovery now automatic via WithToolsFromAssembly()
+- Comprehensive documentation overhaul for MCP architecture
+  - Rewrote docs/ARCHITECTURE.md with detailed server architecture, tool design, and testing strategy
+  - Updated README.md with comprehensive architectural documentation and conventions
+  - Standardized docs/examples/*.mcp.json files with consistent format and relative paths
+  - Enhanced tooling/scripts/local-validate.sh with shellcheck and markdownlint support
+  - Improved .github/workflows/ci.yml with CodeQL, dependency review, and TruffleHog security scanning
 - Updated target framework from .NET 9 to .NET 10 LTS
   - ADR-001: Updated to reference .NET 10, C# 14, and ASP.NET Core 10
   - global.json: Updated SDK version to 10.0.0
