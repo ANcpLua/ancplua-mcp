@@ -1,15 +1,9 @@
 {
   "mcpServers": {
     "ancplua-http": {
-      "command": "dotnet",
-      "args": [
-        "run",
-        "--project",
-        "src/Ancplua.Mcp.HttpServer/Ancplua.Mcp.HttpServer.csproj"
-      ],
-      "env": {
-        "DOTNET_ENVIRONMENT": "Development"
-      }
+      "transport": "http",
+      "url": "http://localhost:5000/mcp",
+      "description": "HTTP-based MCP server for ancplua development tools"
     }
   }
 }
