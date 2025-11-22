@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- Jules auto-reviewer and auto-merge workflows due to critical security issues:
+  - Auto-merging without CI checks, required reviews, or security validation
+  - References to non-existent BeksOmega/jules-action@v1
+  - Infinite loop potential between Jules cleanup PRs and auto-reviewer
+  - Excessive 30-minute cleanup schedule causing resource waste
+  - Missing proper bot exclusion and safety checks
+
 ### Added
 - Initial project structure with Ancplua.Mcp.WorkstationServer and Ancplua.Mcp.HttpServer
 - FileSystemTools for file and directory operations
