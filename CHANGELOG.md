@@ -26,9 +26,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI workflow
 - Dependabot configuration
 - GitHub Copilot instructions file (.github/copilot-instructions.md)
-- global.json for .NET SDK version pinning (9.0)
+- global.json for .NET SDK version pinning (10.0)
 - .editorconfig for consistent C# code style
 - Directory.Packages.props for centralized package version management
+- Spec-002: Comprehensive C# 14 Features Reference documentation
+  - Extension members (instance and static)
+  - Field keyword for simplified properties
+  - Implicit span conversions
+  - Unbound generic types with nameof
+  - Simple lambda parameters with modifiers
+  - Partial constructors and events
+  - User-defined compound assignment operators
+  - Null-conditional assignment
+  - Best practices and usage examples for ancplua-mcp
 
 ### Changed
 - Reorganized project structure to follow target architecture
@@ -44,6 +54,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - HttpServer now uses HTTP transport with MapMcp() endpoint
   - All tool classes updated to use proper MCP attributes and namespaces
   - Tool discovery now automatic via WithToolsFromAssembly()
+- Updated target framework from .NET 9 to .NET 10 LTS
+  - ADR-001: Updated to reference .NET 10, C# 14, and ASP.NET Core 10
+  - global.json: Updated SDK version to 10.0.0
+  - README.md: Updated prerequisites to require .NET 10.0 SDK or later
+  - All .csproj files: Updated TargetFramework from net9.0 to net10.0
+  - GitHub Actions CI workflow: Updated dotnet-version from 9.0.x to 10.0.x
+  - Documentation references updated to .NET 10, C# 14, and ASP.NET Core 10
+  - Migration timeline updated to align with .NET 10 LTS support cycle (3 years)
 
 ### Deprecated
 - N/A
