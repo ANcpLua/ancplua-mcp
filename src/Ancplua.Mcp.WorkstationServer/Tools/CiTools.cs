@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace HttpServer.Tools;
+namespace Ancplua.Mcp.WorkstationServer.Tools;
 
 /// <summary>
 /// Provides MCP tools for CI/CD operations including running builds, tests, and diagnostics.

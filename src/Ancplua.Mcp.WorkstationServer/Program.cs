@@ -1,4 +1,4 @@
-﻿using WorkstationServer.Tools;
+﻿using Ancplua.Mcp.WorkstationServer.Tools;
 
 // WorkstationServer - MCP Server for stdio communication
 // Exposes filesystem, git, and CI tools to MCP clients like Claude Desktop

@@ -1,6 +1,6 @@
-﻿using HttpServer.Tools;
+﻿using Ancplua.Mcp.HttpServer.Tools;
 
-namespace HttpServer.Tests;
+namespace Ancplua.Mcp.HttpServer.Tests;
 
 public class FileSystemToolsTests
 {

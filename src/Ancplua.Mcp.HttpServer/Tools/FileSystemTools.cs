@@ -1,4 +1,4 @@
-namespace HttpServer.Tools;
+namespace Ancplua.Mcp.HttpServer.Tools;
 
 /// <summary>
 /// Provides MCP tools for filesystem operations including reading, writing, and listing files.

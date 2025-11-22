@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace HttpServer.Tools;
+namespace Ancplua.Mcp.HttpServer.Tools;
 
 /// <summary>
 /// Provides MCP tools for Git operations including status, log, diff, and branch management.

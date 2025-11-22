@@ -1,4 +1,4 @@
-namespace WorkstationServer.Tools;
+namespace Ancplua.Mcp.WorkstationServer.Tools;
 
 /// <summary>
 /// Provides MCP tools for filesystem operations including reading, writing, and listing files.
