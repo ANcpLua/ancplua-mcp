@@ -119,7 +119,7 @@ public class GitTools
     /// <param name="repositoryPath">The path to the git repository.</param>
     public static async Task AddAsync(string files, string? repositoryPath = null)
     {
-        await ExecuteGitCommandAsync($"add {files}", repositoryPath);
+        await ExecuteGitCommandAsync(new[] { "add", files }, repositoryPath);
     }
 
     /// <summary>
