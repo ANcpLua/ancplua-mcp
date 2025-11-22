@@ -51,19 +51,20 @@ See the `docs/examples/` directory for MCP configuration examples:
 
 ## GitHub Actions & Code Review
 
-This repository includes automated PR reviews powered by **Gemini 3.0 Pro**:
+This repository includes automated PR reviews powered by **Jules AI**:
 
 - **Automatic Review**: AI reviews are automatically triggered when PRs are opened, updated, or reopened
-- **On-Demand Review**: Comment `/gemini-review` on any PR to request an immediate review
-- **Smart Filtering**: Excludes documentation, configs, and generated files from review
+- **On-Demand Review**: Comment `/jules-review` on any PR to request an immediate review
+- **Customizable Prompts**: Configure review focus (code quality, security, performance, etc.)
+- **Code Generation**: Jules can suggest fixes and improvements directly in PRs
 
 ### Setup
 
-1. Get a Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey)
-2. Add it as a repository secret named `GEMINI_API_KEY`
-3. Open a PR and watch Gemini provide automated feedback
+1. Get a Jules API key from [jules.google.com](https://jules.google.com)
+2. Add it as a repository secret named `JULES_API_KEY`
+3. Open a PR and watch Jules provide automated feedback
 
-For detailed setup instructions, see [docs/gemini-pr-review-setup.md](docs/gemini-pr-review-setup.md).
+For detailed setup instructions, see [docs/jules-pr-review-setup.md](docs/jules-pr-review-setup.md).
 
 ## Architecture
 

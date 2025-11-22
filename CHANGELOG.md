@@ -39,11 +39,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - User-defined compound assignment operators
   - Null-conditional assignment
   - Best practices and usage examples for ancplua-mcp
-- GitHub Actions workflow for automated PR reviews with Gemini 3.0 Pro
+- GitHub Actions workflow for automated PR reviews with Jules AI
   - Automatic review on PR open/update/reopen
-  - On-demand review via `/gemini-review` comment
-  - Configurable file exclusions (docs, configs, lock files)
-  - Comprehensive setup guide in docs/gemini-pr-review-setup.md
+  - On-demand review via `/jules-review` comment
+  - Customizable review prompts for code quality, security, and performance
+  - Comprehensive setup guide in docs/jules-pr-review-setup.md
 
 ### Changed
 - Reorganized project structure to follow target architecture
@@ -59,6 +59,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - HttpServer now uses HTTP transport with MapMcp() endpoint
   - All tool classes updated to use proper MCP attributes and namespaces
   - Tool discovery now automatic via WithToolsFromAssembly()
+- Comprehensive documentation overhaul for MCP architecture
+  - Rewrote docs/ARCHITECTURE.md with detailed server architecture, tool design, and testing strategy
+  - Updated README.md with comprehensive architectural documentation and conventions
+  - Standardized docs/examples/*.mcp.json files with consistent format and relative paths
+  - Enhanced tooling/scripts/local-validate.sh with shellcheck and markdownlint support
+  - Improved .github/workflows/ci.yml with CodeQL, dependency review, and TruffleHog security scanning
 - Updated target framework from .NET 9 to .NET 10 LTS
   - ADR-001: Updated to reference .NET 10, C# 14, and ASP.NET Core 10
   - global.json: Updated SDK version to 10.0.0

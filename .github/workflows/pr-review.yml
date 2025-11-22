@@ -1,4 +1,4 @@
-name: PR Review with Gemini
+name: PR Review with Jules AI
 
 on:
   pull_request:
@@ -13,7 +13,6 @@ permissions:
   issues: write
 
 jobs:
-  # Automatic review when PR is opened/updated
   auto-review:
     name: Automatic PR Review
     runs-on: ubuntu-latest
@@ -24,26 +23,32 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
-    - name: Review PR with Gemini 3.0 Pro
-      uses: truongnh1992/gemini-ai-code-reviewer@v9.1.0
+    - name: Review PR with Jules
+      uses: BeksOmega/jules-action@v1
       with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        GEMINI_MODEL: "gemini-3.0-pro"
-        EXCLUDE: "*.md,*.txt,*.json,*.yml,*.yaml,package-lock.json,*.csproj,*.sln"
+        prompt: |
+          Review this pull request for:
+          - Code quality and best practices
+          - Potential bugs or security issues
+          - Performance concerns
+          - Maintainability and readability
+          - Test coverage
 
-  # On-demand review triggered by comment
+          Focus on C# and .NET code. Skip documentation files, configs, and generated files.
+          Provide constructive feedback with specific suggestions.
+        jules_api_key: ${{ secrets.JULES_API_KEY }}
+
   on-demand-review:
     name: On-Demand PR Review
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'issue_comment' &&
       github.event.issue.pull_request &&
-      contains(github.event.comment.body, '/gemini-review')
+      contains(github.event.comment.body, '/jules-review')
     permissions:
       contents: read
       pull-requests: write
@@ -51,7 +56,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
@@ -70,10 +75,17 @@ jobs:
         git fetch origin ${{ steps.pr-info.outputs.head_ref }}
         git checkout ${{ steps.pr-info.outputs.head_ref }}
 
-    - name: Review PR with Gemini 3.0 Pro
-      uses: truongnh1992/gemini-ai-code-reviewer@v9.1.0
+    - name: Review PR with Jules
+      uses: BeksOmega/jules-action@v1
       with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        GEMINI_MODEL: "gemini-3.0-pro"
-        EXCLUDE: "*.md,*.txt,*.json,*.yml,*.yaml,package-lock.json,*.csproj,*.sln"
+        prompt: |
+          Review this pull request for:
+          - Code quality and best practices
+          - Potential bugs or security issues
+          - Performance concerns
+          - Maintainability and readability
+          - Test coverage
+
+          Focus on C# and .NET code. Skip documentation files, configs, and generated files.
+          Provide constructive feedback with specific suggestions.
+        jules_api_key: ${{ secrets.JULES_API_KEY }}

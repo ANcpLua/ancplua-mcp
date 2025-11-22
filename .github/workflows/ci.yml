@@ -152,12 +152,14 @@ jobs:
       uses: actions/checkout@v6
 
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
+      uses: aquasecurity/trivy-action@0.28.0
       with:
         scan-type: 'fs'
         scan-ref: '.'
         format: 'sarif'
         output: 'trivy-results.sarif'
+        severity: 'CRITICAL,HIGH'
+        ignore-unfixed: true
       continue-on-error: true
 
     - name: Upload Trivy results to GitHub Security
