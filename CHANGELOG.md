@@ -78,7 +78,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - N/A
 
 ### Security
-- N/A
+- Removed dangerous auto-merge workflows and excessive cleanup schedules to prevent potential infinite loops and unauthorized code merges.
+- Ensured `BeksOmega/jules-action` references are valid.
 
 ## [0.1.0] - 2025-11-22
 
