@@ -1,0 +1,46 @@
+name: Jules Cleanup (Every 30 Mins)
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Invoke Jules for Cleanup
+        uses: BeksOmega/jules-action@v1
+        with:
+          prompt: |
+            Please analyze the codebase for dead code, duplication, and overly complex functions.
+            Provide fixes by refactoring the code for clarity and maintainability.
+            Focus on:
+            1. Removing unused variables and imports.
+            2. Reducing cyclomatic complexity.
+            3. Standardizing naming conventions.
+          jules_api_key: ${{ secrets.JULES_API_KEY }}
+
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: Automated cleanup by Jules AI"
+          title: "Automated Code Cleanup by Jules"
+          body: "Jules AI has analyzed the codebase and implemented improvements."
+          branch: jules/automated-cleanup
+          delete-branch: true
+
+      - name: Auto-merge Cleanup PR
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        run: gh pr merge "${{ steps.cpr.outputs.pull-request-number }}" --auto --merge --delete-branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
