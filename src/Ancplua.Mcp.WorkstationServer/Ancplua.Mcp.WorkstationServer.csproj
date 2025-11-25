@@ -13,9 +13,9 @@
     <ProjectReference Include="../Ancplua.Mcp.CoreTools/Ancplua.Mcp.CoreTools.csproj" />
   </ItemGroup>
 
+  <!-- Note: Microsoft.Extensions.Hosting is provided in-box by .NET 10 -->
   <ItemGroup>
     <PackageReference Include="ModelContextProtocol" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" />
   </ItemGroup>
 
 </Project>

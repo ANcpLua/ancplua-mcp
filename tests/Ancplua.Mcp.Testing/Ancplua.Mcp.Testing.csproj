@@ -9,11 +9,11 @@
     <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
+  <!-- Note: Microsoft.Extensions.Hosting is needed for Host.CreateApplicationBuilder()
+       even in .NET 10 for non-web SDK projects -->
   <ItemGroup>
-    <PackageReference Include="ModelContextProtocol" />
-
     <PackageReference Include="Microsoft.Extensions.Hosting" />
-    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="ModelContextProtocol" />
     <PackageReference Include="xunit" />
   </ItemGroup>
 

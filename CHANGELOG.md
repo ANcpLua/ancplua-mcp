@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **NuGet Package Resolution**: Fixed all .NET 10 build warnings
+  - Removed global `FrameworkReference` for `Microsoft.AspNetCore.App` from `Directory.Packages.props` (NETSDK1086)
+  - Removed prunable `Microsoft.Extensions.Hosting` PackageReferences from servers (NU1510)
+  - Removed prunable `Microsoft.Extensions.Logging` PackageReferences where in-box (NU1510)
+  - Removed prunable `Microsoft.Extensions.Diagnostics.HealthChecks` from ServiceDefaults (NU1510)
+  - Removed prunable `Microsoft.Extensions.Configuration.Json` from AIServicesServer (NU1510)
+- **ModelContextProtocol RC2 Dependency Pinning**: Added explicit PackageVersion entries to pin
+  transitive dependencies from MCP 0.4.0-preview.3 (which depends on 10.0.0-rc.2 abstractions)
+  to GA 10.0.0 versions via `CentralPackageTransitivePinningEnabled`
+- **NuGet.config Package Source Mapping**: Updated to allow Microsoft.Extensions.* packages
+  from both `dotnet10` feed and `nuget.org` for proper transitive dependency resolution
+
+### Changed
+- **Directory.Packages.props**: Reorganized Microsoft Extensions packages
+  - Removed in-box packages that don't need explicit references
+  - Added explicit pins for abstractions packages to override MCP's RC2 dependencies
+  - Added NATS.Client packages for WhisperMesh central version management
+  - Added OpenTelemetry.Api for WhisperMesh
+- **DebugTools.csproj**: Added explicit `FrameworkReference` for `Microsoft.AspNetCore.App`
+  (required for `IHttpContextAccessor` in non-web SDK projects)
+- **Testing.csproj**: Retained `Microsoft.Extensions.Hosting` PackageReference
+  (required for `Host.CreateApplicationBuilder()` in test utilities)
+
 ### Added
 - **Ancplua.Mcp.CoreTools**: New shared library consolidating tools from HttpServer and WorkstationServer
   - Implements ADR-006 (Core Tools Consolidation) and spec-006

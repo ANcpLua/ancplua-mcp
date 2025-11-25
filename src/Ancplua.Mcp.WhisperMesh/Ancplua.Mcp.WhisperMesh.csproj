@@ -9,13 +9,11 @@
     <PackageTags>mcp;whispermesh;agent;nats;observability</PackageTags>
   </PropertyGroup>
 
+  <!-- Note: Microsoft.Extensions.Hosting.Abstractions, Logging.Abstractions, Options,
+       and System.Text.Json are provided in-box by .NET 10 - no PackageReference needed. -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
-    <PackageReference Include="Microsoft.Extensions.Options" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
-    <PackageReference Include="NATS.Client.Core" Version="2.5.1" />
-    <PackageReference Include="NATS.Client.JetStream" Version="2.5.1" />
-    <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="NATS.Client.Core" />
+    <PackageReference Include="NATS.Client.JetStream" />
     <PackageReference Include="OpenTelemetry.Api" />
   </ItemGroup>
 

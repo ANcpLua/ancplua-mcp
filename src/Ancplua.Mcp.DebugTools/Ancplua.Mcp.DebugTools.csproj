@@ -8,9 +8,13 @@
     <Description>Debug and introspection tools for Ancplua MCP servers</Description>
   </PropertyGroup>
 
+  <!-- Reference ASP.NET Core shared framework for IHttpContextAccessor -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="ModelContextProtocol" />
-    <PackageReference Include="Microsoft.Extensions.Logging" />
   </ItemGroup>
 
 </Project>

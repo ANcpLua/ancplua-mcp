@@ -1,6 +1,8 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- Transitive pinning enabled to ensure ModelContextProtocol's RC2 dependencies
+         are upgraded to GA 10.0.0 versions via the PackageVersion entries below. -->
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup Label="MCP SDK Packages">
@@ -9,16 +11,21 @@
     <PackageVersion Include="ModelContextProtocol.Core" Version="0.4.0-preview.3"/>
     <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="0.4.0-preview.3"/>
   </ItemGroup>
-  <ItemGroup Label="Microsoft Extensions">
-    <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+  <!-- Note: Many Microsoft.Extensions.* packages are now in-box in .NET 10.
+       However, we must explicitly pin abstractions packages because ModelContextProtocol
+       0.4.0-preview.3 has a transitive dependency on 10.0.0-rc.2 versions. Pinning to
+       10.0.0 GA ensures we use the released versions. -->
+  <ItemGroup Label="Microsoft Extensions (NuGet-distributed)">
+    <!-- Explicitly pin abstractions to GA 10.0.0 (overrides MCP's RC2 transitive deps) -->
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0"/>
-    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.0"/>
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0"/>
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0"/>
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0"/>
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0"/>
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.0"/>
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.0"/>
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0"/>
-    <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.0"/>
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.0.0"/>
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.0.0"/>
-    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="10.0.0"/>
   </ItemGroup>
   <ItemGroup Label="ASP.NET Core">
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0"/>
@@ -41,6 +48,7 @@
     <PackageVersion Include="FluentAssertions" Version="8.8.0"/>
   </ItemGroup>
   <ItemGroup Label="OpenTelemetry – Stable 1.14.0 (released 12.11.2025)">
+    <PackageVersion Include="OpenTelemetry.Api" Version="1.14.0"/>
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0"/>
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.14.0"/>
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0"/>
@@ -48,6 +56,11 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0"/>
     <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="1.14.0-beta.2"/>
   </ItemGroup>
+  <ItemGroup Label="Messaging (NATS)">
+    <PackageVersion Include="NATS.Client.Core" Version="2.5.1"/>
+    <PackageVersion Include="NATS.Client.JetStream" Version="2.5.1"/>
+  </ItemGroup>
+  <!-- Note: System.Text.Json is in-box in .NET 10 - no PackageVersion needed -->
   <ItemGroup Label="NuGet">
     <PackageVersion Include="NuGet.Protocol" Version="7.0.0"/>
     <PackageVersion Include="NuGet.Configuration" Version="7.0.0"/>
