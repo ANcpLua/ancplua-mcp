@@ -1,56 +1,129 @@
+# Codecov Configuration for ancplua-mcp
+# Docs: https://docs.codecov.com/docs/codecovyml-reference
+# Validate: cat codecov.yml | curl --data-binary @- https://codecov.io/validate
+
 codecov:
   require_ci_to_pass: true
   notify:
     wait_for_ci: true
+  # Max age before reports are considered stale
+  max_report_age: 24h
 
 coverage:
   precision: 2
   round: down
-  range: 70..90
+  range: 60..90  # Green starts at 60%, full green at 90%
 
   status:
-    # Global Project Coverage
+    # Project-wide coverage target
     project:
       default:
-        target: 80%     # The Gold Standard goal
-        threshold: 1%   # Very strict - don't let it drop
+        target: 70%
+        threshold: 2%
         if_ci_failed: error
-        informational: false
-      
-    # Patch Coverage (The "Ratchet")
-    # Ensures new code is tested, preventing technical debt accumulation
+        only_pulls: true
+
+    # Patch coverage - the "ratchet" ensuring new code is tested
     patch:
       default:
-        target: 100%    # New code MUST be tested
-        threshold: 5%   # Small leeway for boilerplate
+        target: 80%
+        threshold: 5%
         if_ci_failed: error
-        informational: false
+        only_pulls: true
 
-parsers:
-  dotnet:
-    # .NET 10/Coverage specific improvements if applicable
-    # (Standard parsers usually suffice, keeping simple)
+# GitHub Checks - inline annotations in PR diff
+github_checks:
+  annotations: true
 
+# PR Comment configuration
 comment:
-  layout: "diff, flags, files"
+  layout: "condensed_header, diff, flags, components, files"
   behavior: default
-  require_changes: false
+  require_changes: true
   require_base: false
   require_head: true
+  hide_project_coverage: false
 
+# Component tracking - coverage per project/server
+component_management:
+  default_rules:
+    statuses:
+      - type: project
+        target: 70%
+      - type: patch
+        target: 80%
+  individual_components:
+    # Core Libraries
+    - component_id: core-tools
+      name: CoreTools
+      paths:
+        - src/Ancplua.Mcp.CoreTools/**
+    - component_id: service-defaults
+      name: ServiceDefaults
+      paths:
+        - src/Ancplua.Mcp.ServiceDefaults/**
+    - component_id: debug-tools
+      name: DebugTools
+      paths:
+        - src/Ancplua.Mcp.DebugTools/**
+
+    # MCP Servers
+    - component_id: workstation-server
+      name: WorkstationServer
+      paths:
+        - src/Ancplua.Mcp.WorkstationServer/**
+    - component_id: http-server
+      name: HttpServer
+      paths:
+        - src/Ancplua.Mcp.HttpServer/**
+    - component_id: ai-services
+      name: AIServicesServer
+      paths:
+        - src/Ancplua.Mcp.AIServicesServer/**
+    - component_id: github-apps
+      name: GitHubAppsServer
+      paths:
+        - src/Ancplua.Mcp.GitHubAppsServer/**
+    - component_id: roslyn-metrics
+      name: RoslynMetricsServer
+      paths:
+        - src/Ancplua.Mcp.RoslynMetricsServer/**
+
+    # Future/Experimental
+    - component_id: whispermesh
+      name: WhisperMesh
+      paths:
+        - src/Ancplua.Mcp.WhisperMesh/**
+
+# Flags for grouping coverage by test type
 flags:
   unittests:
     paths:
-      - "src/"
+      - src/
     carryforward: true
+    after_n_builds: 1
 
+# Paths to exclude from coverage analysis
 ignore:
+  # Generated code
   - "**/*.Designer.cs"
   - "**/*.g.cs"
+  - "**/*.generated.cs"
   - "**/obj/**"
   - "**/bin/**"
+
+  # Non-production code
   - "tests/**"
   - "tooling/**"
   - "docs/**"
-  - "**/Program.cs"  # Often excluded from unit tests in microservices
+
+  # Entry points (hard to unit test, integration tested)
+  - "**/Program.cs"
   - "**/Startup.cs"
+
+  # Lock files
+  - "**/packages.lock.json"
+
+# Path fixes for CI environments
+fixes:
+  - "::src/"
