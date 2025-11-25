@@ -2,56 +2,152 @@ name: Claude Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize]
-    # Optional: Only run on specific file changes
-    # paths:
-    #   - "src/**/*.ts"
-    #   - "src/**/*.tsx"
-    #   - "src/**/*.js"
-    #   - "src/**/*.jsx"
+    types: [ opened, synchronize, ready_for_review ]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to review'
+        required: true
+        type: number
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
 
 jobs:
-  claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
-
+  review:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: read
-      issues: read
-      id-token: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Get PR diff
+        id: diff
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number || inputs.pr_number }}
+          gh pr diff "$PR_NUMBER" > pr_diff.txt
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
 
       - name: Run Claude Code Review
-        id: claude-review
-        uses: anthropics/claude-code-action@v1
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          prompt: |
-            REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
+        id: claude_review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          DIFF_CONTENT=$(cat pr_diff.txt)
+          
+          # Create review prompt
+          REVIEW_PROMPT=$(cat << 'PROMPT_EOF'
+          You are reviewing a PR for ancplua-mcp, a .NET 10 MCP server infrastructure project.
 
-            Please review this pull request and provide feedback on:
-            - Code quality and best practices
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
-            - Test coverage
+          ## Repository Context
+          - **Type T Repository**: Pure tool/server implementations, NO workflow logic
+          - **Tech Stack**: .NET 10, C# 14, MCP SDK, OpenTelemetry, ASP.NET Core
+          - **Servers**: WorkstationServer, HttpServer, AIServicesServer, GitHubAppsServer, RoslynMetricsServer
 
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+          ## Review Focus Areas
 
-            Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
+          ### 1. MCP Protocol Compliance
+          - Tool registration follows MCP SDK patterns
+          - Proper stdio/HTTP transport handling
+          - No server-to-server MCP calls (forbidden)
 
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
-          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+          ### 2. Architecture & Patterns
+          - ServiceDefaults usage for cross-cutting concerns
+          - Proper DI registration
+          - Separation of Tools vs Utils vs Models
 
+          ### 3. .NET Best Practices
+          - Nullable reference types enabled and respected
+          - ConfigureAwait(false) on library async calls
+          - Proper CancellationToken propagation
+          - CA analyzer compliance (TreatWarningsAsErrors)
+
+          ### 4. Code Quality
+          - No hardcoded paths or secrets
+          - Proper error handling with specific exceptions
+          - XML documentation on public APIs
+
+          ## Response Format
+          
+          Start your response with one of these verdicts on its own line:
+          - VERDICT: APPROVE - if changes look good
+          - VERDICT: REQUEST_CHANGES - if blocking issues found
+          - VERDICT: COMMENT - if suggestions but not blocking
+
+          Then provide your detailed review with:
+          - Summary of changes
+          - Issues found (if any)
+          - Suggestions for improvement
+          - What was done well
+
+          ## PR Diff to Review:
+          PROMPT_EOF
+          )
+          
+          # Run Claude review
+          REVIEW_OUTPUT=$(claude -p "$REVIEW_PROMPT
+
+          $DIFF_CONTENT" \
+            --model claude-opus-4-5-20251101 \
+            --print \
+            --dangerously-skip-permissions 2>&1) || true
+          
+          # Save review to file (handle multiline)
+          echo "$REVIEW_OUTPUT" > review_output.txt
+          
+          # Extract verdict
+          if echo "$REVIEW_OUTPUT" | grep -q "VERDICT: APPROVE"; then
+            echo "verdict=approve" >> $GITHUB_OUTPUT
+          elif echo "$REVIEW_OUTPUT" | grep -q "VERDICT: REQUEST_CHANGES"; then
+            echo "verdict=request_changes" >> $GITHUB_OUTPUT
+          else
+            echo "verdict=comment" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Submit GitHub Review
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=${{ steps.diff.outputs.pr_number }}
+          VERDICT=${{ steps.claude_review.outputs.verdict }}
+          
+          # Read review body
+          REVIEW_BODY=$(cat review_output.txt)
+          
+          # Add Claude branding
+          FORMATTED_REVIEW=$(cat << EOF
+          ## 🤖 Claude Code Review (Opus 4.5)
+          
+          $REVIEW_BODY
+          
+          ---
+          *Review performed by Claude Opus 4.5 per [CLAUDE.md](../blob/main/CLAUDE.md) guidelines*
+          EOF
+          )
+          
+          # Submit as formal GitHub review
+          case "$VERDICT" in
+            approve)
+              gh pr review "$PR_NUMBER" --approve --body "$FORMATTED_REVIEW"
+              ;;
+            request_changes)
+              gh pr review "$PR_NUMBER" --request-changes --body "$FORMATTED_REVIEW"
+              ;;
+            *)
+              gh pr review "$PR_NUMBER" --comment --body "$FORMATTED_REVIEW"
+              ;;
+          esac
