@@ -1,0 +1,51 @@
+# Multi-stage build for Ancplua.Mcp.AIServicesServer
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# Copy global.json and Directory.Packages.props for version control
+COPY global.json ./
+COPY Directory.Packages.props ./
+
+# Copy project files (AIServicesServer + ServiceDefaults)
+COPY src/Ancplua.Mcp.AIServicesServer/Ancplua.Mcp.AIServicesServer.csproj ./src/Ancplua.Mcp.AIServicesServer/
+COPY src/Ancplua.Mcp.ServiceDefaults/Ancplua.Mcp.ServiceDefaults.csproj ./src/Ancplua.Mcp.ServiceDefaults/
+
+# Restore dependencies
+RUN dotnet restore src/Ancplua.Mcp.AIServicesServer/Ancplua.Mcp.AIServicesServer.csproj
+
+# Copy source code
+COPY src/Ancplua.Mcp.AIServicesServer/ ./src/Ancplua.Mcp.AIServicesServer/
+COPY src/Ancplua.Mcp.ServiceDefaults/ ./src/Ancplua.Mcp.ServiceDefaults/
+
+# Build and publish
+WORKDIR /src/src/Ancplua.Mcp.AIServicesServer
+RUN dotnet publish -c Release -o /app/publish --no-restore
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/runtime:10.0 AS runtime
+WORKDIR /app
+
+# Copy application files
+COPY --from=build /app/publish .
+
+# OCI Labels for Docker MCP Registry
+# https://github.com/docker/mcp-registry/blob/main/CONTRIBUTING.md
+LABEL org.opencontainers.image.title="ancplua AI Services MCP Server" \
+      org.opencontainers.image.description="GitHub Apps orchestration and AI service coordination for Model Context Protocol" \
+      org.opencontainers.image.authors="ANcpLua <your-email@example.com>" \
+      org.opencontainers.image.vendor="ANcpLua" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.url="https://github.com/ANcpLua/ancplua-mcp" \
+      org.opencontainers.image.source="https://github.com/ANcpLua/ancplua-mcp" \
+      org.opencontainers.image.documentation="https://github.com/ANcpLua/ancplua-mcp/blob/main/docs/USER_GUIDE.md" \
+      org.opencontainers.image.version="1.0.0" \
+      com.docker.extension.publisher-url="https://github.com/ANcpLua/ancplua-mcp"
+
+# MCP-specific labels
+LABEL mcp.server.type="stdio" \
+      mcp.server.category="ai-orchestration" \
+      mcp.server.capabilities="service-discovery,ai-coordination" \
+      mcp.server.version="1.0.0"
+
+# MCP servers use stdio transport by default
+ENTRYPOINT ["dotnet", "Ancplua.Mcp.AIServicesServer.dll"]

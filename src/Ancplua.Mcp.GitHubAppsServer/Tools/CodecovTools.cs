@@ -1,5 +1,5 @@
+using ModelContextProtocol.Server;
 using System.ComponentModel;
-using System.Text.Json;
 
 namespace Ancplua.Mcp.GitHubAppsServer.Tools;
 
@@ -9,7 +9,7 @@ namespace Ancplua.Mcp.GitHubAppsServer.Tools;
 [McpServerToolType]
 public static class CodecovTools
 {
-    private static readonly HttpClient _httpClient = new();
+    private static readonly HttpClient HttpClient = new();
 
     /// <summary>
     /// Get coverage report for a repository
@@ -30,11 +30,11 @@ public static class CodecovTools
         var branchParam = branch ?? "main";
         var url = $"https://codecov.io/api/v2/github/{owner}/{repo}/branch/{branchParam}";
 
-        _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", token);
+        HttpClient.DefaultRequestHeaders.Authorization = new("Bearer", token);
 
         try
         {
-            var response = await _httpClient.GetAsync(url);
+            var response = await HttpClient.GetAsync(url);
             var content = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -55,7 +55,7 @@ public static class CodecovTools
     /// </summary>
     [McpServerTool]
     [Description("Trigger Codecov AI to review a pull request")]
-    public static Task<string> TriggerCodecovAIReview(
+    public static Task<string> TriggerCodecovAiReview(
         [Description("Repository owner")] string owner,
         [Description("Repository name")] string repo,
         [Description("Pull request number")] int prNumber)

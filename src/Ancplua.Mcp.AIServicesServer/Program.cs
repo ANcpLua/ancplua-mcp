@@ -1,18 +1,26 @@
+using Ancplua.Mcp.AIServicesServer.Tools;
+using Ancplua.Mcp.ServiceDefaults;
+using System.Net.Http.Headers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.Logging.AddConsole(options =>
+// Apply standardized service defaults (OpenTelemetry, health checks, resilience, service discovery)
+builder.AddServiceDefaults();
+
+// Configure HttpClientFactory for GitHub API calls
+builder.Services.AddHttpClient("GitHubApi", client =>
 {
-    options.LogToStandardErrorThreshold = LogLevel.Trace;
+    client.BaseAddress = new Uri("https://api.github.com");
+    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("ancplua-mcp-ai-services", "1.0"));
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
 });
 
+// Add MCP server with stdio transport and explicit tool registration
 builder.Services
     .AddMcpServer()
     .WithStdioServerTransport()
-    .WithToolsFromAssembly();
+    .WithTools<ServiceDiscoveryTools>();
 
 await builder.Build().RunAsync();

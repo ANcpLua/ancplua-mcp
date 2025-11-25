@@ -1,10 +1,17 @@
-using ModelContextProtocol;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Ancplua.Mcp.ServiceDefaults;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.AddMcpServer()
+// Apply standardized service defaults (OpenTelemetry, health checks, resilience, service discovery)
+builder.AddServiceDefaults();
+
+// Add MCP server with stdio transport and auto-discover tools from this assembly
+builder.Services
+    .AddMcpServer()
     .WithStdioServerTransport()
-    .WithToolsFromAssembly(typeof(Program).Assembly);
+    .WithToolsFromAssembly();
 
 var app = builder.Build();
 

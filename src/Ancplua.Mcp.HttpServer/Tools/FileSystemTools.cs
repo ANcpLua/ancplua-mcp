@@ -7,7 +7,7 @@ namespace Ancplua.Mcp.HttpServer.Tools;
 /// Provides MCP tools for filesystem operations including reading, writing, and listing files.
 /// </summary>
 [McpServerToolType]
-public static class FileSystemTools
+public class FileSystemTools
 {
     /// <summary>
     /// Reads the contents of a file at the specified path.

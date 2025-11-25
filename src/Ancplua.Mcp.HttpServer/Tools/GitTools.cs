@@ -8,7 +8,7 @@ namespace Ancplua.Mcp.HttpServer.Tools;
 /// Provides MCP tools for Git operations including status, log, diff, and branch management.
 /// </summary>
 [McpServerToolType]
-public static class GitTools
+public class GitTools
 {
     /// <summary>
     /// Executes a git command and returns the output.
@@ -141,7 +141,7 @@ public static class GitTools
         [Description("The files to add (e.g., '.' for all files)")] string files,
         [Description("The path to the git repository (optional)")] string? repositoryPath = null)
     {
-        await ExecuteGitCommandAsync(new[] { "add", files }, repositoryPath);
+        await ExecuteGitCommandAsync(["add", files], repositoryPath);
     }
 
     /// <summary>
@@ -155,6 +155,6 @@ public static class GitTools
         [Description("The commit message")] string message,
         [Description("The path to the git repository (optional)")] string? repositoryPath = null)
     {
-        await ExecuteGitCommandAsync(new[] { "commit", "-m", message }, repositoryPath);
+        await ExecuteGitCommandAsync(["commit", "-m", message], repositoryPath);
     }
 }

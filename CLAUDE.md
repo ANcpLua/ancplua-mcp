@@ -1,369 +1,437 @@
-# CLAUDE.md
+# CLAUDE.md – ancplua-mcp
 
-This file defines how you (Claude Code) work in this repository.
-
-> **Repository role:** C# Model Context Protocol (MCP) servers for development workflows and tools.
-
-This repo is about **MCP servers only**. It does not contain Claude Code plugins; those live in a separate repository and consume these servers via `.mcp.json`.
+> **You are the infrastructure layer.** This repo provides the **Type T (Technology)** tools that power the **Type A (Application)** skills in `ancplua-claude-plugins`.
 
 ---
 
-## 1. Role and scope
+## 0. MANDATORY FIRST ACTIONS
 
-### Your role
+<EXTREMELY_IMPORTANT>
 
-You are the **architect and maintainer** of a family of .NET MCP servers:
+**BEFORE doing anything in this repo:**
 
-- Each server exposes one or more **MCP tools** for LLM clients (Claude, IDEs, other agents).
-- Servers are **independent processes**, typically:
-  - stdio-based console apps for local use.
-  - optional HTTP-based apps for remote use.
+1. **Confirm location:**
+   ```bash
+   pwd
+   ls -la *.sln
+   ```
+   You MUST be at the root of `ancplua-mcp` with `Ancplua.Mcp.sln` visible.
 
-You MUST:
+2. **Check for Superpowers:**
+   ```bash
+   ls ~/.claude/plugins/cache/ 2>/dev/null | grep -i super
+   ```
+   If installed, read `getting-started/SKILL.md` FIRST.
 
-- Keep the **server layout predictable** and modular.
-- Keep **tool contracts stable and versioned**.
-- Ensure **tests and diagnostics** exist for any non-trivial tool.
+3. **Load coordination context:**
+  - Read this `CLAUDE.md`
+  - Read `docs/ARCHITECTURE.md`
+  - Read `docs/CROSS_REPO_COORDINATION.md` (if present, or reference the plugins repo)
 
-You MAY:
+4. **Understand your role:**
+  - You build **tools** (Type T)
+  - Skills in `ancplua-claude-plugins` **consume** your tools (Type A)
+  - You do NOT write workflows or decision logic
 
-- Create, move, rename, and delete files and directories.
-- Add or remove MCP tools and servers.
-- Refactor server internals to improve clarity and maintainability.
-
-You MUST NOT:
-
-- Run `git commit` or `git push`.
-- Store or handle secrets outside of this repo’s documented configuration.
+</EXTREMELY_IMPORTANT>
 
 ---
 
-## 2. Target architecture
+## 1. What This Repository Is
 
-This repo is converging toward a structure like:
+> **ancplua-mcp** — The ".NET Insight Spine": C# MCP servers that expose tools for AI-assisted development.
+
+This repo provides:
+- **MCP servers** built on the official C# SDK
+- **Tools** for filesystem, git, CI, NuGet, Roslyn, architecture
+- **Infrastructure** shared via `ServiceDefaults`
+- **Integration points** for external "god-tier" MCP servers
+
+This is **NOT**:
+- A Claude Code plugin (that's `ancplua-claude-plugins`)
+- An IDE extension
+- A standalone application
+
+---
+
+## 2. **THE LAW: Specs and Decisions**
+
+<CRITICAL>
+**NO TASK IS AUTHORIZED WITHOUT A SPEC AND AN ADR.**
+</CRITICAL>
+
+Before writing a single line of code for a new feature or architectural change, you **MUST**:
+
+1.  **Check for an ADR (`docs/decisions/`)**:
+    - Why are we doing this?
+    - What alternatives were rejected?
+    - If no ADR exists, CREATE ONE using `adr-template.md`.
+
+2.  **Check for a Spec (`docs/specs/`)**:
+    - What is the interface?
+    - What are the inputs/outputs?
+    - If no Spec exists, CREATE ONE using `spec-template.md`.
+
+**The Workflow is STRICT:**
+`Idea` -> `ADR (Why)` -> `Spec (What)` -> `Implementation (How)`
+
+Any request to "just add a feature" is **REJECTED** until these documents exist.
+
+---
+
+## 3. Target Architecture
 
 ```text
 ancplua-mcp/
+├── CLAUDE.md                    # This file
 ├── README.md
-├── CLAUDE.md
 ├── CHANGELOG.md
-├── .gitignore
+├── Ancplua.Mcp.sln
 │
 ├── src/
-│   ├── Ancplua.Mcp.WorkstationServer/       # Stdio MCP server(s) for local dev tools
-│   │   ├── Ancplua.Mcp.WorkstationServer.csproj
-│   │   ├── Program.cs
-│   │   └── Tools/                           # [McpServerToolType] classes live here
+│   ├── Ancplua.Mcp.ServiceDefaults/
+│   │   ├── Extensions.cs        # OpenTelemetry, health, resilience
+│   │   └── ...
 │   │
-│   └── Ancplua.Mcp.HttpServer/             # Optional ASP.NET Core MCP server
-│       ├── Ancplua.Mcp.HttpServer.csproj
-│       ├── Program.cs
+│   ├── Ancplua.Mcp.WorkstationServer/
+│   │   ├── Program.cs           # Stdio MCP server
+│   │   └── Tools/
+│   │       ├── FileSystemTools.cs
+│   │       ├── GitTools.cs
+│   │       ├── CiTools.cs
+│   │       ├── NuGetTools.cs
+│   │       ├── RoslynTools.cs
+│   │       ├── RoslynMetricsTools.cs
+│   │       └── ArchitectureTools.cs
+│   │
+│   ├── Ancplua.Mcp.HttpServer/
+│   │   ├── Program.cs           # HTTP MCP server
+│   │   └── Tools/
+│   │
+│   ├── Ancplua.Mcp.AIServicesServer/
+│   │   ├── Program.cs
+│   │   └── Tools/
+│   │       └── ServiceDiscoveryTools.cs
+│   │
+│   └── Ancplua.Mcp.GitHubAppsServer/
 │       └── Tools/
 │
 ├── tests/
 │   ├── Ancplua.Mcp.WorkstationServer.Tests/
-│   └── Ancplua.Mcp.HttpServer.Tests/
+│   ├── Ancplua.Mcp.HttpServer.Tests/
+│   └── ...
 │
 ├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── tool-contracts.md        # CRITICAL: Tool name/signature contracts
 │   ├── specs/
-│   │   ├── spec-template.md
-│   │   └── *.md                             # One spec per feature/tool group
-│   └── decisions/
-│       ├── adr-template.md
-│       └── adr-*.md                         # Architecture Decision Records
+│   │   └── spec-01XX-*.md       # Specs 0100-0199 reserved for this repo
+│   ├── decisions/
+│   │   └── ADR-01XX-*.md        # ADRs 0100-0199 reserved for this repo
+│   └── examples/
+│       └── *.mcp.json           # MCP client config examples
 │
-└── .github/
-    └── workflows/
-        ├── ci.yml
-        └── dependabot.yml
-````
-
-When the real structure differs, treat this as the **north star** and move the repo incrementally toward it.
+└── tooling/
+    └── scripts/
+        └── local-validate.sh
+```
 
 ---
 
-## 3. Tools and permissions
+## 4. Your Role: Type T Provider
 
-Assumptions:
+### 4.1 Blood Type Discipline
 
-* You run with full local permissions (for example: `claude --dangerously-skip-permissions`).
-* You MAY:
+You are **Type T (Technology Infrastructure)**. You:
 
-  * Edit, move, and delete files in this repo.
-  * Run shell commands (`dotnet`, `bash`, etc.).
-* You MUST NOT:
+| ✅ DO | ❌ DON'T |
+|-------|----------|
+| Implement tool logic (shell, API, file ops) | Define workflows or decisions |
+| Expose typed MCP tools with schemas | Write SKILL.md files |
+| Return structured DTOs | Return free-form prose |
+| Handle errors and edge cases | Decide business rules |
+| Log to stderr, protocol to stdout | Mix concerns |
 
-  * Commit or push changes.
-  * Access secrets outside any documented configuration (e.g. `appsettings.*.json`, user-provided env vars).
+### 4.2 Tool Design Principles
 
-Recommended tools:
+Every tool you write MUST:
 
-* **Shell / filesystem**
+1. **Single responsibility** — One tool, one job
+2. **Stable name** — Tool names are public API; changes require spec + ADR
+3. **Typed parameters** — Use `[Description]` attributes, explicit types
+4. **Structured output** — Return DTOs, not strings
+5. **No hidden effects** — If it writes/deletes/calls external API, name says so
 
-  * `Read`, `Write`, `Edit`, `MultiEdit`, `Glob`, `Grep`
-  * `bash` shell commands (`ls`, `tree`, `dotnet`, etc.)
-* **Planning / orchestration**
+```csharp
+// GOOD: Clear, typed, documented
+[McpServerTool]
+[Description("Run dotnet test and return structured results")]
+public static async Task<TestResult> RunDotnetTest(
+    [Description("Path to project or solution")] string path,
+    [Description("Optional test filter expression")] string? filter = null)
+{
+    // Returns DTO with passed/failed/skipped counts
+}
 
-  * `TodoWrite` for task breakdown.
-* **Web**
-
-  * `WebFetch`, `WebSearch` for:
-
-    * `https://modelcontextprotocol.io/`
-    * `https://github.com/modelcontextprotocol/csharp-sdk`
-* **Diagnostics**
-
-  * Any MCP inspector or test client available (e.g. CLI, IDE integrations).
-
-Always show failing commands and how you handled them.
+// BAD: Vague, untyped, side effects hidden
+[McpServerTool]
+public static string DoStuff(string input) { /* ??? */ }
+```
 
 ---
 
-## 4. Default workflow when starting work
+## 5. Cross-Repo Coordination
 
-For any non-trivial task:
+### 5.1 The Contract
+
+Skills in `ancplua-claude-plugins` call your tools by name:
+
+```markdown
+<!-- In a skill -->
+1. Run local tests
+   - MCP Tool: `ancplua-workstation.CiTools.RunDotnetTest`
+```
+
+Your responsibility:
+- Tool `RunDotnetTest` MUST exist
+- Signature MUST match documented contract
+- Breaking changes MUST be coordinated
+
+### 5.2 Tool Contracts Document
+
+Maintain `docs/tool-contracts.md` with ALL exposed tools:
+
+```markdown
+# Tool Contracts
+
+## WorkstationServer Tools
+
+### CiTools.RunDotnetTest
+- **Input**: `{ path: string, filter?: string }`
+- **Output**: `TestResult { passed: int, failed: int, skipped: int, success: bool }`
+- **Side effects**: None (read-only)
+
+### CiTools.WaitForGitHubActions
+- **Input**: `{ timeoutMinutes: int }`
+- **Output**: `CiStatus { completed: bool, success: bool, url: string }`
+- **Side effects**: Polls GitHub API
+```
+
+### 5.3 Spec ID Ranges
+
+| Range | Owner |
+|-------|-------|
+| spec-0001 to spec-0099 | ancplua-claude-plugins |
+| **spec-0100 to spec-0199** | **This repo (ancplua-mcp)** |
+| spec-0200+ | Cross-repo specs |
+
+Same for ADRs.
+
+---
+
+## 6. Mandatory Workflow
+
+### 6.1 For Any Non-Trivial Change
 
 1. **Bootstrap**
+   ```bash
+   pwd                              # Confirm location
+   git status --short               # Check state
+   dotnet build                     # Verify builds
+   dotnet test                      # Verify tests pass
+   ```
 
-   * Run:
+2. **Plan & Authorize**
+  - **Check Docs/Decisions**: Does an ADR exist? If not, STOP. Create it.
+  - **Check Docs/Specs**: Does a Spec exist? If not, STOP. Create it.
+  - Only proceed if ADR + Spec are present.
 
-     ```bash
-     pwd
-     ls -la
-     git status --short
-     tree -L 3 || ls -R
-     ```
+3. **Design (if contract change)**
+  - Update spec in `docs/specs/spec-01XX-*.md`
+  - Update ADR if architectural decision
 
-   * Confirm you are at the repository root (for example, `ancplua-mcp`).
-
-2. **Load context**
-
-   * Read this file (`CLAUDE.md`).
-   * Read `README.md`.
-   * If present and relevant:
-
-     * `docs/specs/*.md`
-     * `docs/decisions/adr-*.md`
-
-3. **Plan**
-
-   * Use `TodoWrite` to create a short todo list.
-   * For larger work, write a brief plan in the chat before changing files.
-
-4. **Execute**
-
-   * Use `Glob` and `Read` to understand existing servers and tools.
-   * Make focused, coherent changes.
-   * Keep related changes grouped and small enough to understand.
+4. **Implement**
+  - TDD: Write test first
+  - Implement tool
+  - Document in tool-contracts.md
 
 5. **Validate**
-
-   * Run:
-
-     ```bash
-     dotnet restore
-     dotnet build
-     dotnet test
-     ```
-
-   * If a CI-like script exists (for example, `.github/workflows/ci.yml` mirrored locally), reuse those steps in a local script (for example, `eng/local-validate.sh`).
+   ```bash
+   dotnet restore
+   dotnet build --no-restore
+   dotnet test --no-build
+   ./tooling/scripts/local-validate.sh  # If present
+   ```
 
 6. **Document**
+  - Update `CHANGELOG.md`
+  - Update `docs/tool-contracts.md`
+  - Update spec/ADR if needed
 
-   * Update:
-
-     * `CHANGELOG.md` for user-visible changes.
-     * Specs and ADRs if behavior or architecture changed.
-     * `README.md` sections that describe usage or server layout.
-
-7. **Report**
-
-   * Summarize:
-
-     * What changed.
-     * What commands you ran.
-     * Any remaining TODOs.
+7. **Cross-Repo Check**
+  - Does any skill reference this tool?
+  - If signature changed, update skill docs in ancplua-claude-plugins
 
 ---
 
-## 5. MCP servers and packages
+## 7. Server-Specific Guidelines
 
-### 5.1 C# MCP SDK usage
+### 7.1 WorkstationServer (Stdio)
 
-Servers in this repo SHOULD be built on the official C# SDK:
+Primary server for local development. Tools grouped by concern:
 
-* `ModelContextProtocol`
+| Tool Class | Responsibility |
+|------------|----------------|
+| `FileSystemTools` | Read/list files, cautious write/delete |
+| `GitTools` | Status, branches, diffs (no destructive ops) |
+| `CiTools` | dotnet build/test, local CI scripts |
+| `NuGetTools` | Package inspection, feed queries |
+| `RoslynTools` | Semantic analysis, diagnostics (read-only) |
+| `RoslynMetricsTools` | Code metrics, complexity |
+| `ArchitectureTools` | Specs, ADRs, diagrams |
 
-  * Hosting and DI.
-  * `AddMcpServer()`, `WithStdioServerTransport()`, `WithToolsFromAssembly()`.
-* `ModelContextProtocol.AspNetCore` (optional)
+### 7.2 HttpServer
 
-  * For HTTP-based MCP servers (`WithHttpTransport`, `MapMcp`, etc.).
-* `ModelContextProtocol.Core` (optional)
+Network-accessible version. Can mirror WorkstationServer or expose subset.
 
-  * For low-level client libraries or shared abstractions.
+Use for:
+- Shared team tooling
+- CI/CD integration
+- Multi-tenant scenarios
 
-Rules:
+### 7.3 AIServicesServer
 
-* **Workstation/local servers**
+Orchestrates external AI services (Claude, Gemini, ChatGPT, CodeRabbit, etc.):
 
-  * Prefer stdio servers using `ModelContextProtocol` only.
-* **Remote/HTTP servers**
+| Tool | Purpose |
+|------|---------|
+| `ServiceDiscoveryTools.ListServices` | Query available AI services |
+| `ServiceDiscoveryTools.GetServiceStatus` | Check service health |
+| Future: `OrchestrateReview` | Multi-AI PR review |
 
-  * Use `ModelContextProtocol` + `ModelContextProtocol.AspNetCore`.
-* Only add `ModelContextProtocol.Core` if you are building shared libraries or custom clients.
+### 7.4 GitHubAppsServer
 
-### 5.2 LLM usage from servers
+Direct GitHub App integration:
 
-If a server itself calls LLMs:
-
-* Use `Microsoft.Extensions.AI*` packages where appropriate.
-* Keep that logic **inside** the server project, not in this repo’s infrastructure.
-* Document any external model dependencies in:
-
-  * The relevant spec.
-  * The server’s README section (if present).
-
-Do not add LLM dependencies unless the server clearly needs them.
-
----
-
-## 6. Tools, prompts, and resources
-
-Tools in this repo SHOULD follow the C# SDK patterns:
-
-* Use `[McpServerToolType]` on static classes that group related tools.
-* Use `[McpServerTool]` on individual tool methods.
-* Use `[Description]` attributes or XML comments to describe:
-
-  * The tool.
-  * Each parameter.
-
-Prompts and resources:
-
-* Use `[McpServerPromptType]` / `[McpServerPrompt]` for reusable prompts.
-* Use `[McpServerResourceType]` / `[McpServerResource]` for file-backed or computed resources when needed.
-
-Rules:
-
-* Tool names must be **stable and descriptive**.
-* Input schemas must be well-defined (simple types, clear descriptions).
-* Return values SHOULD be predictable (for example, clear text or structured JSON).
+| Tool | Purpose |
+|------|---------|
+| `TriggerAIReview` | Kick off AI review on PR |
+| `GetReviewResults` | Fetch completed review |
+| `ManageStatusChecks` | Update PR status |
 
 ---
 
-## 7. Documentation discipline
+## 8. External Server Composition
 
-For **any change that affects external behavior** (new tools, changed contracts, new servers), you MUST:
+You compose with external MCP servers, not replace them:
 
-1. **CHANGELOG**
+| External Server | Strength | When to Use |
+|-----------------|----------|-------------|
+| dotnet-build-insights | Binlog analysis | Build failures, perf tuning |
+| dotnet-code-insights | Roslyn deep dive | Complex refactors |
+| ContextKeeper | Long-term memory | Multi-session context |
+| NuGet Context | Package graphs | Dependency issues |
+| OTEL MCP | Observability | Runtime debugging |
+| mcp-debugger | DAP bridge | Step debugging |
+| Jupyter MCP | Python notebooks | Data analysis, ML |
 
-   * Add an entry to `CHANGELOG.md`.
-   * Include:
-
-     * Added / Changed / Fixed sections.
-     * Server and tool names affected.
-
-2. **Specs**
-
-   * If the change introduces or modifies a feature:
-
-     * Update an existing spec in `docs/specs/`.
-     * Or create a new one based on `spec-template.md`.
-   * Specs should describe:
-
-     * Problem and value.
-     * Tool signatures (inputs/outputs).
-     * Expected usage patterns.
-
-3. **ADRs**
-
-   * If the change is architectural (for example, a new server type, major design choice):
-
-     * Add or update an ADR in `docs/decisions/` based on `adr-template.md`.
-   * Include:
-
-     * Status (`proposed`, `accepted`, `rejected`, `deprecated`, `superseded`).
-     * Decision drivers.
-     * Considered options.
-     * Consequences.
-
-4. **README**
-
-   * Update `README.md` when:
-
-     * New servers are added.
-     * Supported tool categories or usage instructions change.
-
-5. **This file (`CLAUDE.md`)**
-
-   * Update this file when:
-
-     * The target layout changes.
-     * The development workflow meaningfully changes.
-     * New mandatory rules are added.
-
-Do not ship new behavior without updating these documents.
+**Rule**: If an external server does it better, use it. Only build tools for ancplua-specific needs.
 
 ---
 
-## 8. Testing and CI
+## 9. ServiceDefaults Infrastructure
 
-CI configuration lives under `.github/workflows/` (for example, `ci.yml`).
+All servers share `Ancplua.Mcp.ServiceDefaults`:
 
-Expected checks include:
+```csharp
+// In any server's Program.cs
+builder.AddServiceDefaults();
 
-* `dotnet build` on all server and test projects.
-* `dotnet test` on all test projects.
-* Optional:
+// Provides:
+// - OpenTelemetry (logs, metrics, traces)
+// - Health checks (/health, /alive)
+// - Resilience (retry, circuit breaker)
+// - Stdio discipline (stdout = protocol, stderr = logs)
+```
 
-  * `dotnet format` or equivalent for style.
-  * Additional analyzers or code quality tools.
-
-Locally:
-
-* Run the same steps as CI before claiming success.
-* If there is a dedicated script (for example, `eng/local-validate.sh`), keep it in sync with CI.
-
-If tests or builds fail:
-
-* Do not ignore failures.
-* Fix the root cause.
-* Re-run until clean.
+**Rule**: Never add infrastructure code to individual servers. Put it in ServiceDefaults.
 
 ---
 
-## 9. Interaction with other repositories
+## 10. Safety & Permissions
 
-This repo is **independent**:
+You MAY:
+- Read/write files in the working directory
+- Run `dotnet` commands
+- Query external APIs (GitHub, NuGet)
+- Execute shell commands documented in tool contracts
 
-* It does not contain Claude plugins.
-* Other repos (such as a Claude plugin marketplace) may:
-
-  * Reference these servers via `.mcp.json`.
-  * Treat these servers as external tools.
-
-When adding or changing tools that are intended to be used by another repo:
-
-* Clearly document:
-
-  * Server name and startup command.
-  * The MCP tools exposed and their contracts.
-* Avoid introducing tight coupling to any one client repository.
+You MUST NOT:
+- Commit or push (leave for human)
+- Hardcode secrets or tokens
+- Access files outside repo without explicit env vars
+- Break existing tool contracts without spec + ADR
 
 ---
 
-## 10. Starting checklist
+## 11. Failure Conditions
 
-When asked to work in this repo:
+You have FAILED if:
 
-1. Confirm location (`pwd`, `ls`).
-2. Read `CLAUDE.md` and `README.md`.
-3. Inspect structure (`tree -L 3 || ls -R`).
-4. Plan with `TodoWrite`.
-5. Make minimal, coherent changes.
-6. Run `dotnet restore`, `dotnet build`, `dotnet test`.
-7. Update `CHANGELOG.md`, specs, ADRs, and `README.md` as required.
-8. Summarize changes and validation steps in your response.
+- [ ] **Task attempted without existing Spec and ADR**
+- [ ] Tool breaks existing contract without spec/ADR
+- [ ] Skill in ancplua-claude-plugins can't call your tool
+- [ ] Tool returns unstructured string instead of DTO
+- [ ] Tests don't pass
+- [ ] tool-contracts.md not updated for new/changed tools
+- [ ] CHANGELOG missing entry
+- [ ] Cross-repo impact not checked
 
-This file is your operational spec. If you are unsure, re-read this file and the docs before improvising.
+---
+
+## 12. Success Conditions
+
+You have SUCCEEDED when:
+
+- [ ] **Spec and ADR exist and are followed**
+- [ ] All tests pass
+- [ ] tool-contracts.md is accurate
+- [ ] New tools have specs
+- [ ] Breaking changes have ADRs
+- [ ] CHANGELOG updated
+- [ ] Skills in ancplua-claude-plugins can consume your tools
+- [ ] No hidden side effects
+
+---
+
+## 13. Quick Reference
+
+### Build & Test
+```bash
+dotnet restore
+dotnet build
+dotnet test
+```
+
+### Run Servers
+```bash
+# Workstation (stdio)
+dotnet run --project src/Ancplua.Mcp.WorkstationServer
+
+# HTTP
+dotnet run --project src/Ancplua.Mcp.HttpServer
+
+# AI Services
+dotnet run --project src/Ancplua.Mcp.AIServicesServer
+```
+
+### Key Files
+- `docs/tool-contracts.md` — Tool API reference
+- `docs/ARCHITECTURE.md` — System design
+- `CHANGELOG.md` — Change history
+- `docs/specs/spec-01XX-*.md` — Feature specs
+- `docs/decisions/ADR-01XX-*.md` — Architectural decisions
+
+---
+
+**This file is your operational spec. Follow it. Reference CROSS_REPO_COORDINATION.md for integration with ancplua-claude-plugins.**

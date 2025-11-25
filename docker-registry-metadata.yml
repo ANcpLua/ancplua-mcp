@@ -1,0 +1,246 @@
+# Docker MCP Registry Metadata
+# https://github.com/docker/mcp-registry
+#
+# ⚠️ WARNING: DO NOT SUBMIT TO DOCKER/MCP-REGISTRY YET
+# This file is prepared for future submission AFTER Phase 4 completion (v2.0)
+# See: docs/decisions/adr-002-docker-registry-submission.md
+#
+# Requirements before submission:
+# - [ ] Full API integration (no instruction stubs)
+# - [ ] Test coverage >80%
+# - [ ] Complete documentation
+# - [ ] Security review
+# - [ ] Dockerfile with OCI labels
+# - [ ] SBOM generation
+#
+# Estimated submission date: 6-8 weeks from creation
+
+# Server metadata for docker/mcp-registry
+server:
+  name: ancplua-ai-services
+  version: "1.0.0"  # Will be "2.0.0" when ready for submission
+  description: "GitHub Apps orchestration and AI service coordination for Model Context Protocol"
+
+  # Categories (from docker/mcp-registry taxonomy)
+  categories:
+    - ai-orchestration
+    - github-integration
+    - code-review
+
+  # Transport and capabilities
+  transport: stdio
+  capabilities:
+    - service-discovery
+    - ai-coordination
+    # Future v2.0 capabilities:
+    # - inter-service-communication
+    # - workflow-orchestration
+    # - context-management
+    # - result-aggregation
+
+# Docker image configuration
+docker:
+  # When ready for submission, will be: mcp/ancplua-ai-services
+  image: ancplua/ancplua-mcp
+  tag: latest
+
+  # Dockerfile location in source repo
+  dockerfile: Dockerfile.aiservices
+
+  # Build args (if needed)
+  build_args: []
+
+# Repository information
+repository:
+  url: https://github.com/ANcpLua/ancplua-mcp
+  source: https://github.com/ANcpLua/ancplua-mcp
+  homepage: https://github.com/ANcpLua/ancplua-mcp
+
+  # Documentation links
+  docs:
+    user_guide: https://github.com/ANcpLua/ancplua-mcp/blob/main/docs/USER_GUIDE.md
+    api_docs: https://github.com/ANcpLua/ancplua-mcp/blob/main/docs/API_INTEGRATION.md
+    architecture: https://github.com/ANcpLua/ancplua-mcp/blob/main/docs/ARCHITECTURE.md
+
+  # License
+  license: MIT
+
+# MCP tools exposed by this server
+tools:
+  # v1.0 tools (instruction-based)
+  - name: ListAIServices
+    description: Lists all configured AI services with their capabilities and status
+    category: service-discovery
+
+  - name: GetServiceCapabilities
+    description: Get detailed information about a specific AI service
+    category: service-discovery
+    parameters:
+      - name: serviceName
+        type: string
+        required: true
+        description: Name of the AI service (claude, jules, gemini, chatgpt, copilot, coderabbit, codecov)
+
+  # Future v2.0 tools (API-integrated):
+  # - TriggerAllReviewers
+  # - GetAIReviewSummary
+  # - CompareAIReviewers
+  # - TriggerCodecovAIReview
+  # - InvokeGeminiReview
+  # - InvokeJules
+  # - TriggerCodeRabbitReview
+  # - AskCodeRabbit
+
+# Supported AI services
+ai_services:
+  - name: Claude
+    provider: Anthropic
+    capabilities:
+      - code-review
+      - code-generation
+      - refactoring
+      - analysis
+
+  - name: Jules
+    provider: Google Labs
+    capabilities:
+      - pr-review
+      - code-fixes
+      - cleanup
+      - refactoring
+
+  - name: Gemini Code Assist
+    provider: Google
+    capabilities:
+      - code-review
+      - code-generation
+      - analysis
+
+  - name: ChatGPT Codex
+    provider: OpenAI
+    capabilities:
+      - code-review
+      - code-generation
+      - explanation
+
+  - name: GitHub Copilot
+    provider: GitHub
+    capabilities:
+      - code-completion
+      - code-generation
+      - chat
+
+  - name: CodeRabbit AI
+    provider: CodeRabbit
+    capabilities:
+      - pr-review
+      - code-quality
+      - security
+
+  - name: Codecov AI
+    provider: Codecov
+    capabilities:
+      - coverage-analysis
+      - test-quality
+
+# Environment variables (for future v2.0)
+environment:
+  # Optional: Required for v2.0 API-integrated tools
+  - name: GITHUB_TOKEN
+    description: GitHub Personal Access Token for API calls
+    required: false  # Will be true in v2.0
+    default: ""
+
+  - name: CODECOV_TOKEN
+    description: Codecov API token for coverage metrics
+    required: false  # Will be true in v2.0
+    default: ""
+
+# Testing configuration
+testing:
+  # Test credentials form (will be filled when ready for submission)
+  # https://forms.gle/6Lw3nsvu2d6nFg8e6
+  test_repo: null  # Will be provided during submission
+  test_credentials: null  # Will be provided during submission
+
+# Versioning and roadmap
+versioning:
+  current: "1.0.0"  # Instruction-based tools
+  next: "2.0.0"     # API-integrated tools (target for Docker registry submission)
+
+  roadmap:
+    v1.0:
+      status: completed
+      features:
+        - Instruction-based tools
+        - Service discovery
+        - Basic configuration
+
+    v2.0:
+      status: planned
+      target_date: 2025-03-15  # 6-8 weeks from 2025-01-22
+      features:
+        - API-integrated tools
+        - GitHub API integration
+        - Codecov integration
+        - Production-ready implementation
+      requirements:
+        - Full API integration
+        - Test coverage >80%
+        - Complete documentation
+        - Security review
+        - SBOM generation
+
+    v3.0:
+      status: future
+      features:
+        - Full workflow orchestration
+        - Inter-service communication
+        - Advanced result aggregation
+        - Enterprise features
+
+# SBOM and security
+security:
+  sbom:
+    format: cyclonedx
+    file: sbom.json
+    # Will be generated before submission
+
+  vulnerability_scanning:
+    enabled: true
+    tools:
+      - trivy
+      - grype
+
+  secrets_management:
+    method: environment_variables
+    # No secrets stored in image
+
+# Submission checklist (from ADR-002)
+submission:
+  status: not_ready
+  blocked_by:
+    - API integration incomplete
+    - Test coverage <80%
+    - Security review pending
+    - SBOM not generated
+
+  ready_when:
+    - Full API integration (no instruction stubs)
+    - Test coverage >80%
+    - Complete documentation
+    - Security review passed
+    - Dockerfile with OCI labels
+    - SBOM generated
+
+  estimated_ready_date: 2025-03-15  # 6-8 weeks from 2025-01-22
+
+  # When ready, submit PR to:
+  # https://github.com/docker/mcp-registry
+  # Following: https://github.com/docker/mcp-registry/blob/main/CONTRIBUTING.md
+
+# Maintainers
+maintainers:
+  - name: ANcpLua
+    github: ANcpLua
+    # email: your-email@example.com

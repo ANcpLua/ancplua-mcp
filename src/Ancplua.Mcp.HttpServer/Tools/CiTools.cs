@@ -8,7 +8,7 @@ namespace Ancplua.Mcp.HttpServer.Tools;
 /// Provides MCP tools for CI/CD operations including running builds, tests, and diagnostics.
 /// </summary>
 [McpServerToolType]
-public static class CiTools
+public class CiTools
 {
     /// <summary>
     /// Executes a command with arguments and returns the output.
@@ -61,7 +61,7 @@ public static class CiTools
         // Parse command into executable and arguments
         var parts = command.Split(' ', 2);
         var executable = parts[0];
-        var arguments = parts.Length > 1 ? parts[1].Split(' ', StringSplitOptions.RemoveEmptyEntries) : Array.Empty<string>();
+        var arguments = parts.Length > 1 ? parts[1].Split(' ', StringSplitOptions.RemoveEmptyEntries) : [];
 
         return await ExecuteCommandAsync(executable, arguments, workingDirectory);
     }
@@ -77,7 +77,7 @@ public static class CiTools
         [Description("The path to the project or solution (optional)")] string? projectPath = null)
     {
         var path = projectPath ?? ".";
-        return await ExecuteCommandAsync("dotnet", new[] { "build", path }, Path.GetDirectoryName(path));
+        return await ExecuteCommandAsync("dotnet", ["build", path], Path.GetDirectoryName(path));
     }
 
     /// <summary>
@@ -91,7 +91,7 @@ public static class CiTools
         [Description("The path to the test project (optional)")] string? projectPath = null)
     {
         var path = projectPath ?? ".";
-        return await ExecuteCommandAsync("dotnet", new[] { "test", path }, Path.GetDirectoryName(path));
+        return await ExecuteCommandAsync("dotnet", ["test", path], Path.GetDirectoryName(path));
     }
 
     /// <summary>
@@ -105,7 +105,7 @@ public static class CiTools
         [Description("The path to the project or solution (optional)")] string? projectPath = null)
     {
         var path = projectPath ?? ".";
-        return await ExecuteCommandAsync("dotnet", new[] { "restore", path }, Path.GetDirectoryName(path));
+        return await ExecuteCommandAsync("dotnet", ["restore", path], Path.GetDirectoryName(path));
     }
 
     /// <summary>

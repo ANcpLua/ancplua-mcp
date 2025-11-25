@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../Ancplua.Mcp.ServiceDefaults/Ancplua.Mcp.ServiceDefaults.csproj" />
+    <ProjectReference Include="../Ancplua.Mcp.DebugTools/Ancplua.Mcp.DebugTools.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="ModelContextProtocol" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
   </ItemGroup>

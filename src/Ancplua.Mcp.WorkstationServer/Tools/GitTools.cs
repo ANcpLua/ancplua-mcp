@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Text;
 using ModelContextProtocol.Server;
 
 namespace Ancplua.Mcp.WorkstationServer.Tools;
@@ -8,153 +9,233 @@ namespace Ancplua.Mcp.WorkstationServer.Tools;
 /// Provides MCP tools for Git operations including status, log, diff, and branch management.
 /// </summary>
 [McpServerToolType]
-public static class GitTools
+public  class GitTools
 {
-    /// <summary>
-    /// Executes a git command and returns the output.
-    /// </summary>
-    /// <param name="arguments">The git command arguments as a list.</param>
-    /// <param name="workingDirectory">The working directory for the git command.</param>
-    /// <returns>The output of the git command.</returns>
-    private static async Task<string> ExecuteGitCommandAsync(IEnumerable<string> arguments, string? workingDirectory = null)
+    private static ProcessStartInfo CreateGitStartInfo(
+        IReadOnlyList<string> arguments,
+        string? workingDirectory)
     {
-        var processStartInfo = new ProcessStartInfo
+        var startInfo = new ProcessStartInfo
         {
             FileName = "git",
+            WorkingDirectory = workingDirectory ?? Directory.GetCurrentDirectory(),
+            UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            UseShellExecute = false,
             CreateNoWindow = true,
-            WorkingDirectory = workingDirectory ?? Directory.GetCurrentDirectory()
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding = Encoding.UTF8
         };
 
         foreach (var arg in arguments)
         {
-            processStartInfo.ArgumentList.Add(arg);
+            startInfo.ArgumentList.Add(arg);
         }
 
-        using var process = Process.Start(processStartInfo);
-        if (process == null)
-        {
-            throw new InvalidOperationException("Failed to start git process");
-        }
-
-        var output = await process.StandardOutput.ReadToEndAsync();
-        var error = await process.StandardError.ReadToEndAsync();
-        await process.WaitForExitAsync();
-
-        if (process.ExitCode != 0)
-        {
-            throw new InvalidOperationException($"Git command failed: {error}");
-        }
-
-        return output;
+        return startInfo;
     }
 
     /// <summary>
-    /// Executes a git command with string arguments and returns the output.
+    /// Starts a git process and safely captures stdout + stderr without deadlocks.
     /// </summary>
-    /// <param name="arguments">The git command arguments as a string.</param>
-    /// <param name="workingDirectory">The working directory for the git command.</param>
-    /// <returns>The output of the git command.</returns>
-    private static async Task<string> ExecuteGitCommandAsync(string arguments, string? workingDirectory = null)
+    private static async Task<(int ExitCode, string StdOut, string StdErr)> RunGitAsync(
+        IReadOnlyList<string> arguments,
+        string? workingDirectory,
+        CancellationToken cancellationToken)
     {
-        return await ExecuteGitCommandAsync(arguments.Split(' ', StringSplitOptions.RemoveEmptyEntries), workingDirectory);
+        var startInfo = CreateGitStartInfo(arguments, workingDirectory);
+
+        using var process = Process.Start(startInfo)
+            ?? throw new InvalidOperationException("Failed to start git process.");
+
+        // Start reading both streams immediately to avoid deadlocks when both are redirected.
+        // See docs & community warnings about sequential ReadToEnd on both streams.
+        var stdOutTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
+        var stdErrTask = process.StandardError.ReadToEndAsync(cancellationToken);
+
+        await process.WaitForExitAsync(cancellationToken);
+
+        var stdOut = await stdOutTask;
+        var stdErr = await stdErrTask;
+
+        return (process.ExitCode, stdOut, stdErr);
     }
+
+    private static Task<(int ExitCode, string StdOut, string StdErr)> RunGitAsync(
+        string arguments,
+        string? workingDirectory,
+        CancellationToken cancellationToken)
+    {
+        // NOTE: this is still a simple splitter; for complex quoting prefer the IList<string> overload.
+        var args = arguments.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return RunGitAsync(args, workingDirectory, cancellationToken);
+    }
+
+    private static async Task<string> ExecuteGitCommandAsync(
+        string arguments,
+        string? workingDirectory,
+        CancellationToken cancellationToken)
+    {
+        var (exitCode, stdOut, stdErr) = await RunGitAsync(arguments, workingDirectory, cancellationToken);
+
+        if (exitCode != 0)
+        {
+            throw new InvalidOperationException(
+                $"Git command failed with exit code {exitCode}.{Environment.NewLine}{stdErr}");
+        }
+
+        return stdOut;
+    }
+
+    private static async Task ExecuteGitCommandAsync(
+        IReadOnlyList<string> arguments,
+        string? workingDirectory,
+        CancellationToken cancellationToken)
+    {
+        var (exitCode, _, stdErr) = await RunGitAsync(arguments, workingDirectory, cancellationToken);
+
+        if (exitCode != 0)
+        {
+            throw new InvalidOperationException(
+                $"Git command failed with exit code {exitCode}.{Environment.NewLine}{stdErr}");
+        }
+    }
+
+    // ---------- MCP tools ----------
 
     /// <summary>
     /// Gets the status of the git repository.
     /// </summary>
-    /// <param name="repositoryPath">The path to the git repository.</param>
-    /// <returns>The git status output.</returns>
     [McpServerTool]
     [Description("Gets the status of the git repository")]
     public static async Task<string> GetStatusAsync(
-        [Description("The path to the git repository (optional)")] string? repositoryPath = null)
+        [Description("The path to the git repository (optional)")]
+        string? repositoryPath = null,
+        CancellationToken cancellationToken = default)
     {
-        return await ExecuteGitCommandAsync("status --porcelain", repositoryPath);
+        if (repositoryPath is not null && !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException($"Directory not found: {repositoryPath}");
+        }
+
+        return await ExecuteGitCommandAsync("status --porcelain", repositoryPath, cancellationToken);
     }
 
     /// <summary>
     /// Gets the git log for the repository.
     /// </summary>
-    /// <param name="repositoryPath">The path to the git repository.</param>
-    /// <param name="maxCount">Maximum number of commits to return.</param>
-    /// <returns>The git log output.</returns>
     [McpServerTool]
     [Description("Gets the git log for the repository")]
     public static async Task<string> GetLogAsync(
-        [Description("The path to the git repository (optional)")] string? repositoryPath = null,
-        [Description("Maximum number of commits to return")] int maxCount = 10)
+        [Description("The path to the git repository (optional)")]
+        string? repositoryPath = null,
+        [Description("Maximum number of commits to return")]
+        int maxCount = 10,
+        CancellationToken cancellationToken = default)
     {
-        return await ExecuteGitCommandAsync($"log --oneline --max-count={maxCount}", repositoryPath);
+        if (repositoryPath is not null && !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException($"Directory not found: {repositoryPath}");
+        }
+
+        return await ExecuteGitCommandAsync($"log --oneline --max-count={maxCount}", repositoryPath, cancellationToken);
     }
 
     /// <summary>
     /// Gets the diff for the repository.
     /// </summary>
-    /// <param name="repositoryPath">The path to the git repository.</param>
-    /// <returns>The git diff output.</returns>
     [McpServerTool]
     [Description("Gets the diff for the repository")]
     public static async Task<string> GetDiffAsync(
-        [Description("The path to the git repository (optional)")] string? repositoryPath = null)
+        [Description("The path to the git repository (optional)")]
+        string? repositoryPath = null,
+        CancellationToken cancellationToken = default)
     {
-        return await ExecuteGitCommandAsync("diff", repositoryPath);
+        if (repositoryPath is not null && !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException($"Directory not found: {repositoryPath}");
+        }
+
+        return await ExecuteGitCommandAsync("diff", repositoryPath, cancellationToken);
     }
 
     /// <summary>
     /// Lists branches in the repository.
     /// </summary>
-    /// <param name="repositoryPath">The path to the git repository.</param>
-    /// <returns>The list of branches.</returns>
     [McpServerTool]
     [Description("Lists branches in the repository")]
     public static async Task<string> ListBranchesAsync(
-        [Description("The path to the git repository (optional)")] string? repositoryPath = null)
+        [Description("The path to the git repository (optional)")]
+        string? repositoryPath = null,
+        CancellationToken cancellationToken = default)
     {
-        return await ExecuteGitCommandAsync("branch -a", repositoryPath);
+        if (repositoryPath is not null && !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException($"Directory not found: {repositoryPath}");
+        }
+
+        return await ExecuteGitCommandAsync("branch -a", repositoryPath, cancellationToken);
     }
 
     /// <summary>
     /// Gets the current branch name.
     /// </summary>
-    /// <param name="repositoryPath">The path to the git repository.</param>
-    /// <returns>The current branch name.</returns>
     [McpServerTool]
     [Description("Gets the current branch name")]
     public static async Task<string> GetCurrentBranchAsync(
-        [Description("The path to the git repository (optional)")] string? repositoryPath = null)
+        [Description("The path to the git repository (optional)")]
+        string? repositoryPath = null,
+        CancellationToken cancellationToken = default)
     {
-        var output = await ExecuteGitCommandAsync("rev-parse --abbrev-ref HEAD", repositoryPath);
+        if (repositoryPath is not null && !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException($"Directory not found: {repositoryPath}");
+        }
+
+        var output = await ExecuteGitCommandAsync("rev-parse --abbrev-ref HEAD", repositoryPath, cancellationToken);
         return output.Trim();
     }
 
     /// <summary>
     /// Adds files to the staging area.
     /// </summary>
-    /// <param name="files">The files to add (e.g., "." for all files).</param>
-    /// <param name="repositoryPath">The path to the git repository.</param>
     [McpServerTool]
     [Description("Adds files to the staging area")]
     public static async Task AddAsync(
-        [Description("The files to add (e.g., '.' for all files)")] string files,
-        [Description("The path to the git repository (optional)")] string? repositoryPath = null)
+        [Description("The files to add (e.g., '.' for all files)")]
+        string files,
+        [Description("The path to the git repository (optional)")]
+        string? repositoryPath = null,
+        CancellationToken cancellationToken = default)
     {
-        await ExecuteGitCommandAsync(new[] { "add", files }, repositoryPath);
+        ArgumentNullException.ThrowIfNull(files);
+
+        if (repositoryPath is not null && !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException($"Directory not found: {repositoryPath}");
+        }
+
+        await ExecuteGitCommandAsync(new[] { "add", files }, repositoryPath, cancellationToken);
     }
 
     /// <summary>
     /// Commits staged changes with a message.
     /// </summary>
-    /// <param name="message">The commit message.</param>
-    /// <param name="repositoryPath">The path to the git repository.</param>
     [McpServerTool]
     [Description("Commits staged changes with a message")]
     public static async Task CommitAsync(
         [Description("The commit message")] string message,
-        [Description("The path to the git repository (optional)")] string? repositoryPath = null)
+        [Description("The path to the git repository (optional)")]
+        string? repositoryPath = null,
+        CancellationToken cancellationToken = default)
     {
-        await ExecuteGitCommandAsync(new[] { "commit", "-m", message }, repositoryPath);
+        ArgumentNullException.ThrowIfNull(message);
+
+        if (repositoryPath is not null && !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException($"Directory not found: {repositoryPath}");
+        }
+
+        await ExecuteGitCommandAsync(new[] { "commit", "-m", message }, repositoryPath, cancellationToken);
     }
 }

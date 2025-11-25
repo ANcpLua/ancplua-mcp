@@ -7,24 +7,26 @@ namespace Ancplua.Mcp.WorkstationServer.Tools;
 /// Provides MCP tools for filesystem operations including reading, writing, and listing files.
 /// </summary>
 [McpServerToolType]
-public static class FileSystemTools
+public class FileSystemTools
 {
     /// <summary>
     /// Reads the contents of a file at the specified path.
     /// </summary>
     /// <param name="path">The absolute or relative path to the file.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The contents of the file as a string.</returns>
     [McpServerTool]
     [Description("Reads the contents of a file at the specified path")]
     public static async Task<string> ReadFileAsync(
-        [Description("The absolute or relative path to the file")] string path)
+        [Description("The absolute or relative path to the file")] string path,
+        CancellationToken cancellationToken = default)
     {
         if (!File.Exists(path))
         {
-            throw new FileNotFoundException($"File not found: {path}");
+            throw new FileNotFoundException($"File not found: {path}", path);
         }
-
-        return await File.ReadAllTextAsync(path);
+        
+        return await File.ReadAllTextAsync(path, cancellationToken);
     }
 
     /// <summary>
@@ -32,11 +34,13 @@ public static class FileSystemTools
     /// </summary>
     /// <param name="path">The absolute or relative path to the file.</param>
     /// <param name="content">The content to write to the file.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [McpServerTool]
     [Description("Writes content to a file at the specified path")]
     public static async Task WriteFileAsync(
         [Description("The absolute or relative path to the file")] string path,
-        [Description("The content to write to the file")] string content)
+        [Description("The content to write to the file")] string content,
+        CancellationToken cancellationToken = default)
     {
         var directory = Path.GetDirectoryName(path);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
@@ -44,7 +48,7 @@ public static class FileSystemTools
             Directory.CreateDirectory(directory);
         }
 
-        await File.WriteAllTextAsync(path, content);
+        await File.WriteAllTextAsync(path, content, cancellationToken);
     }
 
     /// <summary>
@@ -61,7 +65,7 @@ public static class FileSystemTools
         {
             throw new DirectoryNotFoundException($"Directory not found: {path}");
         }
-
+        
         return Directory.EnumerateFileSystemEntries(path);
     }
 
@@ -74,10 +78,7 @@ public static class FileSystemTools
     public static void DeleteFile(
         [Description("The path to the file to delete")] string path)
     {
-        if (File.Exists(path))
-        {
-            File.Delete(path);
-        }
+        File.Delete(path);
     }
 
     /// <summary>

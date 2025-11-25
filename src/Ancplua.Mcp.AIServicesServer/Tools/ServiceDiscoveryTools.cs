@@ -9,18 +9,18 @@ namespace Ancplua.Mcp.AIServicesServer.Tools;
 /// MCP tools for discovering and querying AI services.
 /// </summary>
 [McpServerToolType]
-public static class ServiceDiscoveryTools
+public class ServiceDiscoveryTools
 {
     /// <summary>
     /// Lists all configured AI services and their status.
     /// </summary>
     [McpServerTool]
     [Description("Lists all configured AI services and their current status")]
-    public static Task<string> ListAIServices()
+    public static Task<string> ListAiServices()
     {
         var services = new[]
         {
-            new AIServiceInfo
+            new AiServiceInfo
             {
                 Name = "claude",
                 Type = "conversational",
@@ -29,7 +29,7 @@ public static class ServiceDiscoveryTools
                 ApiEndpoint = "https://api.anthropic.com",
                 Description = "Anthropic Claude AI assistant"
             },
-            new AIServiceInfo
+            new AiServiceInfo
             {
                 Name = "jules",
                 Type = "task-automation",
@@ -38,7 +38,7 @@ public static class ServiceDiscoveryTools
                 ApiEndpoint = "https://jules.google.com/api",
                 Description = "Google Jules AI coding agent"
             },
-            new AIServiceInfo
+            new AiServiceInfo
             {
                 Name = "gemini",
                 Type = "conversational",
@@ -47,7 +47,7 @@ public static class ServiceDiscoveryTools
                 ApiEndpoint = "https://generativelanguage.googleapis.com",
                 Description = "Google Gemini AI model"
             },
-            new AIServiceInfo
+            new AiServiceInfo
             {
                 Name = "chatgpt",
                 Type = "conversational",
@@ -56,7 +56,7 @@ public static class ServiceDiscoveryTools
                 ApiEndpoint = "https://api.openai.com",
                 Description = "OpenAI ChatGPT"
             },
-            new AIServiceInfo
+            new AiServiceInfo
             {
                 Name = "copilot",
                 Type = "code-completion",
@@ -64,7 +64,7 @@ public static class ServiceDiscoveryTools
                 Capabilities = ["code-completion", "generation", "chat"],
                 Description = "GitHub Copilot"
             },
-            new AIServiceInfo
+            new AiServiceInfo
             {
                 Name = "coderabbit",
                 Type = "code-review",
@@ -72,7 +72,7 @@ public static class ServiceDiscoveryTools
                 Capabilities = ["pr-review", "code-quality", "security"],
                 Description = "CodeRabbit AI code reviewer"
             },
-            new AIServiceInfo
+            new AiServiceInfo
             {
                 Name = "codecov",
                 Type = "test-analysis",

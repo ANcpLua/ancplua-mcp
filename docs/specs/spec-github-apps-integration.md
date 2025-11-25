@@ -320,6 +320,52 @@ System executes:
 4. **Audit Logging**: Log all API calls for security review
 5. **Rate Limiting**: Respect GitHub API rate limits (5000 req/hour)
 
+## Security & Compliance
+
+### Jules Workflow Security (CRITICAL)
+
+Analysis of existing Jules workflows (`jules-auto-reviewer.yml`, `jules-cleanup.yml`) has identified critical security risks that this server must mitigate:
+
+*   **Risk**: Unsupervised Auto-Merge.
+    *   *Mitigation*: This server MUST NOT trigger auto-merge workflows directly. It should only trigger "Review Only" modes.
+*   **Risk**: CI Bypass.
+    *   *Mitigation*: All AI-triggered changes must go through standard PRs with full status checks.
+
+### Recommended GitHub Ruleset
+
+To safely use these AI tools, the target repository should enforce a ruleset similar to:
+
+```json
+{
+  "name": "Copilot review for default branch",
+  "target": "branch",
+  "enforcement": "active",
+  "rules": [
+    {
+      "type": "pull_request",
+      "parameters": {
+        "required_approving_review_count": 2,
+        "dismiss_stale_reviews_on_push": true,
+        "require_code_owner_review": true
+      }
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": true,
+        "required_status_checks": [
+          { "context": "build-and-test" },
+          { "context": "code-quality" },
+          { "context": "codeql / Analyze (csharp)" },
+          { "context": "secret-scan" },
+          { "context": "security-scan" }
+        ]
+      }
+    }
+  ]
+}
+```
+
 ## Testing Strategy
 
 ### Unit Tests

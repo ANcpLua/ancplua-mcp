@@ -1,3 +1,4 @@
+using ModelContextProtocol.Server;
 using System.ComponentModel;
 
 namespace Ancplua.Mcp.GitHubAppsServer.Tools;
@@ -6,7 +7,7 @@ namespace Ancplua.Mcp.GitHubAppsServer.Tools;
 /// Tools for orchestrating multiple AI code review services
 /// </summary>
 [McpServerToolType]
-public static class AIOrchestrationTools
+public static class AiOrchestrationTools
 {
     /// <summary>
     /// Trigger all AI reviewers on a pull request
@@ -38,7 +39,7 @@ public static class AIOrchestrationTools
     /// </summary>
     [McpServerTool]
     [Description("Get a summary of all AI review comments on a PR")]
-    public static Task<string> GetAIReviewSummary(
+    public static Task<string> GetAiReviewSummary(
         [Description("Repository owner")] string owner,
         [Description("Repository name")] string repo,
         [Description("Pull request number")] int prNumber)
@@ -78,7 +79,7 @@ public static class AIOrchestrationTools
     /// </summary>
     [McpServerTool]
     [Description("Get a comparison of AI reviewer capabilities and when to use each")]
-    public static Task<string> CompareAIReviewers()
+    public static Task<string> CompareAiReviewers()
     {
         return Task.FromResult(
             "AI Code Reviewer Comparison:\n\n" +

@@ -1,3 +1,4 @@
+using ModelContextProtocol.Server;
 using System.ComponentModel;
 
 namespace Ancplua.Mcp.GitHubAppsServer.Tools;
