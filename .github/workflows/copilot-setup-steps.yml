@@ -36,11 +36,11 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         # Note: fetch-depth will be overridden by Copilot for security
 
       - name: Set up .NET 10.0 SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: "10.0.x"
           cache: true
