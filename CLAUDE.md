@@ -17,18 +17,25 @@
    ```
    You MUST be at the root of `ancplua-mcp` with `Ancplua.Mcp.sln` visible.
 
-2. **Check for Superpowers:**
+2. **Read CHANGELOG.md:**
+   ```
+   Read the file: CHANGELOG.md
+   ```
+   This tells you what has been done recently. Check the `[Unreleased]` section for pending work.
+
+3. **Check for Superpowers:**
    ```bash
    ls ~/.claude/plugins/cache/ 2>/dev/null | grep -i super
    ```
    If installed, read `getting-started/SKILL.md` FIRST.
 
-3. **Load coordination context:**
+4. **Load coordination context:**
   - Read this `CLAUDE.md`
+  - Read `CHANGELOG.md` (current state of changes)
   - Read `docs/ARCHITECTURE.md`
   - Read `docs/CROSS_REPO_COORDINATION.md` (if present, or reference the plugins repo)
 
-4. **Understand your role:**
+5. **Understand your role:**
   - You build **tools** (Type T)
   - Skills in `ancplua-claude-plugins` **consume** your tools (Type A)
   - You do NOT write workflows or decision logic
@@ -374,7 +381,36 @@ You MUST NOT:
 
 ---
 
-## 11. Failure Conditions
+## 11. MANDATORY: Update CHANGELOG.md When Done
+
+<CRITICAL>
+**BEFORE claiming any task is complete, you MUST update `CHANGELOG.md`.**
+</CRITICAL>
+
+After completing ANY task (bug fix, feature, refactor, documentation):
+
+1. Open `CHANGELOG.md`
+2. Add entry under `## [Unreleased]` section
+3. Categorize as: `### Added`, `### Changed`, `### Fixed`, `### Removed`, `### Security`
+4. Include brief description of what was done
+
+**Example entry:**
+```markdown
+## [Unreleased]
+
+### Fixed
+- Fixed deadlock in ProcessRunner by implementing proper async stream reading pattern
+- Added path traversal validation to FileSystemTools
+
+### Changed
+- GitTools.AddAsync now accepts `IReadOnlyList<string>` instead of single string
+```
+
+**This is NOT optional.** A task without a CHANGELOG entry is an incomplete task.
+
+---
+
+## 12. Failure Conditions
 
 You have FAILED if:
 
@@ -384,12 +420,12 @@ You have FAILED if:
 - [ ] Tool returns unstructured string instead of DTO
 - [ ] Tests don't pass
 - [ ] tool-contracts.md not updated for new/changed tools
-- [ ] CHANGELOG missing entry
+- [ ] **CHANGELOG.md not updated** (MANDATORY)
 - [ ] Cross-repo impact not checked
 
 ---
 
-## 12. Success Conditions
+## 13. Success Conditions
 
 You have SUCCEEDED when:
 
@@ -404,7 +440,7 @@ You have SUCCEEDED when:
 
 ---
 
-## 13. Quick Reference
+## 14. Quick Reference
 
 ### Build & Test
 ```bash

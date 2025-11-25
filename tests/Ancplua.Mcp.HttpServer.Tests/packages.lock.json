@@ -208,6 +208,12 @@
           "xunit.extensibility.core": "[2.9.3]"
         }
       },
+      "ancplua.mcp.coretools": {
+        "type": "Project",
+        "dependencies": {
+          "ModelContextProtocol": "[0.4.0-preview.3, )"
+        }
+      },
       "ancplua.mcp.debugtools": {
         "type": "Project",
         "dependencies": {
@@ -217,6 +223,7 @@
       "ancplua.mcp.httpserver": {
         "type": "Project",
         "dependencies": {
+          "Ancplua.Mcp.CoreTools": "[1.0.0, )",
           "Ancplua.Mcp.DebugTools": "[1.0.0, )",
           "Ancplua.Mcp.ServiceDefaults": "[1.0.0, )",
           "Microsoft.AspNetCore.OpenApi": "[10.0.0, )",
@@ -247,9 +254,9 @@
       },
       "Microsoft.Extensions.AI.Abstractions": {
         "type": "CentralTransitive",
-        "requested": "[10.0.1, )",
-        "resolved": "10.0.1",
-        "contentHash": "SR78I0BV7ljDovyVsZQqpt2NezdLoDtoIOCNwqAteuPc8f5PEmvDjokOQxKnTwXo/9RBKnmrzuPzbsuvueZcrg=="
+        "requested": "[9.10.0, )",
+        "resolved": "9.10.0",
+        "contentHash": "oBdh3TDNN+F28L2ZKOF1NfobJF3BbKWrpta+HI9dz8OcwIiIkFGvP8n1GNPO92upNQ9gofMX1O+MXtopW6tR1A=="
       },
       "Microsoft.Extensions.Http.Resilience": {
         "type": "CentralTransitive",

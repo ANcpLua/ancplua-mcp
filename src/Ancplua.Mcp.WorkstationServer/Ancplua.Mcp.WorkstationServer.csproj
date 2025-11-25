@@ -10,6 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="../Ancplua.Mcp.ServiceDefaults/Ancplua.Mcp.ServiceDefaults.csproj" />
     <ProjectReference Include="../Ancplua.Mcp.DebugTools/Ancplua.Mcp.DebugTools.csproj" />
+    <ProjectReference Include="../Ancplua.Mcp.CoreTools/Ancplua.Mcp.CoreTools.csproj" />
   </ItemGroup>
 
   <ItemGroup>

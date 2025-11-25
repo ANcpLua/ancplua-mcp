@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Ancplua.Mcp.CoreTools**: New shared library consolidating tools from HttpServer and WorkstationServer
+  - Implements ADR-006 (Core Tools Consolidation) and spec-006
+  - Eliminates code duplication between servers
+- **Ancplua.Mcp.CoreTools.Tests**: New test project with 47 tests
+  - ProcessRunner deadlock prevention tests (large stdout/stderr)
+  - CommandParser quote handling tests
+  - FileSystemTools path traversal security tests
+- **Path Traversal Protection**: FileSystemTools now validates all paths against `AllowedBasePath`
+  - Configurable via `FILESYSTEM_TOOLS_BASE_PATH` environment variable
+  - Prevents access to files outside allowed directory
+
+### Fixed
+- **ProcessRunner Deadlock**: Fixed critical deadlock in HttpServer process execution
+  - Now reads stdout/stderr asynchronously before awaiting process exit
+  - Implements proper cancellation with `process.Kill(entireProcessTree: true)`
+- **CommandParser**: Fixed quote handling
+  - Now supports escaped quotes (`\"`) within quoted strings
+  - Supports single quotes (`'...'`)
+  - Detects and reports unclosed quotes
+- **Error Message Truncation**: ProcessRunner now truncates error output to prevent sensitive data leakage
+
+### Changed
+- **GitTools.AddAsync**: Now accepts `IReadOnlyList<string>` instead of single string
+  - Properly handles filenames with spaces
+  - Uses `--` separator to prevent argument injection
+- **IsPackable**: CoreTools.csproj now has `IsPackable=false` to prevent accidental NuGet publishing
+- **Security Warnings**: Added explicit security warnings to `RunCommandAsync` documentation
+
+### Security
+- **Path Traversal Prevention**: All FileSystemTools operations now validate paths
+- **Command Injection Documentation**: Added security warnings to RunCommandAsync
+
 ### Documentation
 
 - **tool-contracts.md**: Expanded comprehensive MCP tool contracts documentation covering all servers:

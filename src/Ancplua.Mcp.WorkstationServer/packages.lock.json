@@ -121,6 +121,12 @@
           "Polly.Core": "8.4.2"
         }
       },
+      "ancplua.mcp.coretools": {
+        "type": "Project",
+        "dependencies": {
+          "ModelContextProtocol": "[0.4.0-preview.3, )"
+        }
+      },
       "ancplua.mcp.debugtools": {
         "type": "Project",
         "dependencies": {
@@ -141,9 +147,9 @@
       },
       "Microsoft.Extensions.AI.Abstractions": {
         "type": "CentralTransitive",
-        "requested": "[10.0.1, )",
-        "resolved": "10.0.1",
-        "contentHash": "SR78I0BV7ljDovyVsZQqpt2NezdLoDtoIOCNwqAteuPc8f5PEmvDjokOQxKnTwXo/9RBKnmrzuPzbsuvueZcrg=="
+        "requested": "[9.10.0, )",
+        "resolved": "9.10.0",
+        "contentHash": "oBdh3TDNN+F28L2ZKOF1NfobJF3BbKWrpta+HI9dz8OcwIiIkFGvP8n1GNPO92upNQ9gofMX1O+MXtopW6tR1A=="
       },
       "Microsoft.Extensions.Http.Resilience": {
         "type": "CentralTransitive",

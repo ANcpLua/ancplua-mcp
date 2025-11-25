@@ -43,7 +43,7 @@ public sealed class DebugTools(IHttpContextAccessor? httpContextAccessor = null)
 
         foreach (System.Collections.DictionaryEntry entry in Environment.GetEnvironmentVariables())
         {
-            var key = entry.Key?.ToString() ?? string.Empty;
+            var key = entry.Key.ToString() ?? string.Empty;
             var value = entry.Value?.ToString() ?? string.Empty;
 
             if (IsSensitiveVariable(key))
@@ -154,7 +154,7 @@ public sealed class DebugTools(IHttpContextAccessor? httpContextAccessor = null)
         }
 
         var user = context.User;
-        if (user?.Identity?.IsAuthenticated != true)
+        if (user.Identity?.IsAuthenticated != true)
         {
             return new UserClaimsInfo
             {

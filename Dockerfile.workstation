@@ -10,6 +10,7 @@ COPY Directory.Packages.props ./
 COPY src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj ./src/Ancplua.Mcp.WorkstationServer/
 COPY src/Ancplua.Mcp.ServiceDefaults/Ancplua.Mcp.ServiceDefaults.csproj ./src/Ancplua.Mcp.ServiceDefaults/
 COPY src/Ancplua.Mcp.DebugTools/Ancplua.Mcp.DebugTools.csproj ./src/Ancplua.Mcp.DebugTools/
+COPY src/Ancplua.Mcp.CoreTools/Ancplua.Mcp.CoreTools.csproj ./src/Ancplua.Mcp.CoreTools/
 
 # Restore dependencies
 RUN dotnet restore src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj
@@ -18,6 +19,7 @@ RUN dotnet restore src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServ
 COPY src/Ancplua.Mcp.WorkstationServer/ ./src/Ancplua.Mcp.WorkstationServer/
 COPY src/Ancplua.Mcp.ServiceDefaults/ ./src/Ancplua.Mcp.ServiceDefaults/
 COPY src/Ancplua.Mcp.DebugTools/ ./src/Ancplua.Mcp.DebugTools/
+COPY src/Ancplua.Mcp.CoreTools/ ./src/Ancplua.Mcp.CoreTools/
 
 # Build and publish
 WORKDIR /src/src/Ancplua.Mcp.WorkstationServer

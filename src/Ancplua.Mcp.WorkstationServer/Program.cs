@@ -1,11 +1,9 @@
+using Ancplua.Mcp.CoreTools.Tools;
 using Ancplua.Mcp.DebugTools;
-using Ancplua.Mcp.WorkstationServer.Tools;
 using Ancplua.Mcp.ServiceDefaults;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-// WorkstationServer - MCP Server for stdio communication
-// Exposes filesystem, git, and CI tools to MCP clients like Claude Desktop
 
 var builder = Host.CreateApplicationBuilder(args);
 
