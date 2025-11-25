@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **spec-0107-whispermesh-phase1-implementation.md**: Comprehensive specification for WhisperMesh Phase 1 Dolphin Pod integration
+  - Defines `IWhisperMeshClient` interface for pub/sub operations
+  - Specifies `NatsWhisperMeshClient` implementation using NATS JetStream
+  - Documents `WhisperAggregator` service for deduplication and tier-based sorting
+  - Defines `AggregateDiscoveries` MCP tool contract (request/response DTOs)
+  - Includes configuration schema, NATS subject naming conventions, and integration test requirements
+  - Authorizes Phase 1 implementation per CLAUDE.md mandatory workflow
+
 ### Fixed
 - **NuGet Package Resolution**: Fixed all .NET 10 build warnings
   - Removed global `FrameworkReference` for `Microsoft.AspNetCore.App` from `Directory.Packages.props` (NETSDK1086)
