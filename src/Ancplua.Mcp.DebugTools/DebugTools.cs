@@ -15,7 +15,7 @@ namespace Ancplua.Mcp.DebugTools;
 /// HTTP context tools gracefully degrade on stdio transport by returning Available = false.
 /// </remarks>
 [McpServerToolType]
-public sealed class DebugTools(IHttpContextAccessor? httpContextAccessor = null)
+public sealed class DebugToolset(IHttpContextAccessor? httpContextAccessor = null)
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {

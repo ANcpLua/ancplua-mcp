@@ -1,6 +1,37 @@
 <Project>
   <PropertyGroup>
-    <!-- Generate packages.lock.json for deterministic builds and CI caching -->
+    <!-- 
+      =======================================================================
+      C# 14 & .NET 10 "Gold Standard" Configuration (2025)
+      =======================================================================
+    -->
+    
+    <!-- Language & Framework -->
+    <LangVersion>preview</LangVersion> <!-- Unlocks C# 14 features like 'field' -->
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Features>strict</Features>
+
+    <!-- Static Analysis & Safety -->
+    <AnalysisLevel>latest-all</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+
+    <!-- Performance (Explicit defaults for clarity) -->
+    <TieredPGO>true</TieredPGO>
+    
+    <!-- Build Layout & Determinism -->
+    <UseArtifactsOutput>true</UseArtifactsOutput>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <Deterministic>true</Deterministic>
+
+    <!-- Reproducible Builds -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <!-- Central Package Management is handled in Directory.Packages.props -->
 </Project>

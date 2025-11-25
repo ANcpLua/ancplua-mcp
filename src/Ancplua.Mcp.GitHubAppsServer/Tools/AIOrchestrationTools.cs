@@ -1,5 +1,6 @@
-using ModelContextProtocol.Server;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using ModelContextProtocol.Server;
 
 namespace Ancplua.Mcp.GitHubAppsServer.Tools;
 
@@ -7,7 +8,9 @@ namespace Ancplua.Mcp.GitHubAppsServer.Tools;
 /// Tools for orchestrating multiple AI code review services
 /// </summary>
 [McpServerToolType]
-public static class AiOrchestrationTools
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1812", Justification = "Instantiated by MCP SDK via reflection.")]
+[SuppressMessage("Design", "CA1515", Justification = "Tools are exposed publicly for MCP discovery.")]
+internal sealed class AIOrchestrationTools
 {
     /// <summary>
     /// Trigger all AI reviewers on a pull request

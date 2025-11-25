@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Upgraded build configuration to .NET 10 / C# 14 "Gold Standard" (Spec-007)
+- Enforced `TreatWarningsAsErrors` and `latest-all` analysis level in `Directory.Build.props`
+- Optimized `codecov.yml` for stricter patch coverage (100% target)
+- Consolidated dependency management to Dependabot; removed Renovate
+
+### Fixed
+- Resolved conflict between Dependabot and Renovate
+
+
 ### Fixed
 - **NuGet Package Resolution**: Fixed all .NET 10 build warnings
   - Removed global `FrameworkReference` for `Microsoft.AspNetCore.App` from `Directory.Packages.props` (NETSDK1086)

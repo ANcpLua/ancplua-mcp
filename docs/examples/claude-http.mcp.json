@@ -1,9 +1,11 @@
 {
+  "$schema": "https://raw.githubusercontent.com/anthropics/anthropic-cookbook/main/misc/mcp/.mcp.schema.json",
   "mcpServers": {
     "ancplua-http": {
-      "type": "http",
-      "url": "http://localhost:5000/mcp",
-      "tools": ["*"]
+      "url": "http://localhost:5000/mcp"
+    },
+    "ancplua-http-secure": {
+      "url": "https://localhost:5001/mcp"
     }
   }
 }

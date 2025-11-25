@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using ModelContextProtocol.Server;
 
 namespace Ancplua.Mcp.CoreTools.Tools;
@@ -17,9 +18,9 @@ namespace Ancplua.Mcp.CoreTools.Tools;
 /// </para>
 /// </remarks>
 [McpServerToolType]
+[SuppressMessage("Design", "CA1052", Justification = "MCP tools are discovered via generic registration and only expose static members.")]
 public class FileSystemTools
 {
-    private static string? _allowedBasePath;
     private static readonly object _lock = new();
 
     /// <summary>
@@ -36,14 +37,14 @@ public class FileSystemTools
         {
             lock (_lock)
             {
-                return _allowedBasePath ??= GetDefaultBasePath();
+                return field ??= GetDefaultBasePath();
             }
         }
         set
         {
             lock (_lock)
             {
-                _allowedBasePath = Path.GetFullPath(value);
+                field = Path.GetFullPath(value);
             }
         }
     }

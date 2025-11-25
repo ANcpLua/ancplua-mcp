@@ -17,8 +17,8 @@ builder.Services
     .WithTools<FileSystemTools>()
     .WithTools<GitTools>()
     .WithTools<CiTools>()
-    .WithTools<DebugTools>();
+    .WithTools<DebugToolset>();
 
 var app = builder.Build();
 
-await app.RunAsync();
+await app.RunAsync().ConfigureAwait(false);
