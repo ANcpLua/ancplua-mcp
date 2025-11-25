@@ -6,14 +6,18 @@ WORKDIR /src
 COPY global.json ./
 COPY Directory.Packages.props ./
 
-# Copy project files
+# Copy project files (including dependencies)
 COPY src/Ancplua.Mcp.HttpServer/Ancplua.Mcp.HttpServer.csproj ./src/Ancplua.Mcp.HttpServer/
+COPY src/Ancplua.Mcp.ServiceDefaults/Ancplua.Mcp.ServiceDefaults.csproj ./src/Ancplua.Mcp.ServiceDefaults/
+COPY src/Ancplua.Mcp.DebugTools/Ancplua.Mcp.DebugTools.csproj ./src/Ancplua.Mcp.DebugTools/
 
 # Restore dependencies
 RUN dotnet restore src/Ancplua.Mcp.HttpServer/Ancplua.Mcp.HttpServer.csproj
 
-# Copy source code
+# Copy source code (including dependencies)
 COPY src/Ancplua.Mcp.HttpServer/ ./src/Ancplua.Mcp.HttpServer/
+COPY src/Ancplua.Mcp.ServiceDefaults/ ./src/Ancplua.Mcp.ServiceDefaults/
+COPY src/Ancplua.Mcp.DebugTools/ ./src/Ancplua.Mcp.DebugTools/
 
 # Build and publish
 WORKDIR /src/src/Ancplua.Mcp.HttpServer
