@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Updated target framework from .NET 10.0 to .NET 9.0 for all projects
+  - Ancplua.Mcp.WorkstationServer
+  - Ancplua.Mcp.HttpServer
+  - All test projects
+- Updated global.json SDK version to 9.0.100
+- Updated README.md to reflect .NET 9.0 SDK requirement
+- Bumped coverlet.collector from 6.0.2 to 6.0.4
+  - Fixed empty coverage report when using include and exclude filters
+  - Fixed RuntimeConfigurationReader to support self-contained builds
+  - Fixed inconsistent filenames with UseSourceLink after .NET 8
+  - Performance improvements (cached regex, faster module filtering)
+
+### Fixed
+- Added required 'type' field to MCP configuration examples
+  - claude-http.mcp.json
+  - claude-workstation.mcp.json
+  - rider-workstation.mcp.json
+
 ### Removed
 - Jules auto-reviewer and auto-merge workflows due to critical security issues:
   - Auto-merging without CI checks, required reviews, or security validation

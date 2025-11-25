@@ -100,7 +100,7 @@ ancplua-mcp/
 
 ### Prerequisites
 
-- .NET 10.0 SDK or later
+- .NET 9.0 SDK or later
 - Git
 
 ### Local Validation
