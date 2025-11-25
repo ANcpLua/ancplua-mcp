@@ -1,9 +1,9 @@
 {
   "mcpServers": {
     "ancplua-http": {
-      "transport": "http",
+      "type": "http",
       "url": "http://localhost:5000/mcp",
-      "description": "HTTP-based MCP server for ancplua development tools"
+      "tools": ["*"]
     }
   }
 }
