@@ -47,6 +47,33 @@ services:
       start_period: 40s
     restart: unless-stopped
 
+  # NATS JetStream - WhisperMesh message broker
+  nats:
+    image: nats:latest
+    container_name: ancplua-mcp-nats
+    ports:
+      - "4222:4222"   # Client connections
+      - "8222:8222"   # HTTP monitoring
+      - "6222:6222"   # Cluster connections
+    command:
+      - "--jetstream"
+      - "--store_dir=/data"
+      - "--max_file_store=10GB"
+      - "--max_mem_store=1GB"
+    volumes:
+      - nats-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+volumes:
+  nats-data:
+    driver: local
+
 networks:
   default:
     name: ancplua-mcp-network
