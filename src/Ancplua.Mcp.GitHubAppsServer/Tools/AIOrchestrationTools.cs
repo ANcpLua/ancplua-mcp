@@ -24,13 +24,14 @@ public static class AiOrchestrationTools
             $"1. **Gemini Code Assist**: @gemini-code-assist\n" +
             $"2. **CodeRabbit AI**: @coderabbitai review\n" +
             $"3. **Codecov AI**: @codecov-ai-reviewer review\n" +
-            $"4. **Jules**: @jules\n" +
-            $"5. **GitHub Copilot**: (automatic, configured in ruleset)\n\n" +
+            $"4. **GitHub Copilot**: (automatic, configured in ruleset)\n\n" +
             $"Alternatively, create a single comment with all tags:\n\n" +
             $"```\n" +
-            $"@gemini-code-assist @coderabbitai @codecov-ai-reviewer @jules please review\n" +
+            $"@gemini-code-assist @coderabbitai @codecov-ai-reviewer please review\n" +
             $"```\n\n" +
-            $"Note: All reviewers are configured to run automatically on PR creation.\n" +
+            $"Note: Jules is NOT triggered via @mentions - use /jules command or API.\n" +
+            $"Jules is an autonomous agent that creates PRs, not review comments.\n\n" +
+            $"All other reviewers are configured to run automatically on PR creation.\n" +
             $"This command is useful for re-triggering reviews after updates.");
     }
 
@@ -60,9 +61,9 @@ public static class AiOrchestrationTools
             $"   - Test generation suggestions\n" +
             $"   - Coverage improvement recommendations\n\n" +
             $"4. **Jules (Google Labs)**\n" +
-            $"   - Review comments with ✅ marker\n" +
-            $"   - Best practices guidance\n" +
-            $"   - Refactoring suggestions\n\n" +
+            $"   - Autonomous Agent: Does NOT leave review comments\n" +
+            $"   - Delivers work by pushing commits or creating new PRs\n" +
+            $"   - Check associated Jules session link for plan and status\n\n" +
             $"5. **GitHub Copilot**\n" +
             $"   - Automatic review in PR checks\n" +
             $"   - Security and quality analysis\n" +
@@ -96,9 +97,10 @@ public static class AiOrchestrationTools
             "✅ Strengths: Coverage insights, AI test generation, quality metrics\n" +
             "✅ Use when: You want to improve test coverage\n\n" +
             "**Jules (Google Labs, FREE)**\n" +
-            "✅ Best for: Best practices, refactoring\n" +
-            "✅ Strengths: Code cleanup, complexity reduction, naming conventions\n" +
-            "✅ Use when: You want maintainability improvements\n\n" +
+            "✅ Best for: Autonomous code changes, not reviews\n" +
+            "✅ Strengths: Creates PRs with actual code changes, plan-based execution\n" +
+            "✅ Use when: You want an agent to implement changes, not just suggest them\n" +
+            "⚠️ Note: Jules creates PRs, it does NOT leave review comments\n\n" +
             "**GitHub Copilot (Included)**\n" +
             "✅ Best for: Native GitHub integration\n" +
             "✅ Strengths: Automated ruleset enforcement, security scanning\n" +

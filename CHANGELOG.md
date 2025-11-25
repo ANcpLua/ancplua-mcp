@@ -33,15 +33,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **GitTools.AddAsync**: Now accepts `IReadOnlyList<string>` instead of single string
   - Properly handles filenames with spaces
   - Uses `--` separator to prevent argument injection
-- **IsPackable**: CoreTools.csproj now has `IsPackable=false` to prevent accidental NuGet publishing
+- **IsPackable**: CoreTools.csproj and DebugTools.csproj now have `IsPackable=false` to prevent accidental NuGet publishing
 - **Security Warnings**: Added explicit security warnings to `RunCommandAsync` documentation
+- **JulesTools Refactoring**: Migrated from instructional to programmatic Jules API integration
+  - `CreateJulesSession`: Creates Jules sessions via `jules.googleapis.com/v1alpha` API
+  - `GetJulesInfo`: Returns configuration status and Jules capabilities
+  - Removed static class - now uses DI for `IConfiguration` access
+  - Added `JULES_API_KEY` environment variable support
+- **ServiceDiscoveryTools**: Fixed Jules API endpoint from incorrect URL to `jules.googleapis.com/v1alpha`
+- **AIOrchestrationTools**: Updated Jules descriptions to clarify it creates PRs, not review comments
+- **MCP Config Examples**: Added required `type` and `tools` fields per GitHub Copilot spec
+
+### Removed
+- **jules-auto-reviewer.yml**: Removed workflow that referenced non-existent `beksomega/jules-action@v1`
+- **jules-cleanup.yml**: Removed workflow with same broken action reference
+- **pr-review.yml**: Disabled orphaned workflow in GitHub Actions
 
 ### Security
 - **Path Traversal Prevention**: All FileSystemTools operations now validate paths
 - **Command Injection Documentation**: Added security warnings to RunCommandAsync
+- **Jules Workflows Removed**: Removed unsafe auto-merge workflows per security decision (PR #22)
 
 ### Documentation
 
+- **jules-chatops.yml**: Added example ChatOps workflow for Jules integration
+  - Triggers via `/jules [task]` comments on PRs
+  - Creates Jules sessions via API with plan approval required
+  - Posts session links back to PR for monitoring
 - **tool-contracts.md**: Expanded comprehensive MCP tool contracts documentation covering all servers:
   - GitHubAppsServer (Gemini, Jules, CodeRabbit, Codecov, AI Orchestration tools)
   - AIServicesServer (ServiceDiscovery tools)

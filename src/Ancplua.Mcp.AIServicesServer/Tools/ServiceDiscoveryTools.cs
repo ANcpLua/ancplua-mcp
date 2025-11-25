@@ -32,11 +32,11 @@ public class ServiceDiscoveryTools
             new AiServiceInfo
             {
                 Name = "jules",
-                Type = "task-automation",
+                Type = "autonomous-agent",
                 Status = "active",
-                Capabilities = ["pr-review", "code-fixes", "cleanup", "refactoring"],
-                ApiEndpoint = "https://jules.google.com/api",
-                Description = "Google Jules AI coding agent"
+                Capabilities = ["code-changes", "pr-creation", "refactoring", "bug-fixes"],
+                ApiEndpoint = "https://jules.googleapis.com/v1alpha",
+                Description = "Google Jules AI coding agent - autonomous agent that creates PRs, not review comments"
             },
             new AiServiceInfo
             {
