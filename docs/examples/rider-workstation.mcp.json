@@ -1,6 +1,7 @@
 {
   "mcpServers": {
     "ancplua-workstation": {
+      "type": "stdio",
       "command": "dotnet",
       "args": [
         "run",
