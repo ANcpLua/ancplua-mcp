@@ -23,4 +23,4 @@ builder.Services
     .WithStdioServerTransport()
     .WithTools<ServiceDiscoveryTools>();
 
-await builder.Build().RunAsync();
+await builder.Build().RunAsync().ConfigureAwait(false);

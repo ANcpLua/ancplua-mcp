@@ -1,3 +1,4 @@
+#pragma warning disable CA1707
 using Ancplua.Mcp.CoreTools.Utils;
 
 namespace Ancplua.Mcp.CoreTools.Tests;
@@ -72,7 +73,7 @@ public class CommandParserTests
         var ex = Assert.Throws<ArgumentException>(() =>
             CommandParser.Parse("git commit -m \"unclosed"));
 
-        Assert.Contains("Unclosed double quote", ex.Message);
+        Assert.Contains("Unclosed double quote", ex.Message, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -82,7 +83,7 @@ public class CommandParserTests
         var ex = Assert.Throws<ArgumentException>(() =>
             CommandParser.Parse("echo 'unclosed"));
 
-        Assert.Contains("Unclosed single quote", ex.Message);
+        Assert.Contains("Unclosed single quote", ex.Message, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -96,7 +97,7 @@ public class CommandParserTests
             CommandParser.Parse("echo \"test\\\""));
 
         // The backslash escapes the closing quote, leaving it unclosed
-        Assert.Contains("Unclosed double quote", ex.Message);
+        Assert.Contains("Unclosed double quote", ex.Message, StringComparison.Ordinal);
     }
 
     [Fact]

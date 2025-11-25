@@ -9,8 +9,14 @@ namespace Ancplua.Mcp.AIServicesServer.Tools;
 /// MCP tools for discovering and querying AI services.
 /// </summary>
 [McpServerToolType]
-public class ServiceDiscoveryTools
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1812", Justification = "Instantiated by MCP SDK via reflection.")]
+internal sealed class ServiceDiscoveryTools
 {
+    private static readonly JsonSerializerOptions s_jsonOptions = new()
+    {
+        WriteIndented = true
+    };
+
     /// <summary>
     /// Lists all configured AI services and their status.
     /// </summary>
@@ -83,10 +89,7 @@ public class ServiceDiscoveryTools
             }
         };
 
-        return Task.FromResult(JsonSerializer.Serialize(services, new JsonSerializerOptions
-        {
-            WriteIndented = true
-        }));
+        return Task.FromResult(JsonSerializer.Serialize(services, s_jsonOptions));
     }
 
     /// <summary>
@@ -98,9 +101,11 @@ public class ServiceDiscoveryTools
         [Description("Service name (claude, jules, gemini, chatgpt, copilot, coderabbit, codecov)")]
         string serviceName)
     {
-        object capabilities = serviceName.ToLowerInvariant() switch
+        ArgumentNullException.ThrowIfNull(serviceName);
+
+        object capabilities = serviceName.ToUpperInvariant() switch
         {
-            "claude" => new
+            "CLAUDE" => new
             {
                 service = "claude",
                 model = "claude-sonnet-4.5",
@@ -114,7 +119,7 @@ public class ServiceDiscoveryTools
                 rateLimit = "50 requests/minute",
                 maxTokens = 200000
             },
-            "jules" => new
+            "JULES" => new
             {
                 service = "jules",
                 capabilities = new[]
@@ -127,7 +132,7 @@ public class ServiceDiscoveryTools
                 rateLimit = "Varies by subscription",
                 features = new[] { "multi-file-editing", "git-integration" }
             },
-            "gemini" => new
+            "GEMINI" => new
             {
                 service = "gemini",
                 model = "gemini-3.0-pro",
@@ -140,7 +145,7 @@ public class ServiceDiscoveryTools
                 rateLimit = "60 requests/minute (free tier)",
                 maxTokens = 1000000
             },
-            "chatgpt" => new
+            "CHATGPT" => new
             {
                 service = "chatgpt",
                 model = "gpt-4-turbo",
@@ -153,7 +158,7 @@ public class ServiceDiscoveryTools
                 rateLimit = "Varies by tier",
                 maxTokens = 128000
             },
-            "copilot" => new
+            "COPILOT" => new
             {
                 service = "copilot",
                 capabilities = new[]
@@ -164,7 +169,7 @@ public class ServiceDiscoveryTools
                 },
                 features = new[] { "ide-integration", "context-aware-suggestions" }
             },
-            "coderabbit" => new
+            "CODERABBIT" => new
             {
                 service = "coderabbit",
                 capabilities = new[]
@@ -175,7 +180,7 @@ public class ServiceDiscoveryTools
                 },
                 features = new[] { "incremental-review", "ai-summaries", "smart-chat" }
             },
-            "codecov" => new
+            "CODECOV" => new
             {
                 service = "codecov",
                 capabilities = new[]
@@ -192,9 +197,6 @@ public class ServiceDiscoveryTools
             }
         };
 
-        return Task.FromResult(JsonSerializer.Serialize(capabilities, new JsonSerializerOptions
-        {
-            WriteIndented = true
-        }));
+        return Task.FromResult(JsonSerializer.Serialize(capabilities, s_jsonOptions));
     }
 }

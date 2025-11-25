@@ -1,5 +1,6 @@
 using ModelContextProtocol.Server;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ancplua.Mcp.GitHubAppsServer.Tools;
 
@@ -7,9 +8,10 @@ namespace Ancplua.Mcp.GitHubAppsServer.Tools;
 /// Tools for interacting with Codecov and Codecov AI
 /// </summary>
 [McpServerToolType]
-public static class CodecovTools
+[SuppressMessage("Performance", "CA1812", Justification = "Instantiated by MCP SDK via reflection.")]
+internal static class CodecovTools
 {
-    private static readonly HttpClient HttpClient = new();
+    private static readonly HttpClient s_httpClient = new();
 
     /// <summary>
     /// Get coverage report for a repository
@@ -30,12 +32,13 @@ public static class CodecovTools
         var branchParam = branch ?? "main";
         var url = $"https://codecov.io/api/v2/github/{owner}/{repo}/branch/{branchParam}";
 
-        HttpClient.DefaultRequestHeaders.Authorization = new("Bearer", token);
+        s_httpClient.DefaultRequestHeaders.Authorization = new("Bearer", token);
 
         try
         {
-            var response = await HttpClient.GetAsync(url);
-            var content = await response.Content.ReadAsStringAsync();
+            var uri = new Uri(url);
+            var response = await s_httpClient.GetAsync(uri).ConfigureAwait(false);
+            var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -44,7 +47,7 @@ public static class CodecovTools
 
             return content;
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
             return $"Error fetching coverage: {ex.Message}";
         }
@@ -61,9 +64,14 @@ public static class CodecovTools
         [Description("Pull request number")] int prNumber)
     {
         return Task.FromResult(
-            $"To trigger Codecov AI review on PR #{prNumber}:\n\n" +
-            $"Comment on the PR: @codecov-ai-reviewer review\n\n" +
-            $"Or for test generation: @codecov-ai-reviewer test\n\n" +
-            $"The Codecov AI bot will respond within a few minutes with AI-generated insights.");
+            $"""
+            To trigger Codecov AI review on PR #{prNumber}:
+
+            Comment on the PR: @codecov-ai-reviewer review
+
+            Or for test generation: @codecov-ai-reviewer test
+
+            The Codecov AI bot will respond within a few minutes with AI-generated insights.
+            """);
     }
 }

@@ -1,17 +1,25 @@
 {
+  "$schema": "https://raw.githubusercontent.com/anthropics/anthropic-cookbook/main/misc/mcp/.mcp.schema.json",
   "mcpServers": {
     "ancplua-workstation": {
-      "type": "local",
       "command": "dotnet",
-      "args": [
-        "run",
-        "--project",
-        "src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj"
-      ],
-      "env": {
-        "DOTNET_ENVIRONMENT": "Development"
-      },
-      "tools": ["*"]
+      "args": ["run", "--no-build", "--project", "src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj"],
+      "env": {}
+    },
+    "ancplua-ai-services": {
+      "command": "dotnet",
+      "args": ["run", "--no-build", "--project", "src/Ancplua.Mcp.AIServicesServer/Ancplua.Mcp.AIServicesServer.csproj"],
+      "env": {}
+    },
+    "ancplua-roslyn-metrics": {
+      "command": "dotnet",
+      "args": ["run", "--no-build", "--project", "src/Ancplua.Mcp.RoslynMetricsServer/Ancplua.Mcp.RoslynMetricsServer.csproj"],
+      "env": {}
+    },
+    "ancplua-github-apps": {
+      "command": "dotnet",
+      "args": ["run", "--no-build", "--project", "src/Ancplua.Mcp.GitHubAppsServer/Ancplua.Mcp.GitHubAppsServer.csproj"],
+      "env": {}
     }
   }
 }

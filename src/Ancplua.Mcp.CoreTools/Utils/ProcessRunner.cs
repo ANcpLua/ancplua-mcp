@@ -80,6 +80,8 @@ public static class ProcessRunner
         string? workingDirectory = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(arguments);
+
         var startInfo = CreateStartInfo(executable, arguments, workingDirectory);
 
         using var process = Process.Start(startInfo)
@@ -87,7 +89,7 @@ public static class ProcessRunner
 
         // Register cancellation callback to kill process if token is triggered.
         // This prevents orphan processes when cancellation occurs.
-        await using var registration = cancellationToken.Register(() =>
+        using var registration = cancellationToken.Register(() =>
         {
             try
             {
@@ -106,12 +108,8 @@ public static class ProcessRunner
         {
             // CRITICAL: Read both streams asynchronously BEFORE WaitForExitAsync
             // to prevent deadlock when stream buffers fill.
-            // Note: We don't pass CancellationToken to ReadToEndAsync because:
-            // 1. StreamReader.ReadToEndAsync doesn't truly cancel the underlying read
-            // 2. Killing the process (via registration above) will close the streams,
-            //    causing ReadToEndAsync to complete naturally
-            var stdOutTask = process.StandardOutput.ReadToEndAsync();
-            var stdErrTask = process.StandardError.ReadToEndAsync();
+            var stdOutTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
+            var stdErrTask = process.StandardError.ReadToEndAsync(cancellationToken);
 
             await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
 
@@ -178,6 +176,8 @@ public static class ProcessRunner
         string? workingDirectory = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(arguments);
+
         var result = await RunAsync(executable, arguments, workingDirectory, cancellationToken).ConfigureAwait(false);
         result.ThrowIfFailed(FormatCommand(executable, arguments));
         return result.StandardOutput;
@@ -192,7 +192,12 @@ public static class ProcessRunner
             return executable;
 
         var formattedArgs = arguments.Select(arg =>
-            arg.Contains(' ') || arg.Contains('"') ? $"\"{arg.Replace("\"", "\\\"")}\"" : arg);
+        {
+            var escapedArg = arg.Replace("\"", "\\\"", StringComparison.Ordinal);
+            return arg.Contains(' ', StringComparison.Ordinal) || arg.Contains('"', StringComparison.Ordinal)
+                ? $"\"{escapedArg}\""
+                : arg;
+        });
         return $"{executable} {string.Join(' ', formattedArgs)}";
     }
 

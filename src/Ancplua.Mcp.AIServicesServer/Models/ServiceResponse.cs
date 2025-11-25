@@ -1,9 +1,12 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ancplua.Mcp.AIServicesServer.Models;
 
 /// <summary>
 /// Response from an AI service.
 /// </summary>
-public record ServiceResponse
+[SuppressMessage("Performance", "CA1812", Justification = "Model for future service orchestration.")]
+internal sealed record ServiceResponse
 {
     /// <summary>
     /// Unique response ID

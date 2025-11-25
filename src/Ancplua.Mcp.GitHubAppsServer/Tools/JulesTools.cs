@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -13,24 +14,37 @@ namespace Ancplua.Mcp.GitHubAppsServer.Tools;
 /// and delivers work via commits/PRs - not review comments.
 /// </summary>
 [McpServerToolType]
-public class JulesTools
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1812", Justification = "Instantiated by MCP SDK via reflection.")]
+[SuppressMessage("Performance", "CA1812", Justification = "Activated via MCP tool discovery/DI.")]
+internal sealed class JulesTools
 {
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly string? _apiKey;
 
     /// <summary>
     /// Initializes JulesTools with configuration for API access.
     /// </summary>
-    public JulesTools(IConfiguration configuration)
+    public JulesTools(IHttpClientFactory httpClientFactory, IConfiguration configuration)
     {
+        ArgumentNullException.ThrowIfNull(httpClientFactory);
+        ArgumentNullException.ThrowIfNull(configuration);
+
+        _httpClientFactory = httpClientFactory;
         _apiKey = configuration["JULES_API_KEY"];
-        _httpClient = new HttpClient { BaseAddress = new Uri("https://jules.googleapis.com/v1alpha/") };
-        _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+    }
+
+    private HttpClient CreateClient()
+    {
+        var client = _httpClientFactory.CreateClient("Jules");
+        client.BaseAddress = new Uri("https://jules.googleapis.com/v1alpha/");
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
         if (!string.IsNullOrEmpty(_apiKey))
         {
-            _httpClient.DefaultRequestHeaders.Add("X-Goog-Api-Key", _apiKey);
+            // CAUTION: This adds the key to every request from this client instance
+            client.DefaultRequestHeaders.Add("X-Goog-Api-Key", _apiKey);
         }
+        return client;
     }
 
     /// <summary>
@@ -46,6 +60,8 @@ public class JulesTools
         [Description("Pull Request number (if the task relates to an existing PR)")] int? prNumber = null,
         [Description("Whether to require human approval of the plan (default: true)")] bool requirePlanApproval = true)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(prompt);
+        
         if (string.IsNullOrEmpty(_apiKey))
         {
             return "Error: JULES_API_KEY is not configured in the server environment.\n\n" +
@@ -79,15 +95,18 @@ public class JulesTools
             title = $"MCP Task: {(prompt.Length > 70 ? prompt[..70] + "..." : prompt)}"
         };
 
-        var content = new StringContent(
+        using var content = new StringContent(
             JsonSerializer.Serialize(requestBody),
             Encoding.UTF8,
             "application/json");
 
+        using var client = CreateClient();
+
         try
         {
-            var response = await _httpClient.PostAsync("sessions", content);
-            var responseBody = await response.Content.ReadAsStringAsync();
+            // CA2234: Use Uri
+            var response = await client.PostAsync(new Uri("sessions", UriKind.Relative), content).ConfigureAwait(false);
+            var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
             if (response.IsSuccessStatusCode)
             {
@@ -104,7 +123,7 @@ public class JulesTools
                        $"3. Awaits human approval (if requirePlanApproval=true)\n" +
                        $"4. Executes the plan\n" +
                        $"5. Creates a PR with the changes\n\n" +
-                       $"Note: Jules delivers work via commits/PRs, not review comments.";
+                       "Note: Jules delivers work via commits/PRs, not review comments.";
             }
             else
             {
@@ -113,7 +132,7 @@ public class JulesTools
                        $"Response: {responseBody}";
             }
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is HttpRequestException or JsonException) // CA1031: Specific exceptions
         {
             return $"Exception during Jules API call: {ex.Message}";
         }
@@ -148,7 +167,7 @@ public class JulesTools
             $"- CodeRabbit/Gemini: Leave review comments with suggestions\n" +
             $"- Jules: Actually implements changes and creates PRs\n" +
             $"- Copilot Workspace: Similar autonomous approach\n\n" +
-            $"Note: Jules API (v1alpha) does not support webhooks.\n" +
-            $"Auto-merge based on Jules completion is not possible.");
+            "Note: Jules API (v1alpha) does not support webhooks.\n" +
+            "Auto-merge based on Jules completion is not possible.");
     }
 }

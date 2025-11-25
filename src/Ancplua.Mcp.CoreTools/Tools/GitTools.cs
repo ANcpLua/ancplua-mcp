@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using Ancplua.Mcp.CoreTools.Utils;
+using System.Diagnostics.CodeAnalysis;
 using ModelContextProtocol.Server;
 
 namespace Ancplua.Mcp.CoreTools.Tools;
@@ -8,6 +9,7 @@ namespace Ancplua.Mcp.CoreTools.Tools;
 /// Provides MCP tools for Git operations including status, log, diff, and branch management.
 /// </summary>
 [McpServerToolType]
+[SuppressMessage("Design", "CA1052", Justification = "MCP tool discovery requires non-static types even when members are static.")]
 public class GitTools
 {
     private static async Task<string> ExecuteGitAsync(
@@ -63,7 +65,8 @@ public class GitTools
         CancellationToken cancellationToken = default)
     {
         ValidateRepositoryPath(repositoryPath);
-        return await ExecuteGitAsync(["status", "--porcelain"], repositoryPath, cancellationToken);
+        return await ExecuteGitAsync(["status", "--porcelain"], repositoryPath, cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <summary>
@@ -82,7 +85,7 @@ public class GitTools
         return await ExecuteGitAsync(
             ["log", "--oneline", $"--max-count={maxCount}"],
             repositoryPath,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -96,7 +99,8 @@ public class GitTools
         CancellationToken cancellationToken = default)
     {
         ValidateRepositoryPath(repositoryPath);
-        return await ExecuteGitAsync(["diff"], repositoryPath, cancellationToken);
+        return await ExecuteGitAsync(["diff"], repositoryPath, cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <summary>
@@ -110,7 +114,8 @@ public class GitTools
         CancellationToken cancellationToken = default)
     {
         ValidateRepositoryPath(repositoryPath);
-        return await ExecuteGitAsync(["branch", "-a"], repositoryPath, cancellationToken);
+        return await ExecuteGitAsync(["branch", "-a"], repositoryPath, cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <summary>
@@ -127,7 +132,7 @@ public class GitTools
         var output = await ExecuteGitAsync(
             ["rev-parse", "--abbrev-ref", "HEAD"],
             repositoryPath,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
         return output.Trim();
     }
 
@@ -160,7 +165,7 @@ public class GitTools
         var args = new List<string>(files.Count + 2) { "add", "--" };
         args.AddRange(files);
 
-        await ExecuteGitNoOutputAsync(args, repositoryPath, cancellationToken);
+        await ExecuteGitNoOutputAsync(args, repositoryPath, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -181,6 +186,7 @@ public class GitTools
         }
 
         ValidateRepositoryPath(repositoryPath);
-        await ExecuteGitNoOutputAsync(["commit", "-m", message], repositoryPath, cancellationToken);
+        await ExecuteGitNoOutputAsync(["commit", "-m", message], repositoryPath, cancellationToken)
+            .ConfigureAwait(false);
     }
 }

@@ -1,8 +1,10 @@
+#pragma warning disable CA1707
+#pragma warning disable CA2007
 using Ancplua.Mcp.CoreTools.Tools;
 
 namespace Ancplua.Mcp.HttpServer.Tests;
 
-public class FileSystemToolsTests : IDisposable
+public sealed class FileSystemToolsTests : IDisposable
 {
     private readonly string _testDir;
     private readonly string _originalBasePath;
@@ -30,6 +32,8 @@ public class FileSystemToolsTests : IDisposable
         {
             Directory.Delete(_testDir, recursive: true);
         }
+
+        GC.SuppressFinalize(this);
     }
 
     [Fact]
@@ -108,7 +112,7 @@ public class CiToolsTests
 
         // Assert
         Assert.NotNull(diagnostics);
-        Assert.Contains("OS:", diagnostics);
-        Assert.Contains("Processor Count:", diagnostics);
+        Assert.Contains("OS:", diagnostics, StringComparison.Ordinal);
+        Assert.Contains("Processor Count:", diagnostics, StringComparison.Ordinal);
     }
 }

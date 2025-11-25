@@ -1,7 +1,7 @@
 codecov:
-  require_ci_to_pass: yes
+  require_ci_to_pass: true
   notify:
-    wait_for_ci: yes
+    wait_for_ci: true
 
 coverage:
   precision: 2
@@ -9,44 +9,48 @@ coverage:
   range: 70..90
 
   status:
+    # Global Project Coverage
     project:
       default:
-        target: 80%
-        threshold: 2%
+        target: 80%     # The Gold Standard goal
+        threshold: 1%   # Very strict - don't let it drop
         if_ci_failed: error
         informational: false
-        only_pulls: false
-
+      
+    # Patch Coverage (The "Ratchet")
+    # Ensures new code is tested, preventing technical debt accumulation
     patch:
       default:
-        target: 70%
-        threshold: 5%
+        target: 100%    # New code MUST be tested
+        threshold: 5%   # Small leeway for boilerplate
         if_ci_failed: error
         informational: false
-        only_pulls: true
 
-  changes:
-    default:
-      if_ci_failed: error
+parsers:
+  dotnet:
+    # .NET 10/Coverage specific improvements if applicable
+    # (Standard parsers usually suffice, keeping simple)
 
 comment:
   layout: "diff, flags, files"
   behavior: default
   require_changes: false
-  require_base: no
-  require_head: yes
+  require_base: false
+  require_head: true
 
 flags:
   unittests:
     paths:
-      - "tests/"
+      - "src/"
     carryforward: true
 
 ignore:
   - "**/*.Designer.cs"
+  - "**/*.g.cs"
   - "**/obj/**"
   - "**/bin/**"
-  - "**/*.g.cs"
-  - "docs/**"
+  - "tests/**"
   - "tooling/**"
-  - "**/*Tests.cs"
+  - "docs/**"
+  - "**/Program.cs"  # Often excluded from unit tests in microservices
+  - "**/Startup.cs"

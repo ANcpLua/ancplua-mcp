@@ -1,7 +1,9 @@
 using System.ComponentModel;
 using System.Text;
 using Ancplua.Mcp.CoreTools.Utils;
+using System.Diagnostics.CodeAnalysis;
 using ModelContextProtocol.Server;
+using System.Globalization;
 
 namespace Ancplua.Mcp.CoreTools.Tools;
 
@@ -9,6 +11,7 @@ namespace Ancplua.Mcp.CoreTools.Tools;
 /// Provides MCP tools for CI/CD operations including running builds, tests, and diagnostics.
 /// </summary>
 [McpServerToolType]
+[SuppressMessage("Design", "CA1052", Justification = "MCP tool discovery requires non-static types even when members are static.")]
 public class CiTools
 {
     /// <summary>
@@ -53,7 +56,7 @@ public class CiTools
             "dotnet",
             ["build", target],
             workingDir,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -70,7 +73,7 @@ public class CiTools
             "dotnet",
             ["test", target],
             workingDir,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -87,7 +90,7 @@ public class CiTools
             "dotnet",
             ["restore", target],
             workingDir,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -103,7 +106,8 @@ public class CiTools
         [Description("The working directory (optional)")] string? workingDirectory = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await ProcessRunner.RunCommandAsync(command, workingDirectory, cancellationToken);
+        var result = await ProcessRunner.RunCommandAsync(command, workingDirectory, cancellationToken)
+            .ConfigureAwait(false);
         result.ThrowIfFailed(command);
         return result.StandardOutput;
     }
@@ -116,11 +120,11 @@ public class CiTools
     public static string GetDiagnostics()
     {
         var diagnostics = new StringBuilder();
-        diagnostics.AppendLine($"OS: {Environment.OSVersion}");
-        diagnostics.AppendLine($"64-bit OS: {Environment.Is64BitOperatingSystem}");
-        diagnostics.AppendLine($"Processor Count: {Environment.ProcessorCount}");
-        diagnostics.AppendLine($"Working Directory: {Directory.GetCurrentDirectory()}");
-        diagnostics.AppendLine($".NET Version: {Environment.Version}");
+        diagnostics.AppendLine(CultureInfo.InvariantCulture, $"OS: {Environment.OSVersion}");
+        diagnostics.AppendLine(CultureInfo.InvariantCulture, $"64-bit OS: {Environment.Is64BitOperatingSystem}");
+        diagnostics.AppendLine(CultureInfo.InvariantCulture, $"Processor Count: {Environment.ProcessorCount}");
+        diagnostics.AppendLine(CultureInfo.InvariantCulture, $"Working Directory: {Directory.GetCurrentDirectory()}");
+        diagnostics.AppendLine(CultureInfo.InvariantCulture, $".NET Version: {Environment.Version}");
         return diagnostics.ToString();
     }
 }

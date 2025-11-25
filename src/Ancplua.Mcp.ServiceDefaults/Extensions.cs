@@ -11,93 +11,94 @@ using OpenTelemetry.Trace;
 
 namespace Ancplua.Mcp.ServiceDefaults;
 
-public static class Extensions
+public static class ServiceDefaultsExtensions
 {
-    extension<TBuilder>(TBuilder builder) where TBuilder : IHostApplicationBuilder
+    public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
-        public TBuilder AddServiceDefaults()
-        {
-            builder.ConfigureOpenTelemetry();
-            builder.AddDefaultHealthChecks();
-            builder.ConfigureNetworking();
+        ArgumentNullException.ThrowIfNull(builder);
 
-            return builder;
+        builder.ConfigureOpenTelemetry();
+        builder.AddDefaultHealthChecks();
+        builder.ConfigureNetworking();
+
+        return builder;
+    }
+
+    private static void ConfigureOpenTelemetry(this IHostApplicationBuilder builder)
+    {
+        var optimizeForStdio = !builder.Configuration.GetValue<bool>("MCP:DisableStdioLoggingOptimization");
+        if (optimizeForStdio)
+        {
+            builder.Logging.AddConsole(options =>
+            {
+                options.LogToStandardErrorThreshold = LogLevel.Trace;
+            });
         }
 
-        private void ConfigureOpenTelemetry()
+        builder.Logging.AddOpenTelemetry(logging =>
         {
-            var optimizeForStdio = !builder.Configuration.GetValue<bool>("MCP:DisableStdioLoggingOptimization");
-            if (optimizeForStdio)
+            logging.IncludeFormattedMessage = true;
+            logging.IncludeScopes = true;
+        });
+
+        var otel = builder.Services.AddOpenTelemetry();
+
+        otel.WithMetrics(metrics =>
+        {
+            metrics.AddRuntimeInstrumentation()
+                .AddHttpClientInstrumentation();
+
+            if (builder is WebApplicationBuilder)
             {
-                builder.Logging.AddConsole(options =>
+                metrics.AddAspNetCoreInstrumentation();
+            }
+        });
+
+        otel.WithTracing(tracing =>
+        {
+            tracing.AddSource(builder.Environment.ApplicationName)
+                .AddHttpClientInstrumentation();
+
+            if (builder is WebApplicationBuilder)
+            {
+                tracing.AddAspNetCoreInstrumentation(options =>
                 {
-                    options.LogToStandardErrorThreshold = LogLevel.Trace;
+                    options.Filter = context =>
+                        !context.Request.Path.StartsWithSegments("/health", StringComparison.OrdinalIgnoreCase) &&
+                        !context.Request.Path.StartsWithSegments("/alive", StringComparison.OrdinalIgnoreCase);
                 });
             }
+        });
 
-            builder.Logging.AddOpenTelemetry(logging =>
-            {
-                logging.IncludeFormattedMessage = true;
-                logging.IncludeScopes = true;
-            });
-
-            var otel = builder.Services.AddOpenTelemetry();
-
-            otel.WithMetrics(metrics =>
-            {
-                metrics.AddRuntimeInstrumentation()
-                    .AddHttpClientInstrumentation();
-
-                if (builder is WebApplicationBuilder)
-                {
-                    metrics.AddAspNetCoreInstrumentation();
-                }
-            });
-
-            otel.WithTracing(tracing =>
-            {
-                tracing.AddSource(builder.Environment.ApplicationName)
-                    .AddHttpClientInstrumentation();
-
-                if (builder is WebApplicationBuilder)
-                {
-                    tracing.AddAspNetCoreInstrumentation(options =>
-                    {
-                        options.Filter = context =>
-                            !context.Request.Path.StartsWithSegments("/health") &&
-                            !context.Request.Path.StartsWithSegments("/alive");
-                    });
-                }
-            });
-
-            var otlpEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
-            if (!string.IsNullOrWhiteSpace(otlpEndpoint))
-            {
-                otel.UseOtlpExporter();
-            }
-        }
-
-        private void AddDefaultHealthChecks()
+        var otlpEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
+        if (!string.IsNullOrWhiteSpace(otlpEndpoint))
         {
-            builder.Services.AddHealthChecks()
-                .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"]);
+            otel.UseOtlpExporter();
         }
+    }
 
-        private void ConfigureNetworking()
+    private static void AddDefaultHealthChecks(this IHostApplicationBuilder builder)
+    {
+        builder.Services.AddHealthChecks()
+            .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"]);
+    }
+
+    private static void ConfigureNetworking(this IHostApplicationBuilder builder)
+    {
+        builder.Services.AddServiceDiscovery();
+
+        builder.Services.ConfigureHttpClientDefaults(http =>
         {
-            builder.Services.AddServiceDiscovery();
+            http.AddStandardResilienceHandler();
 
-            builder.Services.ConfigureHttpClientDefaults(http =>
-            {
-                http.AddStandardResilienceHandler();
-
-                http.AddServiceDiscovery();
-            });
-        }
+            http.AddServiceDiscovery();
+        });
     }
 
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
+        ArgumentNullException.ThrowIfNull(app);
+
         if (app.Environment.IsDevelopment())
         {
             app.MapHealthChecks("/health");

@@ -1,8 +1,9 @@
+#pragma warning disable CA1707
 using Ancplua.Mcp.CoreTools.Tools;
 
 namespace Ancplua.Mcp.CoreTools.Tests;
 
-public class FileSystemToolsTests : IDisposable
+public sealed class FileSystemToolsTests : IDisposable
 {
     private readonly string _testDir;
 
@@ -23,6 +24,8 @@ public class FileSystemToolsTests : IDisposable
         {
             Directory.Delete(_testDir, recursive: true);
         }
+
+        GC.SuppressFinalize(this);
     }
 
     [Fact]
