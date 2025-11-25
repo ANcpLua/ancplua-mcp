@@ -49,7 +49,7 @@ internal sealed record AiServiceInfo
     /// <summary>
     /// Service capabilities
     /// </summary>
-    public required IReadOnlyList<string> Capabilities { get; init; } = Array.Empty<string>();
+    public required IReadOnlyList<string> Capabilities { get; init; } = [];
 
     /// <summary>
     /// API endpoint (if applicable)
