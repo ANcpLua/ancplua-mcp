@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Deterministic NuGet Restore**: Enabled locked restore mode for CI enforcement
+  - Added `RestoreLockedMode` to `Directory.Build.props` (conditional on CI environment)
+  - Updated CI cache key to use `packages.lock.json` for proper cache invalidation
+  - Added "NuGet dependency management" section to README with developer workflow documentation
+- **Dual-AI Code Review**: Automatic parallel review by Claude and Jules on every PR
+  - `jules-auto-review.yml`: Jules reviews PRs and creates fix PRs if issues found
+  - `claude-code-review.yml`: Claude posts review comments
+  - Both run automatically without human intervention
+  - Documented in CLAUDE.md Section 10
+- **WhisperMesh Protocol Foundations**: Established ambient multi-agent intelligence infrastructure
+  - ADR-0107: WhisperMesh Protocol Adoption (decision to adopt NATS-based agent-to-agent communication)
+  - Implemented `WhisperTier` enum (Lightning/Storm dual-tier system)
+  - Implemented `WhisperMetadata` record (traceability context with OpenTelemetry support)
+  - Fixed build errors in `Ancplua.Mcp.WhisperMesh` project (now compiles successfully)
+  - Protocol spec: [spec-whispermesh-protocol.md](docs/specs/spec-whispermesh-protocol.md) (1062 lines, v1.0)
+  - **Note**: WhisperMesh is currently 5% implemented (data model only, no client/server yet)
+- **Ancplua.Mcp.CoreTools**: New shared library consolidating tools from HttpServer and WorkstationServer
+  - Implements ADR-006 (Core Tools Consolidation) and spec-006
+  - Eliminates code duplication between servers
+- **Ancplua.Mcp.CoreTools.Tests**: New test project with 47 tests
+  - ProcessRunner deadlock prevention tests (large stdout/stderr)
+  - CommandParser quote handling tests
+  - FileSystemTools path traversal security tests
+- **Path Traversal Protection**: FileSystemTools now validates all paths against `AllowedBasePath`
+  - Configurable via `FILESYSTEM_TOOLS_BASE_PATH` environment variable
+  - Prevents access to files outside allowed directory
+
 ### Fixed
 - **NuGet Package Resolution**: Fixed all .NET 10 build warnings
   - Removed global `FrameworkReference` for `Microsoft.AspNetCore.App` from `Directory.Packages.props` (NETSDK1086)
@@ -30,23 +58,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (required for `IHttpContextAccessor` in non-web SDK projects)
 - **Testing.csproj**: Retained `Microsoft.Extensions.Hosting` PackageReference
   (required for `Host.CreateApplicationBuilder()` in test utilities)
-
-### Added
-- **Dual-AI Code Review**: Automatic parallel review by Claude and Jules on every PR
-  - `jules-auto-review.yml`: Jules reviews PRs and creates fix PRs if issues found
-  - `claude-code-review.yml`: Claude posts review comments
-  - Both run automatically without human intervention
-  - Documented in CLAUDE.md Section 10
-- **Ancplua.Mcp.CoreTools**: New shared library consolidating tools from HttpServer and WorkstationServer
-  - Implements ADR-006 (Core Tools Consolidation) and spec-006
-  - Eliminates code duplication between servers
-- **Ancplua.Mcp.CoreTools.Tests**: New test project with 47 tests
-  - ProcessRunner deadlock prevention tests (large stdout/stderr)
-  - CommandParser quote handling tests
-  - FileSystemTools path traversal security tests
-- **Path Traversal Protection**: FileSystemTools now validates all paths against `AllowedBasePath`
-  - Configurable via `FILESYSTEM_TOOLS_BASE_PATH` environment variable
-  - Prevents access to files outside allowed directory
 
 ### Fixed
 - **ProcessRunner Deadlock**: Fixed critical deadlock in HttpServer process execution

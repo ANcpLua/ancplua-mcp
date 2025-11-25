@@ -129,7 +129,50 @@ docker run -i --rm ancplua-ai-services
 
 ---
 
-## 5. Example MCP client configuration
+## 5. NuGet dependency management
+
+This repository uses **Central Package Management (CPM)** with **per-project lock files** for deterministic builds.
+
+### Key files
+
+| File | Purpose |
+|------|---------|
+| `Directory.Packages.props` | Centralized package version definitions |
+| `Directory.Build.props` | Enables lock files and locked restore in CI |
+| `**/packages.lock.json` | Per-project lock files (one per `.csproj`) |
+
+### How it works
+
+- **All package versions** are defined centrally in `Directory.Packages.props`
+- **Individual `.csproj` files** use `<PackageReference Include="..." />` without `Version` attributes
+- **Lock files** are generated per project and committed to source control
+- **CI enforces locked restore**: if lock files would change, CI fails
+
+### Developer workflow
+
+```bash
+# Normal build (lock files respected)
+dotnet restore
+dotnet build
+
+# When adding/updating packages, lock files regenerate automatically
+# Commit the updated packages.lock.json files with your changes
+```
+
+### Updating dependencies
+
+1. Update version in `Directory.Packages.props`
+2. Run `dotnet restore` — lock files regenerate
+3. Run `dotnet build && dotnet test` — verify changes
+4. Commit both the `.props` changes and updated `packages.lock.json` files
+
+### CI behavior
+
+CI runs with `RestoreLockedMode=true`. If your PR changes dependencies without updating lock files, CI will fail with a restore error. Always commit lock file changes alongside dependency updates.
+
+---
+
+## 6. Example MCP client configuration
 
 For Claude Desktop / Claude Code (`claude.mcp` or `.mcp.json`):
 
@@ -261,7 +304,7 @@ To use these servers with **GitHub Copilot Coding Agent** (in repository setting
 
 ---
 
-## 6. Machine-friendly MCP server inventory
+## 7. Machine-friendly MCP server inventory
 
 You can drop this JSON into `docs/servers.json` or similar for agents to parse:
 
