@@ -1,38 +1,60 @@
-﻿using HttpServer.Tools;
+using Ancplua.Mcp.CoreTools.Tools;
 
-namespace HttpServer.Tests;
+namespace Ancplua.Mcp.HttpServer.Tests;
 
-public class FileSystemToolsTests
+public class FileSystemToolsTests : IDisposable
 {
+    private readonly string _testDir;
+    private readonly string _originalBasePath;
+
+    public FileSystemToolsTests()
+    {
+        // Store original base path
+        _originalBasePath = FileSystemTools.AllowedBasePath;
+
+        // Create test directory in temp
+        _testDir = Path.Combine(Path.GetTempPath(), $"HttpServerTests_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(_testDir);
+
+        // Set allowed base path to test directory
+        FileSystemTools.AllowedBasePath = _testDir;
+    }
+
+    public void Dispose()
+    {
+        // Restore original base path
+        FileSystemTools.AllowedBasePath = _originalBasePath;
+
+        // Clean up test directory
+        if (Directory.Exists(_testDir))
+        {
+            Directory.Delete(_testDir, recursive: true);
+        }
+    }
+
     [Fact]
     public void FileExists_ReturnsTrueForExistingFile()
     {
         // Arrange
-        var tempFile = Path.GetTempFileName();
-        
-        try
-        {
-            // Act
-            var result = FileSystemTools.FileExists(tempFile);
-            
-            // Assert
-            Assert.True(result);
-        }
-        finally
-        {
-            File.Delete(tempFile);
-        }
+        var testFile = Path.Combine(_testDir, "test.txt");
+        File.WriteAllText(testFile, "content");
+
+        // Act
+        var result = FileSystemTools.FileExists(testFile);
+
+        // Assert
+        Assert.True(result);
     }
 
     [Fact]
     public void FileExists_ReturnsFalseForNonExistingFile()
     {
         // Arrange
-        var nonExistentFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        
+        var nonExistentFile = Path.Combine(_testDir, Guid.NewGuid().ToString());
+
         // Act
         var result = FileSystemTools.FileExists(nonExistentFile);
-        
+
         // Assert
         Assert.False(result);
     }
@@ -41,22 +63,15 @@ public class FileSystemToolsTests
     public async Task ReadFileAsync_ReturnsFileContents()
     {
         // Arrange
-        var tempFile = Path.GetTempFileName();
+        var testFile = Path.Combine(_testDir, "test.txt");
         var expectedContent = "Test content";
-        await File.WriteAllTextAsync(tempFile, expectedContent);
-        
-        try
-        {
-            // Act
-            var content = await FileSystemTools.ReadFileAsync(tempFile);
-            
-            // Assert
-            Assert.Equal(expectedContent, content);
-        }
-        finally
-        {
-            File.Delete(tempFile);
-        }
+        await File.WriteAllTextAsync(testFile, expectedContent);
+
+        // Act
+        var content = await FileSystemTools.ReadFileAsync(testFile);
+
+        // Assert
+        Assert.Equal(expectedContent, content);
     }
 }
 
@@ -71,7 +86,7 @@ public class GitToolsTests
         {
             // Act
             var branch = await GitTools.GetCurrentBranchAsync();
-            
+
             // Assert
             Assert.NotNull(branch);
             Assert.NotEmpty(branch);
@@ -79,7 +94,6 @@ public class GitToolsTests
         catch (InvalidOperationException)
         {
             // Expected when not in a git repository - test passes
-            Assert.True(true);
         }
     }
 }
@@ -91,7 +105,7 @@ public class CiToolsTests
     {
         // Act
         var diagnostics = CiTools.GetDiagnostics();
-        
+
         // Assert
         Assert.NotNull(diagnostics);
         Assert.Contains("OS:", diagnostics);

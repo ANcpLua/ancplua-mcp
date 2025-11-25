@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ancplua.Mcp.ServiceDefaults\Ancplua.Mcp.ServiceDefaults.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="ModelContextProtocol" />
+    <PackageReference Include="ModelContextProtocol.AspNetCore"/>
+    <PackageReference Include="Microsoft.Build.Locator"/>
+    <PackageReference Include="Microsoft.Build" ExcludeAssets="runtime"/>
+    <PackageReference Include="Microsoft.Build.Framework" ExcludeAssets="runtime"/>
+    <PackageReference Include="Microsoft.Build.Utilities.Core" ExcludeAssets="runtime"/>
+    <PackageReference Include="Microsoft.Build.Tasks.Core" ExcludeAssets="runtime"/>
+    <PackageReference Include="Microsoft.NET.StringTools" ExcludeAssets="runtime"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.Metrics"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild"/>
+    <PackageReference Include="NuGet.Packaging" ExcludeAssets="runtime"/>
+    <PackageReference Include="NuGet.Protocol" ExcludeAssets="runtime"/>
+    <PackageReference Include="NuGet.Versioning" ExcludeAssets="runtime"/>
+    <PackageReference Include="NuGet.Frameworks" ExcludeAssets="runtime"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.CodeAnalysis.Features">
+      <HintPath>$(NuGetPackageRoot)microsoft.codeanalysis.metrics/4.14.0/Metrics/Microsoft.CodeAnalysis.Features.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.Workspaces">
+      <HintPath>$(NuGetPackageRoot)microsoft.codeanalysis.metrics/4.14.0/Metrics/Microsoft.CodeAnalysis.Workspaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild">
+      <HintPath>$(NuGetPackageRoot)microsoft.codeanalysis.metrics/4.14.0/Metrics/Microsoft.CodeAnalysis.Workspaces.MSBuild.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.CSharp.Features">
+      <HintPath>$(NuGetPackageRoot)microsoft.codeanalysis.metrics/4.14.0/Metrics/Microsoft.CodeAnalysis.CSharp.Features.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.AnalyzerUtilities">
+      <HintPath>$(NuGetPackageRoot)microsoft.codeanalysis.metrics/4.14.0/Metrics/Microsoft.CodeAnalysis.AnalyzerUtilities.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

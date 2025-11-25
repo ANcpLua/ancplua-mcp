@@ -1,0 +1,188 @@
+[
+  {
+    "name": "Ancplua Workstation MCP Server",
+    "id": "ancplua-workstation",
+    "primaryLanguage": "C#",
+    "repo": "https://github.com/ANcpLua/ancplua-mcp",
+    "category": ["workstation", "filesystem", "git", "ci"],
+    "mcp": {
+      "type": "stdio",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--no-build",
+        "--project",
+        "src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj"
+      ]
+    }
+  },
+  {
+    "name": "Ancplua HTTP MCP Server",
+    "id": "ancplua-http",
+    "primaryLanguage": "C#",
+    "repo": "https://github.com/ANcpLua/ancplua-mcp",
+    "category": ["http", "shared", "remote"],
+    "mcp": {
+      "type": "stdio",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--no-build",
+        "--project",
+        "src/Ancplua.Mcp.HttpServer/Ancplua.Mcp.HttpServer.csproj"
+      ]
+    }
+  },
+  {
+    "name": "Ancplua AI Services MCP Server",
+    "id": "ancplua-ai-services",
+    "primaryLanguage": "C#",
+    "repo": "https://github.com/ANcpLua/ancplua-mcp",
+    "category": ["ai-orchestration", "github-apps"],
+    "mcp": {
+      "type": "stdio",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--no-build",
+        "--project",
+        "src/Ancplua.Mcp.AIServicesServer/Ancplua.Mcp.AIServicesServer.csproj"
+      ]
+    }
+  },
+
+  // External “god-tier” servers
+  {
+    "name": ".NET Types Explorer MCP Server",
+    "id": "dotnet-types-explorer",
+    "primaryLanguage": "C#",
+    "repo": "https://github.com/V0v1kkk/DotNetMetadataMcpServer",
+    "category": ["code-intel", "dotnet", "nuget"],
+    "mcp": {
+      "type": "stdio",
+      "command": "/path/to/DotNetMetadataMcpServer",
+      "args": []
+    }
+  },
+  {
+    "name": "ContextKeeper MCP",
+    "id": "contextkeeper",
+    "primaryLanguage": "C#",
+    "repo": "https://github.com/chasecuppdev/contextkeeper-mcp",
+    "category": ["context", "history", "roslyn", "dotnet"],
+    "mcp": {
+      "type": "stdio",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "/path/to/contextkeeper-mcp/src/ContextKeeper"
+      ]
+    }
+  },
+  {
+    "name": "Roslyn MCP Server",
+    "id": "roslyn-mcp",
+    "primaryLanguage": "C#",
+    "repo": "https://github.com/egorpavlikhin/roslyn-mcp",
+    "category": ["code-intel", "analysis", "dotnet"],
+    "mcp": {
+      "type": "stdio",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--no-build",
+        "--project",
+        "/path/to/roslyn-mcp/RoslynMCP/RoslynMCP.csproj"
+      ]
+    }
+  },
+  {
+    "name": "NuGet Context MCP Server",
+    "id": "nuget-context",
+    "primaryLanguage": "C#",
+    "repo": "https://github.com/plucked/nuget-context-server",
+    "category": ["nuget", "dependencies"],
+    "mcp": {
+      "type": "stdio",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "/path/to/nuget-context-server/src/NuGetContextServer"
+      ]
+    }
+  },
+  {
+    "name": "Jupyter MCP Server",
+    "id": "jupyter",
+    "primaryLanguage": "Python",
+    "repo": "https://github.com/datalayer/jupyter-mcp-server",
+    "category": ["python", "notebooks", "data"],
+    "mcp": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["jupyter-mcp-server@latest"]
+    }
+  },
+  {
+    "name": "GitHub Semantic Search MCP",
+    "id": "github-semantic-search",
+    "primaryLanguage": "TypeScript",
+    "repo": "https://github.com/edelauna/github-semantic-search-mcp",
+    "category": ["rag", "search", "github"],
+    "mcp": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/path/to/server-dist.js"]
+    }
+  },
+  {
+    "name": "XRAY MCP",
+    "id": "xray-mcp",
+    "primaryLanguage": "TypeScript",
+    "repo": "https://github.com/xray-app/xray-mcp",
+    "category": ["code-intel", "ast"],
+    "mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "xray-mcp"]
+    }
+  },
+  {
+    "name": "mcp-debugger",
+    "id": "mcp-debugger",
+    "primaryLanguage": "TypeScript",
+    "repo": "https://github.com/debugmcpdev/mcp-debugger",
+    "category": ["debugging", "dap", "python", "node", "rust"],
+    "mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@debugmcp/mcp-debugger"]
+    }
+  },
+  {
+    "name": "OTEL MCP Server",
+    "id": "otel-mcp-server",
+    "primaryLanguage": "TypeScript",
+    "repo": "https://github.com/shiftyp/otel-mcp-server",
+    "category": ["observability", "opentelemetry", "logging"],
+    "mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "otel-mcp-server"]
+    }
+  },
+  {
+    "name": "Scout Monitoring MCP",
+    "id": "scout-mcp-local",
+    "primaryLanguage": "Python",
+    "repo": "https://github.com/scoutapp/scout-mcp-local",
+    "category": ["apm", "logging", "metrics"],
+    "mcp": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["-m", "scout_mcp_local"]
+    }
+  }
+]

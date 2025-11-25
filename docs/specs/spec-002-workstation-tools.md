@@ -1,7 +1,7 @@
 # Spec-002: Workstation MCP Tools
 
 **Status**: Implemented
-**Last Updated**: 2025-11-22
+**Last Updated**: 2025-11-25
 
 ## Overview
 
@@ -207,6 +207,44 @@ Integration tests verify:
 - Errors are properly propagated as MCP error responses
 
 See `tests/Ancplua.Mcp.WorkstationServer.Tests/ToolsTests.cs` for test coverage.
+
+## Partner Integration: JetBrains Rider
+
+Starting with Rider 2025.3, JetBrains IDEs include a built-in MCP server that exposes ~40 IDE-specific tools. These complement the `Ancplua.Mcp.WorkstationServer` tools by providing deep code intelligence and IDE automation.
+
+### Rider Tool Categories
+
+1.  **Run Configurations**: `get_run_configurations`, `execute_run_configuration`
+2.  **Code Analysis**: `get_file_problems`, `get_project_dependencies`, `get_project_modules`
+3.  **File Operations**: `create_new_file`, `get_file_text_by_path`, `replace_text_in_file`
+4.  **Search & Navigation**: `find_files_by_glob`, `find_files_by_name_keyword`, `search_in_files_by_text`, `search_in_files_by_regex`
+5.  **Code Intelligence**: `get_symbol_info`, `rename_refactoring`, `reformat_file`
+6.  **Structure**: `list_directory_tree`, `get_all_open_file_paths`
+7.  **Terminal**: `execute_terminal_command`
+8.  **Version Control**: `get_repositories`
+
+### Integration Pattern
+
+The intended workflow is to run both servers side-by-side in the client configuration:
+
+```json
+{
+  "mcpServers": {
+    "rider": {
+      "command": "rider",
+      "args": ["mcp", "--project", "/path/to/solution.sln"]
+    },
+    "ancplua-workstation": {
+      "command": "dotnet",
+      "args": ["run", "--project", ".../Ancplua.Mcp.WorkstationServer.csproj"]
+    }
+  }
+}
+```
+
+This allows the agent to choose the best tool for the job:
+*   **Rider**: "Refactor this method", "Run unit tests", "Find usages"
+*   **Workstation**: "Commit changes", "Read file (outside project)", "Run CI script"
 
 ## References
 

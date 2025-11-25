@@ -1,0 +1,38 @@
+# Multi-stage build for Ancplua.Mcp.WorkstationServer
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# Copy global.json and Directory.Packages.props for version control
+COPY global.json ./
+COPY Directory.Packages.props ./
+
+# Copy project files (including dependencies)
+COPY src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj ./src/Ancplua.Mcp.WorkstationServer/
+COPY src/Ancplua.Mcp.ServiceDefaults/Ancplua.Mcp.ServiceDefaults.csproj ./src/Ancplua.Mcp.ServiceDefaults/
+COPY src/Ancplua.Mcp.DebugTools/Ancplua.Mcp.DebugTools.csproj ./src/Ancplua.Mcp.DebugTools/
+COPY src/Ancplua.Mcp.CoreTools/Ancplua.Mcp.CoreTools.csproj ./src/Ancplua.Mcp.CoreTools/
+
+# Restore dependencies
+RUN dotnet restore src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj
+
+# Copy source code (including dependencies)
+COPY src/Ancplua.Mcp.WorkstationServer/ ./src/Ancplua.Mcp.WorkstationServer/
+COPY src/Ancplua.Mcp.ServiceDefaults/ ./src/Ancplua.Mcp.ServiceDefaults/
+COPY src/Ancplua.Mcp.DebugTools/ ./src/Ancplua.Mcp.DebugTools/
+COPY src/Ancplua.Mcp.CoreTools/ ./src/Ancplua.Mcp.CoreTools/
+
+# Build and publish
+WORKDIR /src/src/Ancplua.Mcp.WorkstationServer
+RUN dotnet publish -c Release -o /app/publish --no-restore
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/runtime:10.0 AS runtime
+WORKDIR /app
+
+# Install git for GitTools functionality
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
+COPY --from=build /app/publish .
+
+# MCP servers typically use stdio transport
+ENTRYPOINT ["dotnet", "Ancplua.Mcp.WorkstationServer.dll"]

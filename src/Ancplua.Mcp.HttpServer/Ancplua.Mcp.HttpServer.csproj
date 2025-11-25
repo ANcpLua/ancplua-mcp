@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../Ancplua.Mcp.ServiceDefaults/Ancplua.Mcp.ServiceDefaults.csproj" />
+    <ProjectReference Include="../Ancplua.Mcp.DebugTools/Ancplua.Mcp.DebugTools.csproj" />
+    <ProjectReference Include="../Ancplua.Mcp.CoreTools/Ancplua.Mcp.CoreTools.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="ModelContextProtocol" />
     <PackageReference Include="ModelContextProtocol.AspNetCore" />

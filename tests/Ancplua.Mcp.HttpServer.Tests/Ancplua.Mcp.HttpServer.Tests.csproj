@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Ancplua.Mcp.HttpServer\Ancplua.Mcp.HttpServer.csproj" />
+    <ProjectReference Include="..\..\src\Ancplua.Mcp.CoreTools\Ancplua.Mcp.CoreTools.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,151 @@
+# Jules Code Task via API (ChatOps style)
+#
+# Triggers a Jules session via API when a '/jules' command is used in a PR comment.
+# Required secret: JULES_API_KEY
+#
+# Usage: Comment "/jules [task description]" on a PR
+# Example: "/jules Fix the null reference exception in UserService"
+#
+# NOTE: This is an EXAMPLE workflow. Copy to .github/workflows/ to use.
+# The Jules API (v1alpha) does NOT support webhooks, so auto-merge based on
+# Jules completion is not possible without external polling.
+
+name: Jules Code Task Runner
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: write
+
+jobs:
+  jules-task:
+    # Only run if it's a PR comment AND starts with /jules
+    if: github.event.issue.pull_request && startsWith(github.event.comment.body, '/jules')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate API Key
+        run: |
+          if [ -z "${{ secrets.JULES_API_KEY }}" ]; then
+            echo "::error::JULES_API_KEY secret is not set"
+            exit 1
+          fi
+
+      - name: Extract Prompt
+        id: extract
+        run: |
+          COMMENT_BODY="${{ github.event.comment.body }}"
+          # Remove the /jules prefix
+          PROMPT=$(echo "$COMMENT_BODY" | sed 's/^\/jules\s*//')
+
+          # If prompt is empty after prefix removal, provide a default task
+          if [ -z "$PROMPT" ]; then
+            PROMPT="Review the changes in this PR, suggest improvements, fix any bugs found, and ensure code quality."
+          fi
+
+          # Handle multiline raw prompt for display later
+          echo "prompt_raw<<EOF" >> $GITHUB_OUTPUT
+          echo "$PROMPT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          # Escape JSON characters for the API payload
+          PROMPT_JSON=$(echo "$PROMPT" | jq -Rsa .)
+          echo "prompt_json=$PROMPT_JSON" >> $GITHUB_OUTPUT
+
+      - name: Get PR Details
+        id: pr_details
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=${{ github.event.issue.number }}
+          PR_INFO=$(gh pr view $PR_NUMBER --json baseRefName --repo ${{ github.repository }})
+          BASE_BRANCH=$(echo "$PR_INFO" | jq -r '.baseRefName')
+
+          echo "base_branch=$BASE_BRANCH" >> $GITHUB_OUTPUT
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Create Jules Session
+        id: jules
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          STARTING_BRANCH="${{ steps.pr_details.outputs.base_branch }}"
+          PROMPT_JSON=${{ steps.extract.outputs.prompt_json }}
+          PR_NUMBER=${{ steps.pr_details.outputs.pr_number }}
+
+          # Construct the title for the Jules UI
+          TITLE="CI Task (PR #${PR_NUMBER}) - $(echo "${{ steps.extract.outputs.prompt_raw }}" | cut -c 1-70)"
+          TITLE_JSON=$(echo "$TITLE" | jq -Rsa .)
+
+          # Create session via Jules API
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            'https://jules.googleapis.com/v1alpha/sessions' \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -H "X-Goog-Api-Key: $JULES_API_KEY" \
+            -d "{
+              \"prompt\": $PROMPT_JSON,
+              \"sourceContext\": {
+                \"source\": \"sources/github/${{ github.repository }}\",
+                \"githubRepoContext\": {
+                  \"startingBranch\": \"$STARTING_BRANCH\",
+                  \"pullRequestNumber\": $PR_NUMBER
+                }
+              },
+              \"automationMode\": \"AUTO_CREATE_PR\",
+              \"requirePlanApproval\": true,
+              \"title\": $TITLE_JSON
+            }")
+
+          # Extract HTTP code and body
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Jules API returned HTTP $HTTP_CODE"
+            gh issue comment $PR_NUMBER --body "❌ Failed to start Jules session. API Error: $HTTP_CODE
+
+\`\`\`json
+$BODY
+\`\`\`" --repo ${{ github.repository }}
+            exit 1
+          fi
+
+          # Extract session ID
+          SESSION_ID=$(echo "$BODY" | jq -r '.id')
+          echo "session_id=$SESSION_ID" >> $GITHUB_OUTPUT
+
+      - name: Post Session Link to PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sessionId = '${{ steps.jules.outputs.session_id }}';
+            const julesUrl = `https://jules.google/session/${sessionId}`;
+            const promptRaw = `${{ steps.extract.outputs.prompt_raw }}`;
+            const prNumber = ${{ steps.pr_details.outputs.pr_number }};
+
+            await github.rest.issues.createComment({
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🤖 Jules AI Task Started
+
+**Task:**
+\`\`\`
+${promptRaw}
+\`\`\`
+
+**Session:** [View in Jules](${julesUrl})
+
+Jules is analyzing the code and creating a plan.
+Visit the link above to **approve the plan** and monitor progress.
+
+---
+*Note: Jules delivers work via commits/PRs, not review comments.*
+*The Jules API does not support webhooks - no auto-notifications on completion.*`
+            });

@@ -1,45 +1,88 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- Transitive pinning enabled to ensure ModelContextProtocol's RC2 dependencies
+         are upgraded to GA 10.0.0 versions via the PackageVersion entries below. -->
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
-
   <ItemGroup Label="MCP SDK Packages">
-    <PackageVersion Include="ModelContextProtocol" Version="0.4.0-preview.3" />
-    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="0.3.0-preview.4" />
-    <PackageVersion Include="ModelContextProtocol.Core" Version="0.4.0-preview.3" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0"/>
+    <PackageVersion Include="ModelContextProtocol" Version="0.4.0-preview.3"/>
+    <PackageVersion Include="ModelContextProtocol.Core" Version="0.4.0-preview.3"/>
+    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="0.4.0-preview.3"/>
   </ItemGroup>
-
-  <ItemGroup Label="Microsoft Extensions">
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Logging" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+  <!-- Note: Many Microsoft.Extensions.* packages are now in-box in .NET 10.
+       However, we must explicitly pin abstractions packages because ModelContextProtocol
+       0.4.0-preview.3 has a transitive dependency on 10.0.0-rc.2 versions. Pinning to
+       10.0.0 GA ensures we use the released versions. -->
+  <ItemGroup Label="Microsoft Extensions (NuGet-distributed)">
+    <!-- Explicitly pin abstractions to GA 10.0.0 (overrides MCP's RC2 transitive deps) -->
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0"/>
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0"/>
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0"/>
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0"/>
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0"/>
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.0"/>
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.0"/>
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.0.0"/>
+    <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.0.0"/>
   </ItemGroup>
-
   <ItemGroup Label="ASP.NET Core">
-    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.11" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0"/>
   </ItemGroup>
-
+  <ItemGroup Label=" AI">
+    <!-- Note: ModelContextProtocol.Core depends on Microsoft.Extensions.AI.Abstractions 9.10.0 -->
+    <!-- Keep this in sync with ModelContextProtocol transitive dependency -->
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="9.10.0"/>
+    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="10.0.1-preview.1.25571.5"/>
+    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="9.10.0"/>
+    <PackageVersion Include="Microsoft.SemanticKernel.Core" Version="1.67.1"/>
+    <PackageVersion Include="System.Linq.Async" Version="7.0.0"/>
+  </ItemGroup>
   <ItemGroup Label="Testing">
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
-    <PackageVersion Include="xunit" Version="2.9.3" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
-    <PackageVersion Include="coverlet.collector" Version="6.0.2" />
-    <PackageVersion Include="Moq" Version="4.20.72" />
-    <PackageVersion Include="FluentAssertions" Version="7.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1"/>
+    <PackageVersion Include="xunit" Version="2.9.3"/>
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5"/>
+    <PackageVersion Include="coverlet.collector" Version="6.0.4"/>
+    <PackageVersion Include="Moq" Version="4.20.72"/>
+    <PackageVersion Include="FluentAssertions" Version="8.8.0"/>
   </ItemGroup>
-
+  <ItemGroup Label="OpenTelemetry – Stable 1.14.0 (released 12.11.2025)">
+    <PackageVersion Include="OpenTelemetry.Api" Version="1.14.0"/>
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0"/>
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.14.0"/>
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0"/>
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0"/>
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0"/>
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="1.14.0-beta.2"/>
+  </ItemGroup>
+  <ItemGroup Label="Messaging (NATS)">
+    <PackageVersion Include="NATS.Client.Core" Version="2.5.1"/>
+    <PackageVersion Include="NATS.Client.JetStream" Version="2.5.1"/>
+  </ItemGroup>
+  <!-- Note: System.Text.Json is in-box in .NET 10 - no PackageVersion needed -->
+  <ItemGroup Label="NuGet">
+    <PackageVersion Include="NuGet.Protocol" Version="7.0.0"/>
+    <PackageVersion Include="NuGet.Configuration" Version="7.0.0"/>
+    <PackageVersion Include="NuGet.Frameworks" Version="7.0.0"/>
+    <PackageVersion Include="NuGet.Packaging" Version="7.0.0"/>
+    <PackageVersion Include="NuGet.Versioning" Version="7.0.0"/>
+  </ItemGroup>
+  <ItemGroup Label="Roslyn">
+    <PackageVersion Include="Microsoft.Build" Version="18.0.2"/>
+    <PackageVersion Include="Microsoft.Build.Framework" Version="18.0.2"/>
+    <PackageVersion Include="Microsoft.Build.Locator" Version="1.11.1"/>
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="18.0.2"/>
+    <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="18.0.2"/>
+    <PackageVersion Include="Microsoft.NET.StringTools" Version="18.0.2"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.Metrics" Version="4.14.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis" Version="4.14.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.14.0"/>
+  </ItemGroup>
   <ItemGroup Label="Code Analysis">
-    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0" />
-    <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
-  </ItemGroup>
-
-  <ItemGroup Label="Microsoft.Extensions.AI (Optional - for future LLM integration)">
-    <!-- Uncomment when needed for servers that call LLMs -->
-    <!-- <PackageVersion Include="Microsoft.Extensions.AI" Version="9.0.0-preview.1.25070.1" /> -->
-    <!-- <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="9.0.0-preview.1.25070.1" /> -->
-    <!-- <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="9.0.0-preview.1.25070.1" /> -->
+    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.100"/>
+    <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556"/>
   </ItemGroup>
 </Project>

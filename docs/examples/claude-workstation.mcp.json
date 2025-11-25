@@ -1,6 +1,7 @@
 {
   "mcpServers": {
     "ancplua-workstation": {
+      "type": "local",
       "command": "dotnet",
       "args": [
         "run",
@@ -9,7 +10,8 @@
       ],
       "env": {
         "DOTNET_ENVIRONMENT": "Development"
-      }
+      },
+      "tools": ["*"]
     }
   }
 }

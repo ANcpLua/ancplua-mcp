@@ -1,0 +1,44 @@
+# Multi-stage build for Ancplua.Mcp.HttpServer
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# Copy global.json and Directory.Packages.props for version control
+COPY global.json ./
+COPY Directory.Packages.props ./
+
+# Copy project files (including dependencies)
+COPY src/Ancplua.Mcp.HttpServer/Ancplua.Mcp.HttpServer.csproj ./src/Ancplua.Mcp.HttpServer/
+COPY src/Ancplua.Mcp.ServiceDefaults/Ancplua.Mcp.ServiceDefaults.csproj ./src/Ancplua.Mcp.ServiceDefaults/
+COPY src/Ancplua.Mcp.DebugTools/Ancplua.Mcp.DebugTools.csproj ./src/Ancplua.Mcp.DebugTools/
+COPY src/Ancplua.Mcp.CoreTools/Ancplua.Mcp.CoreTools.csproj ./src/Ancplua.Mcp.CoreTools/
+
+# Restore dependencies
+RUN dotnet restore src/Ancplua.Mcp.HttpServer/Ancplua.Mcp.HttpServer.csproj
+
+# Copy source code (including dependencies)
+COPY src/Ancplua.Mcp.HttpServer/ ./src/Ancplua.Mcp.HttpServer/
+COPY src/Ancplua.Mcp.ServiceDefaults/ ./src/Ancplua.Mcp.ServiceDefaults/
+COPY src/Ancplua.Mcp.DebugTools/ ./src/Ancplua.Mcp.DebugTools/
+COPY src/Ancplua.Mcp.CoreTools/ ./src/Ancplua.Mcp.CoreTools/
+
+# Build and publish
+WORKDIR /src/src/Ancplua.Mcp.HttpServer
+RUN dotnet publish -c Release -o /app/publish --no-restore
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+WORKDIR /app
+
+# Install git for GitTools functionality
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
+COPY --from=build /app/publish .
+
+# Expose HTTP and HTTPS ports
+EXPOSE 5000 5001
+
+# Environment variables
+ENV ASPNETCORE_URLS=http://+:5000;https://+:5001
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+ENTRYPOINT ["dotnet", "Ancplua.Mcp.HttpServer.dll"]

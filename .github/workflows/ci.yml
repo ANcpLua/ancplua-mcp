@@ -84,36 +84,8 @@ jobs:
         run: dotnet format --verify-no-changes --verbosity diagnostic
         continue-on-error: true
 
-  codeql:
-    name: CodeQL Analysis
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: csharp
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
-          global-json-file: global.json
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:csharp"
+  # Note: CodeQL analysis is handled by GitHub's default setup.
+  # Do not add a custom codeql job here - it conflicts with the default setup.
 
   dependency-review:
     name: Dependency Review

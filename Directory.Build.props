@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!-- Generate packages.lock.json for deterministic builds and CI caching -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+</Project>

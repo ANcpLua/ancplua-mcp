@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # WorkstationServer - stdio-based MCP server
+  workstation-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.workstation
+    image: ancplua/ancplua-mcp:workstation-latest
+    container_name: ancplua-mcp-workstation
+    stdin_open: true
+    tty: true
+    volumes:
+      # Mount workspace for file operations
+      - ${WORKSPACE_PATH:-./workspace}:/workspace
+      # Mount git config for git operations
+      - ${HOME}/.gitconfig:/root/.gitconfig:ro
+    working_dir: /workspace
+    environment:
+      - DOTNET_ENVIRONMENT=Production
+
+  # HttpServer - HTTP-based MCP server
+  http-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.http
+    image: ancplua/ancplua-mcp:http-latest
+    container_name: ancplua-mcp-http
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    volumes:
+      # Mount workspace for file operations
+      - ${WORKSPACE_PATH:-./workspace}:/workspace
+      # Mount git config for git operations
+      - ${HOME}/.gitconfig:/root/.gitconfig:ro
+    working_dir: /workspace
+    environment:
+      - ASPNETCORE_URLS=http://+:5000;https://+:5001
+      - ASPNETCORE_ENVIRONMENT=Production
+      - DOTNET_ENVIRONMENT=Production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+networks:
+  default:
+    name: ancplua-mcp-network

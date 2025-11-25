@@ -1,40 +1,38 @@
 # Architecture
 
-This document describes the intended architecture of the **ancplua-mcp** repository.
-
-The goal is to provide **small, focused MCP servers** implemented in C#, with clear contracts and minimal dependencies. This repo is for **servers only**. Claude Code plugins, IDE plugins, and other clients live elsewhere and connect to these servers via `.mcp.json` (or equivalent) configuration.
+This document describes the architecture of the **ancplua-mcp** repository and how it fits into a broader “.NET insight spine” composed of multiple MCP servers (both custom and external).   
 
 ---
 
-## 1. High-level overview
+## 1. Goals and non-goals
 
-**Primary responsibilities of this repository:**
+### 1.1 Goals
 
-- Implement one or more **MCP servers** in .NET.
-- Expose **tools** (filesystem, Git, CI, etc.) to LLM clients via the **Model Context Protocol**.
-- Maintain **clear contracts** and **strong documentation**:
-  - Tool signatures and behavior.
-  - Server startup commands.
-  - Versioned changes (via `CHANGELOG.md`, specs, ADRs).
+- Provide **small, focused MCP servers** implemented in C#/.NET.
+- Expose **strongly-typed tools** for:
+  - Filesystem, git, CI, NuGet, Roslyn, metrics, architecture docs.
+- Act as the **.NET intelligence layer** that can be combined with:
+  - MSBuild binlog analysis servers
+  - Roslyn analyzer servers
+  - NuGet metadata servers
+  - Observability servers (OTEL, APM)
+- Use **official C# MCP SDK** and a shared **ServiceDefaults** library for consistent infrastructure.   
 
-**Out of scope for this repository:**
+### 1.2 Non-goals
 
-- Claude Code **plugins** and **Skills** (those live in `ancplua-claude-plugins`).
-- Frontend applications, web UIs, or IDE plugins.
-- Orchestrating which client uses which server (that is handled by client configuration).
+- Not a client: **no IDE plugins, no Claude skills** here (those live in `ancplua-claude-plugins`).
+- Not a monolith: servers do **not** call each other directly.
+- Not a replacement for existing “god-tier” MCP servers; this repo is designed to **compose with them**, not to supersede them.
 
 ---
 
-## 2. Repository layout
-
-Target layout:
+## 2. Repository layout (target)
 
 ```text
 ancplua-mcp/
 ├── README.md
 ├── CLAUDE.md
 ├── CHANGELOG.md
-├── .gitignore
 │
 ├── src/
 │   ├── Ancplua.Mcp.WorkstationServer/
@@ -43,16 +41,38 @@ ancplua-mcp/
 │   │   └── Tools/
 │   │       ├── FileSystemTools.cs
 │   │       ├── GitTools.cs
-│   │       └── CiTools.cs
+│   │       ├── CiTools.cs
+│   │       ├── NuGetTools.cs
+│   │       ├── RoslynTools.cs
+│   │       ├── RoslynMetricsTools.cs
+│   │       └── ArchitectureTools.cs
 │   │
-│   └── Ancplua.Mcp.HttpServer/
-│       ├── Ancplua.Mcp.HttpServer.csproj
-│       ├── Program.cs
-│       └── Tools/
+│   ├── Ancplua.Mcp.HttpServer/
+│   │   ├── Ancplua.Mcp.HttpServer.csproj
+│   │   ├── Program.cs
+│   │   └── Tools/        # Optional HTTP-only tools
+│   │
+│   ├── Ancplua.Mcp.AIServicesServer/
+│   │   ├── Ancplua.Mcp.AIServicesServer.csproj
+│   │   ├── Program.cs
+│   │   ├── Tools/
+│   │   │   └── ServiceDiscoveryTools.cs
+│   │   ├── Models/
+│   │   └── Config/
+│   │       └── ai-services.json
+│   │
+│   ├── Ancplua.Mcp.GitHubAppsServer/
+│   │   ├── Ancplua.Mcp.GitHubAppsServer.csproj
+│   │   └── Tools/
+│   │
+│   └── Ancplua.Mcp.ServiceDefaults/
+│       ├── Ancplua.Mcp.ServiceDefaults.csproj
+│       └── Extensions.cs
 │
 ├── tests/
 │   ├── Ancplua.Mcp.WorkstationServer.Tests/
-│   └── Ancplua.Mcp.HttpServer.Tests/
+│   ├── Ancplua.Mcp.HttpServer.Tests/
+│   └── Ancplua.Mcp.AIServicesServer.Tests/
 │
 ├── docs/
 │   ├── ARCHITECTURE.md
@@ -78,226 +98,159 @@ ancplua-mcp/
         └── dependabot.yml
 ```
 
-If the actual filesystem differs, move toward this layout incrementally rather than via a single large refactor.
+If the actual filesystem differs, treat this as the **north star**. Refactor toward it incrementally. 
 
 ---
 
-## 3. Server architecture
+## 3. Integration with the C# MCP SDK
 
-### 3.1 Common building blocks
-
-All servers use the official C# MCP SDK:
+All servers are built on the **official C# MCP SDK**:
 
 * `ModelContextProtocol`
 
   * `AddMcpServer()`
   * `WithStdioServerTransport()`
-  * `WithToolsFromAssembly()` or `WithTools<TToolType>()`
-* `ModelContextProtocol.AspNetCore` (HTTP server only)
+  * `WithToolsFromAssembly()` / `WithTools<TToolType>()`
+* `ModelContextProtocol.AspNetCore` (for HTTP servers)
 
-  * `WithHttpTransport(...)`
-  * `MapMcp(...)` on an ASP.NET Core pipeline
+  * `WithHttpTransport()`
+  * `MapMcp()` on an ASP.NET Core pipeline 
 
-Tools are defined via attributes in the `ModelContextProtocol.Server` namespace:
+Tools are defined via attributes in `ModelContextProtocol.Server`:
 
-* `[McpServerToolType]` on a static class that groups tools.
+* `[McpServerToolType]` on static tool groups.
 * `[McpServerTool]` on individual methods.
-* `[Description]` (or XML comments) for tool and parameter documentation.
+* `[Description]` and XML comments for documentation.
 
-Optional:
+Prompts and resources (optional):
 
 * `[McpServerPromptType]` / `[McpServerPrompt]`
 * `[McpServerResourceType]` / `[McpServerResource]`
 
-Each server is responsible for:
+---
 
-* Hosting and transport (stdio or HTTP).
-* Registering tool types.
-* Wiring logging and DI.
+## 4. ServiceDefaults (shared infrastructure)
 
-### 3.2 Ancplua.Mcp.WorkstationServer
+**Project**: `src/Ancplua.Mcp.ServiceDefaults/`
+
+Responsibilities:
+
+* **OpenTelemetry**: logs, metrics, traces.
+* **Health checks**: `/health`, `/alive` endpoints for HTTP servers.
+* **Resilience**: retry, circuit breaker, timeouts using `Microsoft.Extensions.Http.Resilience`.
+* **Service discovery**: for downstream HTTP clients.
+* **Stdio logging discipline**: stdout reserved for MCP protocol, logs go to stderr. 
+
+Usage:
+
+```csharp
+// Host builder
+builder.AddServiceDefaults();
+
+// ASP.NET Core app
+app.MapDefaultEndpoints();
+```
+
+This keeps **protocol responsibilities** (MCP) separate from **infrastructure**.
+
+---
+
+## 5. Server roles
+
+### 5.1 WorkstationServer (stdio)
 
 Purpose:
 
-* **Local, stdio-based MCP server** suitable for:
+* Local, stdio-based MCP server.
+* Used by Claude Desktop, Claude Code, Rider, etc., running on the same machine.
 
-  * Claude Desktop / Claude Code.
-  * IDE integrations (for example, Rider MCP).
-* Exposes **workstation-style tools**, e.g.:
+Tools:
 
-  * `FileSystemTools`: list files, read files, basic filesystem queries.
-  * `GitTools`: status, diff summaries, branch info.
-  * `CiTools`: run local CI checks, inspect last run, etc.
+* `FileSystemTools` – safe read/list operations, with cautious write/delete operations.
+* `GitTools` – status, branches, short diffs (no destructive operations by default).
+* `CiTools` – local CI tasks (`dotnet build`, `dotnet test`, `./tooling/scripts/local-validate.sh`).
+* `NuGetTools` – inspect csproj/package references, feeds, versions.
+* `RoslynTools` – semantic validation, diagnostics (read-only).
+* `RoslynMetricsTools` – metrics, complex code/architecture smells.
+* `ArchitectureTools` – manage specs/ADRs, generate/validate diagrams. 
 
 Key characteristics:
 
 * Transport: **stdio**.
-* Intended to run **on the same machine** as the client.
-* Does not listen on a network port.
-* Minimal dependencies (prefer `ModelContextProtocol` only).
+* No TCP ports.
+* Minimum dependencies besides MCP SDK + ServiceDefaults.
 
-Example Program skeleton (conceptual):
-
-```csharp
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
-
-var builder = Host.CreateApplicationBuilder(args);
-
-builder.Logging.AddConsole(options =>
-{
-    options.LogToStandardErrorThreshold = LogLevel.Trace;
-});
-
-builder.Services
-    .AddMcpServer()
-    .WithStdioServerTransport()
-    .WithToolsFromAssembly(); // Registers all [McpServerToolType] in this assembly
-
-await builder.Build().RunAsync();
-```
-
-### 3.3 Ancplua.Mcp.HttpServer (optional)
+### 5.2 HttpServer (HTTP MCP)
 
 Purpose:
 
-* **HTTP-based MCP server** for:
+* Optional; used when you need network-accessible tools (e.g., shared CI agents).
+* Exposes tools via HTTP transport (`WithHttpTransport()` + `MapMcp()`).
 
-  * Shared, remote, or multi-tenant tool access.
-  * More complex deployments behind reverse proxies or API gateways.
+Use cases:
 
-Key characteristics:
+* Centralized MCP server in a dev cluster.
+* Shared workspace tooling for a team.
 
-* Transport: **HTTP**, implemented with `ModelContextProtocol.AspNetCore`.
-* Runs as an ASP.NET Core application.
-* Can expose different tool sets per route, tenant, or API key (documented in specs/ADRs when added).
+### 5.3 AIServicesServer
 
-This server is optional. It should only be added when there is a clear, documented need (spec + ADR).
+Purpose:
 
----
+* Orchestrate AI services (Claude, Gemini, ChatGPT, Copilot, CodeRabbit, Codecov).
+* Provide a single entry point for **multi-AI workflows**. 
 
-## 4. Tool design
+Current state:
 
-Tools should follow these principles:
+* Instruction-based tools that return guidance strings for GitHub Apps, manual execution.
 
-* **Single responsibility**: each tool does one clear thing.
-* **Stable names**: tool names MUST be stable once clients rely on them.
-* **Explicit parameters**:
+Target state:
 
-  * Simple .NET types where possible (`string`, numeric types, enums, etc.).
-  * Clear descriptions for each parameter.
-* **Predictable outputs**:
+* Fully API-integrated tools that call GitHub and other services, with tokens/OAuth.
 
-  * Either simple results (strings, arrays) or well-defined DTOs.
-  * JSON-serializable without ambiguity.
+### 5.4 GitHubAppsServer
 
-Tools are grouped by domain:
+Purpose:
 
-* `FileSystemTools` – local filesystem operations.
-* `GitTools` – version control operations.
-* `CiTools` – CI / test workflows.
-* Additional groups MAY be added; each new group must be documented in specs and the changelog.
+* Focused MCP server for GitHub Apps.
+* Tools for:
+
+  * Triggering AI reviews.
+  * Fetching review results.
+  * Managing status checks and coverage.
 
 ---
 
-## 5. Documentation and versioning
+## 6. External servers: “.NET Insight Spine”
 
-This repository uses:
+Rather than stuffing everything into this repo, you compose with **external MCP servers**:
 
-* `CHANGELOG.md`
+* Build-time lens: **MSBuild binlogs** (e.g., `dotnet-build-insights`).
+* Code-time lens: **Roslyn analyzers** (e.g., `roslyn-mcp`).
+* Metadata lens: **NuGet Context MCP**.
+* Context lens: **ContextKeeper**.
+* Cross-language AST lens: **XRAY**.
+* Runtime lens: **OTEL MCP**, **Scout Monitoring MCP**.
 
-  * Records user-visible changes (Added / Changed / Fixed).
-  * Each entry references affected servers and tool families.
-* `docs/specs/`
+The host (Claude / Cursor) composes them:
 
-  * One spec per feature or tool group.
-  * Describes:
+1. Call `AnalyzeBinlog` → find failing targets/projects.
+2. Call your `RoslynTools.ValidateFile` or any Roslyn MCP server on those files.
+3. Call `NuGet Context` to inspect package graph if the error is dependency-related.
+4. Call OTEL/Scout to correlate with runtime regressions.
 
-    * Problem and value.
-    * Tool signatures (inputs/outputs).
-    * Example usage.
-* `docs/decisions/`
-
-  * Architecture Decision Records (ADRs).
-  * Capture structural decisions (e.g. "introduce HTTP server", "split tools into new project").
-
-When implementing or modifying tools/servers:
-
-1. Update or create **spec**.
-2. Update or create **ADR** if the architecture changes.
-3. Add an entry to **CHANGELOG.md**.
-4. Update **README.md** if public usage changes.
-5. Adjust **docs/examples/*.mcp.json** if client configuration needs to change.
+No cross-server calls; only **shared DTOs and mental model**.
 
 ---
 
-## 6. Client configuration examples
+## 7. Tool design principles
 
-Client configuration files do **not** drive the servers directly; they are examples to help:
+* **Single responsibility** – each tool does exactly one thing.
+* **Stable names** – tool names become part of the public contract; changes require a spec + ADR.
+* **Explicit parameters** – no magic defaults; parameter changes must be backward compatible.
+* **JSON-shaped outputs** – avoid free-form strings; make it easy for clients to render tables/graphs.
 
-* Claude Desktop / Claude Code.
-* JetBrains Rider MCP.
-* Other MCP clients.
+When evolving tools:
 
-These examples live under `docs/examples/` and are treated as:
-
-* Copy-paste templates for users.
-* Documentation of expected startup commands and environment.
-
-They must be kept in sync with:
-
-* Actual project names and paths under `src/`.
-* Major breaking changes in server behavior.
-
----
-
-## 7. Testing and CI
-
-Tests:
-
-* Each server has a corresponding test project under `tests/`.
-* Tests cover:
-
-  * Tool behavior.
-  * Error paths (invalid parameters, I/O errors, etc.).
-  * Integration scenarios where practical.
-
-CI:
-
-* Defined in `.github/workflows/ci.yml`.
-* At minimum:
-
-  * `dotnet restore`
-  * `dotnet build`
-  * `dotnet test`
-* May include additional checks (formatting, analyzers, security scans).
-
-Local validation:
-
-* `tooling/scripts/local-validate.sh` runs a subset or all of CI steps for local use.
-* Claude Code uses the same script when validating work in this repo.
-
----
-
-## 8. Relationship to other repositories
-
-This repository is designed to cooperate with, but remain independent from:
-
-* `ancplua-claude-plugins`:
-
-  * Contains Claude Code plugins and Skills.
-  * Uses `.mcp.json` to connect to MCP servers defined here.
-* Any other client repos (IDE helpers, agent frameworks, etc.) that:
-
-  * Reference these servers via configuration.
-  * Rely on documented tool names and contracts.
-
-Contract boundaries:
-
-* Server **startup commands** and configuration (documented here and in specs).
-* Tool **names**, **inputs**, and **outputs** (documented in specs and examples).
-* **Versioning** of behavior and breaking changes (documented in `CHANGELOG.md` and ADRs).
-
-Any change that affects these boundaries must be documented before being considered complete.
+* Write or update a `docs/specs/spec-*.md`.
+* Record breaking decisions in `docs/decisions/adr-*.md`.
+* Update `CLAUDE.md` if the default agent workflow changes.

@@ -1,17 +1,23 @@
+using Ancplua.Mcp.CoreTools.Tools;
+using Ancplua.Mcp.DebugTools;
+using Ancplua.Mcp.ServiceDefaults;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ModelContextProtocol;
 
-// WorkstationServer - MCP Server for stdio communication
-// Exposes filesystem, git, and CI tools to MCP clients like Claude Desktop
 
 var builder = Host.CreateApplicationBuilder(args);
 
-// Configure MCP server with stdio transport and auto-discover tools
+// Apply standardized service defaults (OpenTelemetry, health checks, resilience, service discovery)
+builder.AddServiceDefaults();
+
+// Add MCP server with stdio transport and explicit tool registration
 builder.Services
     .AddMcpServer()
     .WithStdioServerTransport()
-    .WithToolsFromAssembly();
+    .WithTools<FileSystemTools>()
+    .WithTools<GitTools>()
+    .WithTools<CiTools>()
+    .WithTools<DebugTools>();
 
 var app = builder.Build();
 

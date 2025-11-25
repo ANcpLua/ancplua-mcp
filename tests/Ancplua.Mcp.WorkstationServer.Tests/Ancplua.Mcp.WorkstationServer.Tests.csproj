@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
   </ItemGroup>
@@ -20,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Ancplua.Mcp.WorkstationServer\Ancplua.Mcp.WorkstationServer.csproj" />
+    <ProjectReference Include="..\..\src\Ancplua.Mcp.CoreTools\Ancplua.Mcp.CoreTools.csproj" />
   </ItemGroup>
 
 </Project>

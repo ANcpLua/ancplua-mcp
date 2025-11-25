@@ -1,0 +1,107 @@
+name: "Copilot Setup Steps"
+
+# This workflow is automatically run by GitHub Copilot coding agent before
+# it starts working on issues. It sets up the development environment with
+# all necessary dependencies for running ancplua-mcp MCP servers.
+#
+# IMPORTANT: This workflow MUST be on your default branch (main) for Copilot to use it.
+
+on:
+  # Allow manual testing via Actions tab
+  workflow_dispatch:
+
+  # Auto-run when this file changes for validation
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  # The job MUST be called `copilot-setup-steps` or it won't be picked up by Copilot
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+
+    # Maximum timeout for setup (Copilot allows max 59 minutes)
+    timeout-minutes: 10
+
+    # Minimal permissions for security
+    # Copilot will use its own token for git operations
+    permissions:
+      contents: read
+
+    # Required: Use the 'copilot' environment for secrets
+    environment: copilot
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        # Note: fetch-depth will be overridden by Copilot for security
+
+      - name: Set up .NET 10.0 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+          cache: true
+          cache-dependency-path: "**/packages.lock.json"
+
+      - name: Restore NuGet packages
+        run: dotnet restore
+
+      - name: Build WorkstationServer
+        run: |
+          dotnet build \
+            src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj \
+            --no-restore \
+            --configuration Release
+
+      - name: Build AIServicesServer
+        run: |
+          dotnet build \
+            src/Ancplua.Mcp.AIServicesServer/Ancplua.Mcp.AIServicesServer.csproj \
+            --no-restore \
+            --configuration Release
+
+      # Optional: Verify servers can start
+      - name: Verify servers are runnable
+        run: |
+          # Quick smoke test to ensure servers load
+          timeout 5s dotnet run \
+            --project src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj \
+            --no-build \
+            --configuration Release \
+            || [ $? -eq 124 ]  # timeout exits with 124, which is expected
+
+          echo "✅ WorkstationServer can start"
+
+          timeout 5s dotnet run \
+            --project src/Ancplua.Mcp.AIServicesServer/Ancplua.Mcp.AIServicesServer.csproj \
+            --no-build \
+            --configuration Release \
+            || [ $? -eq 124 ]
+
+          echo "✅ AIServicesServer can start"
+
+      # Optional: Cache build outputs for Copilot's session
+      - name: Display setup summary
+        run: |
+          echo "🎉 Copilot setup completed successfully!"
+          echo ""
+          echo "Available MCP servers:"
+          echo "  • Ancplua.Mcp.WorkstationServer (Git, Filesystem, CI tools)"
+          echo "  • Ancplua.Mcp.AIServicesServer (AI service orchestration)"
+          echo ""
+          echo "Environment secrets configured:"
+          echo "  • GITHUB_TOKEN: $([ -n "$GITHUB_TOKEN" ] && echo '✅ Set' || echo '❌ Missing')"
+          echo "  • GEMINI_API_KEY: $([ -n "$GEMINI_API_KEY" ] && echo '✅ Set' || echo '❌ Missing')"
+          echo "  • JULES_API_KEY: $([ -n "$JULES_API_KEY" ] && echo '✅ Set' || echo '❌ Missing')"
+          echo "  • CODECOV_TOKEN: $([ -n "$CODECOV_TOKEN" ] && echo '✅ Set' || echo '❌ Missing')"
+          echo ""
+          echo "Copilot is ready to work! 🚀"
+        env:
+          # These are made available from the 'copilot' environment
+          GITHUB_TOKEN: ${{ secrets.COPILOT_MCP_GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.COPILOT_MCP_GEMINI_API_KEY }}
+          JULES_API_KEY: ${{ secrets.COPILOT_MCP_JULES_API_KEY }}
+          CODECOV_TOKEN: ${{ secrets.COPILOT_MCP_CODECOV_TOKEN }}
