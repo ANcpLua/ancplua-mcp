@@ -1,0 +1,125 @@
+# Jules Automatic PR Review
+#
+# Triggers Jules AI review automatically on every PR.
+# Works alongside Claude Code Review for dual-AI validation.
+# Required secret: JULES_API_KEY
+#
+# Jules creates PRs with fixes, NOT review comments.
+# Human approval required for Jules plans before execution.
+
+name: Jules Auto Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  jules-review:
+    # Skip draft PRs and bot PRs
+    if: |
+      !github.event.pull_request.draft &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'renovate[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check API Key
+        id: check_key
+        run: |
+          if [ -z "${{ secrets.JULES_API_KEY }}" ]; then
+            echo "has_key=false" >> $GITHUB_OUTPUT
+            echo "::warning::JULES_API_KEY not configured - skipping Jules review"
+          else
+            echo "has_key=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Jules Review Session
+        if: steps.check_key.outputs.has_key == 'true'
+        id: jules
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+
+          # Review prompt for Jules
+          PROMPT="Review PR #${PR_NUMBER}: ${PR_TITLE}
+
+          Analyze the changes and:
+          1. Check for bugs, logic errors, and edge cases
+          2. Verify security best practices (OWASP compliance)
+          3. Assess code quality and maintainability
+          4. Suggest performance improvements if applicable
+          5. Ensure proper error handling
+
+          If you find issues that can be fixed, create a PR with the fixes.
+          Focus on high-impact improvements, not style nitpicks."
+
+          PROMPT_JSON=$(echo "$PROMPT" | jq -Rsa .)
+          TITLE="Auto-Review PR #${PR_NUMBER}: $(echo "$PR_TITLE" | cut -c 1-50)"
+          TITLE_JSON=$(echo "$TITLE" | jq -Rsa .)
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            'https://jules.googleapis.com/v1alpha/sessions' \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -H "X-Goog-Api-Key: $JULES_API_KEY" \
+            -d "{
+              \"prompt\": $PROMPT_JSON,
+              \"sourceContext\": {
+                \"source\": \"sources/github/${{ github.repository }}\",
+                \"githubRepoContext\": {
+                  \"startingBranch\": \"$BASE_BRANCH\",
+                  \"pullRequestNumber\": $PR_NUMBER
+                }
+              },
+              \"automationMode\": \"AUTO_CREATE_PR\",
+              \"requirePlanApproval\": true,
+              \"title\": $TITLE_JSON
+            }")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::warning::Jules API returned HTTP $HTTP_CODE - review skipped"
+            echo "success=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          SESSION_ID=$(echo "$BODY" | jq -r '.id')
+          echo "session_id=$SESSION_ID" >> $GITHUB_OUTPUT
+          echo "success=true" >> $GITHUB_OUTPUT
+
+      - name: Post Jules Session Link
+        if: steps.check_key.outputs.has_key == 'true' && steps.jules.outputs.success == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sessionId = '${{ steps.jules.outputs.session_id }}';
+            const julesUrl = `https://jules.google/session/${sessionId}`;
+            const prNumber = ${{ github.event.pull_request.number }};
+
+            await github.rest.issues.createComment({
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🔮 Jules AI Review Started
+
+            **Session:** [View in Jules](${julesUrl})
+
+            Jules is analyzing this PR for bugs, security issues, and improvements.
+
+            - **Plan approval required** before any changes
+            - If issues found, Jules will create a fix PR
+            - Review the plan at the link above
+
+            ---
+            *Dual-AI review: Jules + Claude working in parallel*`
+            });
