@@ -365,7 +365,64 @@ builder.AddServiceDefaults();
 
 ---
 
-## 10. Safety & Permissions
+## 10. AI Code Review Configuration
+
+This repository uses automatic dual-AI review for all PRs:
+
+### 10.1 Automatic Reviewers
+
+| Reviewer | Trigger | Output |
+|----------|---------|--------|
+| **Claude** | `pull_request` (opened, synchronize) | Review comments on PR |
+| **Jules** | `pull_request` (opened, synchronize, ready_for_review) | Creates fix PRs if issues found |
+
+Both reviewers run **automatically** on every PR. No human intervention required to trigger reviews.
+
+### 10.2 How They Work Together
+
+```
+PR Created/Updated
+        │
+        ├─► Claude Review (automatic)
+        │       └─► Posts review comments
+        │
+        └─► Jules Review (automatic)
+                └─► Analyzes code
+                └─► Creates plan (requires approval)
+                └─► If approved: creates fix PR
+```
+
+**Validation Flow:**
+1. Claude identifies issues via comments
+2. Jules independently analyzes and may propose fixes
+3. If both flag the same issue → high confidence
+4. If they disagree → human review needed
+
+### 10.3 Configuration
+
+**Claude** (`.github/workflows/claude-code-review.yml`):
+- Uses `anthropics/claude-code-action@v1`
+- Requires: `CLAUDE_CODE_OAUTH_TOKEN` secret
+- Posts comments via `gh pr comment`
+
+**Jules** (`.github/workflows/jules-auto-review.yml`):
+- Calls `jules.googleapis.com/v1alpha` API
+- Requires: `JULES_API_KEY` secret
+- `requirePlanApproval: true` (safety)
+- `automationMode: AUTO_CREATE_PR`
+
+### 10.4 Skipped PRs
+
+Jules skips:
+- Draft PRs
+- Dependabot PRs
+- Renovate PRs
+
+Claude runs on all PRs.
+
+---
+
+## 11. Safety & Permissions
 
 You MAY:
 - Read/write files in the working directory
@@ -381,7 +438,7 @@ You MUST NOT:
 
 ---
 
-## 11. MANDATORY: Update CHANGELOG.md When Done
+## 12. MANDATORY: Update CHANGELOG.md When Done
 
 <CRITICAL>
 **BEFORE claiming any task is complete, you MUST update `CHANGELOG.md`.**
@@ -410,7 +467,7 @@ After completing ANY task (bug fix, feature, refactor, documentation):
 
 ---
 
-## 12. Failure Conditions
+## 13. Failure Conditions
 
 You have FAILED if:
 
@@ -425,7 +482,7 @@ You have FAILED if:
 
 ---
 
-## 13. Success Conditions
+## 14. Success Conditions
 
 You have SUCCEEDED when:
 
@@ -440,7 +497,7 @@ You have SUCCEEDED when:
 
 ---
 
-## 14. Quick Reference
+## 15. Quick Reference
 
 ### Build & Test
 ```bash

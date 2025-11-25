@@ -32,6 +32,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (required for `Host.CreateApplicationBuilder()` in test utilities)
 
 ### Added
+- **Dual-AI Code Review**: Automatic parallel review by Claude and Jules on every PR
+  - `jules-auto-review.yml`: Jules reviews PRs and creates fix PRs if issues found
+  - `claude-code-review.yml`: Claude posts review comments
+  - Both run automatically without human intervention
+  - Documented in CLAUDE.md Section 10
 - **Ancplua.Mcp.CoreTools**: New shared library consolidating tools from HttpServer and WorkstationServer
   - Implements ADR-006 (Core Tools Consolidation) and spec-006
   - Eliminates code duplication between servers
