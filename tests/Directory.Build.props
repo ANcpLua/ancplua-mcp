@@ -1,0 +1,10 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <!-- Suppress CA1307 (StringComparison) in test projects - test assertions don't need it -->
+    <NoWarn>$(NoWarn);CA1307</NoWarn>
+    <!-- Suppress CA1707 (underscore naming) for test method names like Method_Condition_ExpectedResult -->
+    <NoWarn>$(NoWarn);CA1707</NoWarn>
+  </PropertyGroup>
+</Project>

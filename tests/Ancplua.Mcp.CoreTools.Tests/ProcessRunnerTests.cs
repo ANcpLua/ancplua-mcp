@@ -150,7 +150,7 @@ done
     }
 
     [Fact]
-    public async Task ProcessResult_ThrowIfFailed_TruncatesLongOutput()
+    public void ProcessResult_ThrowIfFailed_TruncatesLongOutput()
     {
         // Arrange
         var longOutput = new string('x', 2000);

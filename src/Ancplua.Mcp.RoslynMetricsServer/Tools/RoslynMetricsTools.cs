@@ -1,31 +1,37 @@
 using System.ComponentModel;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeMetrics;
 using ModelContextProtocol.Server;
 
 namespace Ancplua.Mcp.RoslynMetricsServer.Tools;
 
+/// <summary>
+/// MCP tools for code metrics analysis.
+/// </summary>
 [McpServerToolType]
-public static class RoslynMetricsTools
+internal static class RoslynMetricsTools
 {
     [McpServerTool]
-    [Description("Analyze C# code and return metrics with a summary.")]
-    public static async Task<object> AnalyzeCSharp(
+    [Description("Analyze C# code and return structured metrics.")]
+    public static async Task<MetricsResult> AnalyzeCSharp(
         [Description("C# source code")] string code,
         [Description("Assembly name (optional)")] string? assemblyName = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken ct = default)
     {
-        var metrics = await MetricsAnalyzer.AnalyzeCSharpAsync(code, assemblyName, cancellationToken);
-        return new {
-            symbol = metrics.Symbol.Name,
-            complexity = metrics.CyclomaticComplexity,
-            maintainability = metrics.MaintainabilityIndex,
-            sourceLines = metrics.SourceLines,
-            methods = metrics.CountMethods(),
-            types = metrics.CountTypes(),
-            namespaces = metrics.CountNamespaces(),
-            summary = metrics.ToSummaryString()
-        };
+        var compilation = CompilationFactory.CreateCSharp(code, assemblyName ?? "Analysis");
+        var metrics = await CompilationFactory.ComputeMetricsAsync(compilation, ct).ConfigureAwait(false);
+        return MetricsResult.From(metrics);
+    }
+
+    [McpServerTool]
+    [Description("Analyze VB.NET code and return structured metrics.")]
+    public static async Task<MetricsResult> AnalyzeVb(
+        [Description("VB.NET source code")] string code,
+        [Description("Assembly name (optional)")] string? assemblyName = null,
+        CancellationToken ct = default)
+    {
+        var compilation = CompilationFactory.CreateVisualBasic(code, assemblyName ?? "Analysis");
+        var metrics = await CompilationFactory.ComputeMetricsAsync(compilation, ct).ConfigureAwait(false);
+        return MetricsResult.From(metrics);
     }
 
     [McpServerTool]
@@ -33,38 +39,32 @@ public static class RoslynMetricsTools
     public static async Task<string> GenerateCSharpReport(
         [Description("C# source code")] string code,
         [Description("Assembly name (optional)")] string? assemblyName = null,
-        CancellationToken cancellationToken = default)
-        => await code.GenerateCSharpMetricsReportAsync(assemblyName, cancellationToken);
-
-    [McpServerTool]
-    [Description("Analyze VB.NET code and return metrics.")]
-    public static async Task<object> AnalyzeVb(
-        [Description("VB.NET source code")] string code,
-        [Description("Assembly name (optional)")] string? assemblyName = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken ct = default)
     {
-        var metrics = await MetricsAnalyzer.AnalyzeVBAsync(code, assemblyName, cancellationToken);
-        return new { symbol = metrics.Symbol.Name, complexity = metrics.CyclomaticComplexity, maintainability = metrics.MaintainabilityIndex, sourceLines = metrics.SourceLines };
+        var compilation = CompilationFactory.CreateCSharp(code, assemblyName ?? "Analysis");
+        var metrics = await CompilationFactory.ComputeMetricsAsync(compilation, ct).ConfigureAwait(false);
+        return metrics.ToMarkdownReport();
     }
 
     [McpServerTool]
-    [Description("Query metrics from C# code with filters and return a Markdown table.")]
-    public static async Task<string> QueryMetrics(
+    [Description("Query metrics from C# code with filters.")]
+    public static async Task<SymbolMetrics[]> QueryMetrics(
         [Description("C# source code")] string code,
         [Description("Min cyclomatic complexity")] int? minComplexity = null,
         [Description("Max cyclomatic complexity")] int? maxComplexity = null,
         [Description("Min maintainability index")] int? minMaintainability = null,
-        [Description("Symbol kind to include (Method|NamedType|Namespace)")] string? kind = null,
-        [Description("Max rows")] int take = 25,
-        CancellationToken cancellationToken = default)
+        [Description("Symbol kind (Method|NamedType|Namespace)")] string? kind = null,
+        [Description("Max results")] int take = 25,
+        CancellationToken ct = default)
     {
-        var root = await MetricsAnalyzer.AnalyzeCSharpAsync(code, null, cancellationToken);
-        var query = new MetricsQuery(root.Flatten());
-        if (minComplexity is int min) query = query.WhereComplexityAtLeast(min);
-        if (maxComplexity is int max) query = query.WhereComplexityAtMost(max);
-        if (minMaintainability is int mi) query = query.WhereMaintainabilityAtLeast(mi);
-        if (!string.IsNullOrWhiteSpace(kind) && Enum.TryParse<SymbolKind>(kind, ignoreCase: true, out var k)) query = query.WhereKind(k);
-        query = query.OrderByComplexity(descending: true).ThenByMaintainability(ascending: true).Take(take);
-        return query.ToMarkdown();
+        var compilation = CompilationFactory.CreateCSharp(code);
+        var metrics = await CompilationFactory.ComputeMetricsAsync(compilation, ct).ConfigureAwait(false);
+
+        SymbolKind? symbolKind = kind is not null && Enum.TryParse<SymbolKind>(kind, true, out var k) ? k : null;
+
+        return [.. metrics
+            .Query(minComplexity, maxComplexity, minMaintainability, symbolKind)
+            .Take(take)
+            .Select(SymbolMetrics.From)];
     }
 }

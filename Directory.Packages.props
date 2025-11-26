@@ -68,6 +68,9 @@
     <PackageVersion Include="NuGet.Packaging" Version="7.0.0"/>
     <PackageVersion Include="NuGet.Versioning" Version="7.0.0"/>
   </ItemGroup>
+  <ItemGroup Label="Decompilation">
+    <PackageVersion Include="ICSharpCode.Decompiler" Version="9.1.0.7988"/>
+  </ItemGroup>
   <ItemGroup Label="Roslyn">
     <PackageVersion Include="Microsoft.Build" Version="18.0.2"/>
     <PackageVersion Include="Microsoft.Build.Framework" Version="18.0.2"/>
@@ -79,7 +82,9 @@
     <PackageVersion Include="Microsoft.CodeAnalysis" Version="4.14.0"/>
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0"/>
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="4.14.0"/>
     <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.14.0"/>
+    <PackageVersion Include="Basic.Reference.Assemblies.NetStandard20" Version="1.8.0"/>
   </ItemGroup>
   <ItemGroup Label="Code Analysis">
     <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.100"/>
