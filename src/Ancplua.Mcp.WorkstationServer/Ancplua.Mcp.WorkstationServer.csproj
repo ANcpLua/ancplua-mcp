@@ -11,7 +11,8 @@
     <ProjectReference Include="../Ancplua.Mcp.ServiceDefaults/Ancplua.Mcp.ServiceDefaults.csproj" />
     <ProjectReference Include="../Ancplua.Mcp.DebugTools/Ancplua.Mcp.DebugTools.csproj" />
     <ProjectReference Include="../Ancplua.Mcp.CoreTools/Ancplua.Mcp.CoreTools.csproj" />
-    <ProjectReference Include="../Ancplua.Mcp.WhisperMesh/Ancplua.Mcp.WhisperMesh.csproj" />
+    <!-- WhisperMesh temporarily excluded pending NATS 2.x API migration -->
+    <!-- <ProjectReference Include="../Ancplua.Mcp.WhisperMesh/Ancplua.Mcp.WhisperMesh.csproj" /> -->
   </ItemGroup>
 
   <!-- Note: Microsoft.Extensions.Hosting is provided in-box by .NET 10 -->
