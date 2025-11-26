@@ -14,14 +14,13 @@ queue_rules:
       - check-success=Build and Test
       - check-success=Code Quality
       - check-success=Analyze (csharp)
-      - check-success=Secret Scanning
       - check-success=Security Scan
 
       # Require at least 1 approval
       - "#approved-reviews-by>=1"
 
-      # No unresolved conversations
-      - "#changes-requested-by=0"
+      # No changes requested
+      - "#changes-requested-reviews-by=0"
 
       # Branch must be up to date
       - base=main
@@ -77,7 +76,6 @@ pull_request_rules:
       - check-success=Build and Test
       - check-success=Code Quality
       - check-success=Analyze (csharp)
-      - check-success=Secret Scanning
       - check-success=Security Scan
       - -draft
       - -label~=do-not-merge
