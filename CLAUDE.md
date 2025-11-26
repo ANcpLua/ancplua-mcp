@@ -365,18 +365,21 @@ builder.AddServiceDefaults();
 
 ---
 
-## 10. AI Code Review Configuration
+## 10. Quad-AI Code Review System
 
-This repository uses automatic dual-AI review for all PRs:
+This repository uses **automatic quad-AI review** for all PRs. Five AI systems review every PR independently.
 
-### 10.1 Automatic Reviewers
+### 10.1 AI Tool Capabilities Matrix
 
-| Reviewer | Trigger | Output |
-|----------|---------|--------|
-| **Claude** | `pull_request` (opened, synchronize) | Review comments on PR |
-| **Jules** | `pull_request` (opened, synchronize, ready_for_review) | Creates fix PRs if issues found |
+| Tool | Reviews | Comments | Creates Fix PRs | Auto-Fix |
+|------|---------|----------|-----------------|----------|
+| **Claude** | ✅ | ✅ | ❌ | ❌ |
+| **Jules** | ✅ | ✅ | ✅ (needs approval) | ❌ |
+| **Copilot** | ✅ | ✅ | ❌ | ❌ |
+| **Gemini** | ✅ | ✅ | ❌ | ❌ |
+| **CodeRabbit** | ✅ | ✅ | ❌ | ❌ |
 
-Both reviewers run **automatically** on every PR. No human intervention required to trigger reviews.
+**The gap:** No AI currently does `detect failure → understand fix → push fix → re-run CI` autonomously.
 
 ### 10.2 How They Work Together
 
@@ -384,41 +387,64 @@ Both reviewers run **automatically** on every PR. No human intervention required
 PR Created/Updated
         │
         ├─► Claude Review (automatic)
+        │       └─► Posts formal GitHub review (APPROVE/REQUEST_CHANGES/COMMENT)
+        │
+        ├─► Jules Review (automatic)
+        │       └─► Analyzes code
+        │       └─► Creates plan (requires human approval)
+        │       └─► If approved: creates fix PR
+        │
+        ├─► Gemini Review (automatic)
+        │       └─► Posts inline suggestions
+        │
+        ├─► Copilot Review (automatic)
         │       └─► Posts review comments
         │
-        └─► Jules Review (automatic)
-                └─► Analyzes code
-                └─► Creates plan (requires approval)
-                └─► If approved: creates fix PR
+        └─► CodeRabbit Review (automatic)
+                └─► Posts summary + inline comments
 ```
 
 **Validation Flow:**
-1. Claude identifies issues via comments
-2. Jules independently analyzes and may propose fixes
-3. If both flag the same issue → high confidence
-4. If they disagree → human review needed
+1. All five AIs review the same PR independently
+2. If multiple AIs flag the same issue → **high confidence**
+3. If they disagree → human review needed
+4. Jules is the ONLY one that can create fix PRs (with human approval)
 
-### 10.3 Configuration
+### 10.3 Type T Review Scope
 
-**Claude** (`.github/workflows/claude-code-review.yml`):
-- Uses `anthropics/claude-code-action@v1`
-- Requires: `CLAUDE_CODE_OAUTH_TOKEN` secret
-- Posts comments via `gh pr comment`
+All AIs review the same things in this repo:
 
-**Jules** (`.github/workflows/jules-auto-review.yml`):
-- Calls `jules.googleapis.com/v1alpha` API
-- Requires: `JULES_API_KEY` secret
-- `requirePlanApproval: true` (safety)
-- `automationMode: AUTO_CREATE_PR`
+1. **Correctness** - Logic errors, null handling, race conditions
+2. **Security** - OWASP: path traversal, injection, secrets exposure
+3. **Performance** - `ConfigureAwait(false)`, `CancellationToken` propagation, disposal
+4. **CA Compliance** - CA1002, CA1062, CA1305, CA1307, CA1308, CA1707, CA1812, CA1822, CA1848, CA2007
+5. **MCP Protocol** - Tool signatures, `[McpServerTool]` attributes, structured returns
+6. **Documentation** - CHANGELOG.md updates, specs/ADRs, XML docs
 
-### 10.4 Skipped PRs
+### 10.4 AI Coordination
 
-Jules skips:
-- Draft PRs
-- Dependabot PRs
-- Renovate PRs
+AIs coordinate through **shared files**, not real-time communication:
+- `CHANGELOG.md` - What has changed
+- `CLAUDE.md` / `GEMINI.md` - Repository context
+- `docs/specs/` and `docs/decisions/` - Authoritative requirements
 
-Claude runs on all PRs.
+Each AI does its own complete review. Overlapping findings indicate high confidence issues.
+
+### 10.5 Configuration Files
+
+| AI | Config Location | Trigger |
+|----|-----------------|---------|
+| Claude | `.github/workflows/claude-code-review.yml` | `pull_request` |
+| Jules | `.github/workflows/jules-auto-review.yml` | `pull_request` |
+| Gemini | `.gemini/` directory | Automatic |
+| Copilot | `.github/copilot-instructions.md` | Automatic |
+| CodeRabbit | `.coderabbit.yaml` (if present) | Automatic |
+
+### 10.6 Skipped PRs
+
+Jules skips: Draft PRs, Dependabot PRs, Renovate PRs
+
+All other AIs run on all non-draft PRs.
 
 ---
 

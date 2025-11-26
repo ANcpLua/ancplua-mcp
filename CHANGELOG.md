@@ -12,11 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `RestoreLockedMode` to `Directory.Build.props` (conditional on CI environment)
   - Updated CI cache key to use `packages.lock.json` for proper cache invalidation
   - Added "NuGet dependency management" section to README with developer workflow documentation
-- **Dual-AI Code Review**: Automatic parallel review by Claude and Jules on every PR
-  - `jules-auto-review.yml`: Jules reviews PRs and creates fix PRs if issues found
-  - `claude-code-review.yml`: Claude posts review comments
-  - Both run automatically without human intervention
-  - Documented in CLAUDE.md Section 10
+- **Quad-AI Code Review System**: Automatic parallel review by five AI systems on every PR
+  - Claude, Jules, Copilot, Gemini, CodeRabbit review all PRs independently
+  - Jules is unique: can create fix PRs (with human plan approval)
+  - All others: review-only (comments, no fix PRs)
+  - AI capability matrix documented in CLAUDE.md, README.md, GEMINI.md, copilot-instructions.md
+  - Type T review scope: Correctness, Security, Performance, CA Compliance, MCP Protocol, Documentation
+  - AIs coordinate via shared files (CHANGELOG.md, specs, ADRs), not real-time communication
 - **WhisperMesh Protocol Foundations**: Established ambient multi-agent intelligence infrastructure
   - ADR-0107: WhisperMesh Protocol Adoption (decision to adopt NATS-based agent-to-agent communication)
   - Implemented `WhisperTier` enum (Lightning/Storm dual-tier system)

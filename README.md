@@ -304,7 +304,34 @@ To use these servers with **GitHub Copilot Coding Agent** (in repository setting
 
 ---
 
-## 7. Machine-friendly MCP server inventory
+## 7. Quad-AI Code Review
+
+Every PR in this repository is automatically reviewed by **five AI systems**:
+
+### AI Tool Capabilities
+
+| Tool | Reviews | Comments | Creates Fix PRs | Auto-Fix |
+|------|---------|----------|-----------------|----------|
+| **Claude** | ✅ | ✅ | ❌ | ❌ |
+| **Jules** | ✅ | ✅ | ✅ (needs approval) | ❌ |
+| **Copilot** | ✅ | ✅ | ❌ | ❌ |
+| **Gemini** | ✅ | ✅ | ❌ | ❌ |
+| **CodeRabbit** | ✅ | ✅ | ❌ | ❌ |
+
+### How it works
+
+1. Open a PR → All five AIs review automatically
+2. Reviews appear in the GitHub PR sidebar
+3. If multiple AIs flag the same issue → high confidence
+4. Jules can create fix PRs (requires human approval of its plan)
+
+**The gap:** No AI currently does `detect failure → understand fix → push fix → re-run CI` autonomously.
+
+See `CLAUDE.md` Section 10 for full configuration details.
+
+---
+
+## 8. Machine-friendly MCP server inventory
 
 You can drop this JSON into `docs/servers.json` or similar for agents to parse:
 

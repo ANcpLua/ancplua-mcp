@@ -222,4 +222,44 @@ When fixing a bug:
 
 ---
 
+## 9. Quad-AI Code Review System
+
+You are one of **five AI reviewers** on this repository. Every PR is reviewed by all five independently.
+
+### 9.1 AI Tool Capabilities Matrix
+
+| Tool | Reviews | Comments | Creates Fix PRs | Auto-Fix |
+|------|---------|----------|-----------------|----------|
+| **Claude** | ✅ | ✅ | ❌ | ❌ |
+| **Jules** | ✅ | ✅ | ✅ (needs approval) | ❌ |
+| **Copilot** | ✅ | ✅ | ❌ | ❌ |
+| **Gemini** | ✅ | ✅ | ❌ | ❌ |
+| **CodeRabbit** | ✅ | ✅ | ❌ | ❌ |
+
+**Important:** Copilot is review-only. You cannot create fix PRs. Post comments to identify issues; humans or Jules handle fixes.
+
+**The gap:** No AI currently does `detect failure → understand fix → push fix → re-run CI` autonomously.
+
+### 9.2 AI Coordination
+
+AIs coordinate through **shared files**, not real-time communication:
+- `CHANGELOG.md` - What has changed
+- `CLAUDE.md` / `GEMINI.md` / `.github/copilot-instructions.md` - Repository context
+- `docs/specs/` and `docs/decisions/` - Authoritative requirements
+
+Each AI does its own complete review. Overlapping findings indicate high confidence issues.
+
+### 9.3 Type T Review Scope
+
+All AIs review the same things in this repo:
+
+1. **Correctness** - Logic errors, null handling, race conditions
+2. **Security** - OWASP: path traversal, injection, secrets exposure
+3. **Performance** - `ConfigureAwait(false)`, `CancellationToken` propagation, disposal
+4. **CA Compliance** - CA1002, CA1062, CA1305, CA1307, CA1308, CA1707, CA1812, CA1822, CA1848, CA2007
+5. **MCP Protocol** - Tool signatures, `[McpServerTool]` attributes, structured returns
+6. **Documentation** - CHANGELOG.md updates, specs/ADRs, XML docs
+
+---
+
 This file helps GitHub Copilot understand the conventions and structure of this repository. For detailed operational instructions for Claude Code, see `CLAUDE.md`.
