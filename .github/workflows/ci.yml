@@ -104,26 +104,7 @@ jobs:
         with:
           fail-on-severity: moderate
 
-  secret-scan:
-    name: Secret Scanning
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: TruffleHog Secret Scan
-        uses: trufflesecurity/trufflehog@main
-        with:
-          path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
-          extra_args: --only-verified
+  # TruffleHog removed - redundant with GitGuardian + GitHub native secret scanning
 
   security-scan:
     name: Security Scan
