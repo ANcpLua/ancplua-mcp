@@ -1,29 +1,28 @@
 using System.ComponentModel;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using ModelContextProtocol.Server;
-using NuGet.Common;
 using NuGet.Configuration;
-using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 
 namespace Ancplua.Mcp.RoslynMetricsServer.Tools;
 
 [McpServerToolType]
-public class NuGetTools(ILogger<NuGetTools> logger)
+#pragma warning disable CA1812 // Internal class instantiated by MCP framework via reflection
+internal sealed partial class NuGetTools(ILogger<NuGetTools> logger)
+#pragma warning restore CA1812
 {
-    private async Task<SourceRepository> GetSourceAsync(string? sourceUrl)
+    private static SourceRepository GetSource(string? sourceUrl)
     {
         var providers = Repository.Provider.GetCoreV3();
         if (!string.IsNullOrWhiteSpace(sourceUrl))
-            return Repository.CreateSource(new PackageSource(sourceUrl), providers);
+            return new SourceRepository(new PackageSource(sourceUrl), providers);
 
         var settings = Settings.LoadDefaultSettings(root: null);
         var sourceProvider = new PackageSourceProvider(settings);
         var src = sourceProvider.LoadPackageSources().FirstOrDefault(s => s.IsEnabled)
                   ?? new PackageSource("https://api.nuget.org/v3/index.json");
-        return Repository.CreateSource(src, providers);
+        return new SourceRepository(src, providers);
     }
 
     [McpServerTool]
@@ -36,14 +35,21 @@ public class NuGetTools(ILogger<NuGetTools> logger)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(query);
 
-        logger.LogInformation("Searching NuGet for {Query}", query);
+        LogSearching(query);
 
-        var repo = await GetSourceAsync(source);
-        var search = await repo.GetResourceAsync<PackageSearchResource>(cancellationToken);
+        var repo = GetSource(source);
+        var search = await repo.GetResourceAsync<PackageSearchResource>(cancellationToken).ConfigureAwait(false);
 
-        var results = await search.SearchAsync(query, new SearchFilter(includePrerelease: true), skip: 0, take: take, log: NullLogger.Instance, cancellationToken);
+        var results = await search.SearchAsync(
+            query,
+            new SearchFilter(includePrerelease: true),
+            skip: 0,
+            take: take,
+            log: NuGet.Common.NullLogger.Instance,
+            cancellationToken: cancellationToken).ConfigureAwait(false);
 
-        return results.Select(r => new {
+        return results.Select(r => new
+        {
             id = r.Identity.Id,
             version = r.Identity.Version?.ToString(),
             description = r.Description,
@@ -62,18 +68,26 @@ public class NuGetTools(ILogger<NuGetTools> logger)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
 
-        logger.LogInformation("Getting versions for package {PackageId}", id);
+        LogGettingVersions(id);
 
-        var repo = await GetSourceAsync(source);
-        var metadata = await repo.GetResourceAsync<PackageMetadataResource>(cancellationToken);
-        var items = await metadata.GetMetadataAsync(id, includePrerelease, includeUnlisted: false, NullLogger.Instance, cancellationToken);
+        var repo = GetSource(source);
+        var metadata = await repo.GetResourceAsync<PackageMetadataResource>(cancellationToken).ConfigureAwait(false);
+        using var cache = new SourceCacheContext();
+        var items = await metadata.GetMetadataAsync(
+            id,
+            includePrerelease,
+            includeUnlisted: false,
+            cache,
+            NuGet.Common.NullLogger.Instance,
+            cancellationToken).ConfigureAwait(false);
 
         var versions = items.Select(m => m.Identity.Version)
                             .OfType<NuGetVersion>()
                             .OrderByDescending(v => v)
                             .ToList();
 
-        return new {
+        return new
+        {
             id,
             latestStable = versions.FirstOrDefault(v => !v.IsPrerelease)?.ToString(),
             latest = versions.FirstOrDefault()?.ToString(),
@@ -88,5 +102,11 @@ public class NuGetTools(ILogger<NuGetTools> logger)
         [Description("Include prerelease")] bool includePrerelease = true,
         [Description("Custom source URL (optional)")] string? source = null,
         CancellationToken cancellationToken = default)
-        => await GetVersionsAsync(id, includePrerelease, source, cancellationToken);
+        => await GetVersionsAsync(id, includePrerelease, source, cancellationToken).ConfigureAwait(false);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Searching NuGet for {Query}")]
+    private partial void LogSearching(string query);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Getting versions for package {PackageId}")]
+    private partial void LogGettingVersions(string packageId);
 }
