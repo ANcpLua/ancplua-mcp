@@ -15,4 +15,4 @@ builder.Services
 
 var app = builder.Build();
 
-await app.RunAsync();
+await app.RunAsync().ConfigureAwait(false);

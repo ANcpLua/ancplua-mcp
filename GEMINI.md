@@ -80,4 +80,46 @@ You have FAILED if:
 
 ---
 
+## 5. Quad-AI Code Review System
+
+You are one of **five AI reviewers** on this repository. Every PR is reviewed by all five independently.
+
+### 5.1 AI Tool Capabilities Matrix
+
+| Tool | Reviews | Comments | Creates Fix PRs | Auto-Fix |
+|------|---------|----------|-----------------|----------|
+| **Claude** | ✅ | ✅ | ❌ | ❌ |
+| **Jules** | ✅ | ✅ | ✅ (needs approval) | ❌ |
+| **Copilot** | ✅ | ✅ | ❌ | ❌ |
+| **Gemini** | ✅ | ✅ | ❌ | ❌ |
+| **CodeRabbit** | ✅ | ✅ | ❌ | ❌ |
+
+**The gap:** No AI currently does `detect failure → understand fix → push fix → re-run CI` autonomously.
+
+### 5.2 AI Coordination
+
+AIs coordinate through **shared files**, not real-time communication:
+- `CHANGELOG.md` - What has changed
+- `CLAUDE.md` / `GEMINI.md` - Repository context and rules
+- `docs/specs/` and `docs/decisions/` - Authoritative requirements
+
+Each AI does its own complete review. Overlapping findings indicate high confidence issues.
+
+### 5.3 Your Unique Strength
+
+As Gemini, you can provide **inline code suggestions** directly in PRs. Use this capability to propose concrete fixes, not just identify problems.
+
+### 5.4 Type T Review Scope
+
+All AIs review the same things in this repo:
+
+1. **Correctness** - Logic errors, null handling, race conditions
+2. **Security** - OWASP: path traversal, injection, secrets exposure
+3. **Performance** - `ConfigureAwait(false)`, `CancellationToken` propagation, disposal
+4. **CA Compliance** - CA1002, CA1062, CA1305, CA1307, CA1308, CA1707, CA1812, CA1822, CA1848, CA2007
+5. **MCP Protocol** - Tool signatures, `[McpServerTool]` attributes, structured returns
+6. **Documentation** - CHANGELOG.md updates, specs/ADRs, XML docs
+
+---
+
 **This file governs your behavior. Strict adherence to the "Spec & ADR" law is required.**

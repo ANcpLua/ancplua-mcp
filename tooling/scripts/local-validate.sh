@@ -3,17 +3,38 @@ set -euo pipefail
 
 echo "🔍 Running ancplua-mcp local validation..."
 
-# Restore and build all projects
-echo "➡️  dotnet restore"
-dotnet restore
+# Tooling sanity: show SDK info and ensure we're on the pinned SDK
+echo "➡️  dotnet --info"
+dotnet --info
 
-echo "➡️  dotnet build (Release)"
-dotnet build --configuration Release --no-restore
+if command -v dotnet >/dev/null 2>&1 && dotnet sdk check >/dev/null 2>&1; then
+  echo "➡️  dotnet sdk check"
+  dotnet sdk check
+fi
+
+# Restore tools (if present)
+if [ -f "dotnet-tools.json" ] || [ -f ".config/dotnet-tools.json" ]; then
+  echo "➡️  dotnet tool restore"
+  dotnet tool restore
+fi
+
+# Restore and build solution
+echo "➡️  dotnet restore ancplua-mcp.sln"
+dotnet restore ancplua-mcp.sln
+
+echo "➡️  dotnet format --verify-no-changes"
+dotnet format --verify-no-changes --no-restore ancplua-mcp.sln || {
+  echo "❌ Formatting issues detected. Run 'dotnet format ancplua-mcp.sln' to fix." >&2
+  exit 1
+}
+
+echo "➡️  dotnet build ancplua-mcp.sln (Release, warn as error)"
+dotnet build ancplua-mcp.sln --configuration Release --no-restore -warnaserror
 
 # Run tests if any test projects exist
 if ls tests/*.sln tests/*/*.csproj >/dev/null 2>&1; then
-  echo "➡️  dotnet test (Release)"
-  dotnet test --configuration Release --no-build
+  echo "➡️  dotnet test ancplua-mcp.sln (Release)"
+  dotnet test ancplua-mcp.sln --configuration Release --no-build
 else
   echo "ℹ️  No test projects found under tests/. Skipping dotnet test."
 fi

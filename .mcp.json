@@ -20,6 +20,11 @@
       "command": "dotnet",
       "args": ["run", "--no-build", "--project", "src/Ancplua.Mcp.GitHubAppsServer/Ancplua.Mcp.GitHubAppsServer.csproj"],
       "env": {}
+    },
+    "ancplua-http": {
+      "command": "dotnet",
+      "args": ["run", "--no-build", "--project", "src/Ancplua.Mcp.HttpServer/Ancplua.Mcp.HttpServer.csproj"],
+      "env": {}
     }
   }
 }

@@ -1,3 +1,5 @@
+#pragma warning disable CA1707
+#pragma warning disable CA2007
 using Ancplua.Mcp.CoreTools.Utils;
 
 namespace Ancplua.Mcp.CoreTools.Tests;
@@ -13,7 +15,7 @@ public class ProcessRunnerTests
         // Assert
         Assert.True(result.Success);
         Assert.Equal(0, result.ExitCode);
-        Assert.Contains("hello", result.StandardOutput);
+        Assert.Contains("hello", result.StandardOutput, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -59,7 +61,7 @@ public class ProcessRunnerTests
 
         // Assert
         Assert.True(result.Success);
-        Assert.Contains("Line 10000", result.StandardOutput);
+        Assert.Contains("Line 10000", result.StandardOutput, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -73,7 +75,7 @@ public class ProcessRunnerTests
 
         // Assert
         Assert.True(result.Success);
-        Assert.Contains("Error line 10000", result.StandardError);
+        Assert.Contains("Error line 10000", result.StandardError, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -92,8 +94,8 @@ done
 
         // Assert
         Assert.True(result.Success);
-        Assert.Contains("stdout line 5000", result.StandardOutput);
-        Assert.Contains("stderr line 5000", result.StandardError);
+        Assert.Contains("stdout line 5000", result.StandardOutput, StringComparison.Ordinal);
+        Assert.Contains("stderr line 5000", result.StandardError, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -103,7 +105,7 @@ done
         var output = await ProcessRunner.RunAndThrowAsync("echo", ["test"]);
 
         // Assert
-        Assert.Contains("test", output);
+        Assert.Contains("test", output, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -118,7 +120,7 @@ done
             await ProcessRunner.RunAndThrowAsync("sh", ["-c", script]);
         });
 
-        Assert.Contains("failed with exit code 1", ex.Message);
+        Assert.Contains("failed with exit code 1", ex.Message, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -129,7 +131,7 @@ done
 
         // Assert
         Assert.True(result.Success);
-        Assert.Contains("hello", result.StandardOutput);
+        Assert.Contains("hello", result.StandardOutput, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -139,11 +141,12 @@ done
         // Since we use ArgumentList, this should be properly handled
 
         // Act
-        var result = await ProcessRunner.RunAsync("echo", ["hello world with spaces"]);
+        var result = await ProcessRunner.RunAsync("echo", ["hello world with spaces"])
+            ;
 
         // Assert
         Assert.True(result.Success);
-        Assert.Contains("hello world with spaces", result.StandardOutput);
+        Assert.Contains("hello world with spaces", result.StandardOutput, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -157,7 +160,7 @@ done
         var ex = Assert.Throws<InvalidOperationException>(() => result.ThrowIfFailed("test"));
 
         // Verify truncation occurred
-        Assert.Contains("truncated", ex.Message);
+        Assert.Contains("truncated", ex.Message, StringComparison.Ordinal);
         Assert.True(ex.Message.Length < longOutput.Length + 500); // Some overhead for other text
     }
 }

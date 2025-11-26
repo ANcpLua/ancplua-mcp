@@ -1,5 +1,6 @@
 using ModelContextProtocol.Server;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ancplua.Mcp.GitHubAppsServer.Tools;
 
@@ -7,7 +8,9 @@ namespace Ancplua.Mcp.GitHubAppsServer.Tools;
 /// Tools for interacting with CodeRabbit AI
 /// </summary>
 [McpServerToolType]
-public static class CodeRabbitTools
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1812", Justification = "Instantiated by MCP SDK via reflection.")]
+[SuppressMessage("Design", "CA1515", Justification = "Tools are exposed publicly for MCP discovery.")]
+internal sealed class CodeRabbitTools
 {
     /// <summary>
     /// Trigger CodeRabbit AI review

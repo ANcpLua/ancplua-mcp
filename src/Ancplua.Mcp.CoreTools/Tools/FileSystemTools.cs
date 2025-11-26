@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using ModelContextProtocol.Server;
 
 namespace Ancplua.Mcp.CoreTools.Tools;
@@ -17,10 +18,11 @@ namespace Ancplua.Mcp.CoreTools.Tools;
 /// </para>
 /// </remarks>
 [McpServerToolType]
+[SuppressMessage("Design", "CA1052",
+    Justification = "MCP tools are discovered via generic registration and only expose static members.")]
 public class FileSystemTools
 {
-    private static string? _allowedBasePath;
-    private static readonly object _lock = new();
+    private static readonly Lock _lock = new();
 
     /// <summary>
     /// Gets or sets the allowed base path for filesystem operations.
@@ -36,14 +38,14 @@ public class FileSystemTools
         {
             lock (_lock)
             {
-                return _allowedBasePath ??= GetDefaultBasePath();
+                return field ??= GetDefaultBasePath();
             }
         }
         set
         {
             lock (_lock)
             {
-                _allowedBasePath = Path.GetFullPath(value);
+                field = Path.GetFullPath(value);
             }
         }
     }
@@ -51,11 +53,7 @@ public class FileSystemTools
     private static string GetDefaultBasePath()
     {
         var envPath = Environment.GetEnvironmentVariable("FILESYSTEM_TOOLS_BASE_PATH");
-        if (!string.IsNullOrEmpty(envPath))
-        {
-            return Path.GetFullPath(envPath);
-        }
-        return Directory.GetCurrentDirectory();
+        return !string.IsNullOrEmpty(envPath) ? Path.GetFullPath(envPath) : Directory.GetCurrentDirectory();
     }
 
     /// <summary>
@@ -80,11 +78,13 @@ public class FileSystemTools
 
         // Normalize paths with trailing separator for proper prefix checking
         var normalizedBase = basePath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-            + Path.DirectorySeparatorChar;
+                             + Path.DirectorySeparatorChar;
         var normalizedPath = fullPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
         // Check if path equals base or starts with base + separator
-        var isWithinBase = normalizedPath.Equals(basePath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar), comparison)
+        var isWithinBase =
+            normalizedPath.Equals(basePath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
+                comparison)
             || (normalizedPath + Path.DirectorySeparatorChar).StartsWith(normalizedBase, comparison);
 
         if (!isWithinBase)
@@ -105,7 +105,8 @@ public class FileSystemTools
     [McpServerTool]
     [Description("Reads the contents of a file at the specified path (must be within allowed directory)")]
     public static async Task<string> ReadFileAsync(
-        [Description("The absolute or relative path to the file")] string path,
+        [Description("The absolute or relative path to the file")]
+        string path,
         CancellationToken cancellationToken = default)
     {
         var validPath = ValidateAndNormalizePath(path);
@@ -127,8 +128,10 @@ public class FileSystemTools
     [McpServerTool]
     [Description("Writes content to a file at the specified path (must be within allowed directory)")]
     public static async Task WriteFileAsync(
-        [Description("The absolute or relative path to the file")] string path,
-        [Description("The content to write to the file")] string content,
+        [Description("The absolute or relative path to the file")]
+        string path,
+        [Description("The content to write to the file")]
+        string content,
         CancellationToken cancellationToken = default)
     {
         var validPath = ValidateAndNormalizePath(path);
@@ -151,7 +154,8 @@ public class FileSystemTools
     [McpServerTool]
     [Description("Lists files and directories at the specified path (must be within allowed directory)")]
     public static IEnumerable<string> ListDirectory(
-        [Description("The directory path to list")] string path)
+        [Description("The directory path to list")]
+        string path)
     {
         var validPath = ValidateAndNormalizePath(path);
 
@@ -175,7 +179,8 @@ public class FileSystemTools
     [McpServerTool]
     [Description("Deletes a file at the specified path (must be within allowed directory)")]
     public static void DeleteFile(
-        [Description("The path to the file to delete")] string path)
+        [Description("The path to the file to delete")]
+        string path)
     {
         var validPath = ValidateAndNormalizePath(path);
 
@@ -196,7 +201,8 @@ public class FileSystemTools
     [McpServerTool]
     [Description("Creates a directory at the specified path (must be within allowed directory)")]
     public static void CreateDirectory(
-        [Description("The path to the directory to create")] string path)
+        [Description("The path to the directory to create")]
+        string path)
     {
         var validPath = ValidateAndNormalizePath(path);
 

@@ -13,30 +13,45 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="07e5339c-7e04-46dc-a962-b6e4d06fcbba" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.ancplua-mcp/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ancplua-mcp/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile.http" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile.http" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile.workstation" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile.workstation" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ancplua-mcp.sln" beforeDir="false" afterPath="$PROJECT_DIR$/ancplua-mcp.sln" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.AIServicesServer/packages.lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.AIServicesServer/packages.lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.GitHubAppsServer/packages.lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.GitHubAppsServer/packages.lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.HttpServer/Ancplua.Mcp.HttpServer.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.HttpServer/Ancplua.Mcp.HttpServer.csproj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.mcp.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/decisions/ADR-0108-renovate-replaces-dependabot.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/decisions/ADR-0109-csharp-modernization-wave1.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/decisions/adr-007-modern-csharp-standards.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/specs/spec-007-modern-configuration.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/specs/spec-0108-renovate-configuration.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHANGELOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/CHANGELOG.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Directory.Build.props" beforeDir="false" afterPath="$PROJECT_DIR$/Directory.Build.props" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/codecov.yml" beforeDir="false" afterPath="$PROJECT_DIR$/codecov.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/examples/claude-http.mcp.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/examples/claude-http.mcp.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/examples/claude-workstation.mcp.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/examples/claude-workstation.mcp.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/examples/rider-workstation.mcp.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/examples/rider-workstation.mcp.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/servers.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/servers.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.AIServicesServer/Models/AIServiceInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.AIServicesServer/Models/AIServiceInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.AIServicesServer/Models/ServiceResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.AIServicesServer/Models/ServiceResponse.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.AIServicesServer/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.AIServicesServer/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.AIServicesServer/Tools/ServiceDiscoveryTools.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.AIServicesServer/Tools/ServiceDiscoveryTools.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.CoreTools/Tools/CiTools.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.CoreTools/Tools/CiTools.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.CoreTools/Tools/FileSystemTools.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.CoreTools/Tools/FileSystemTools.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.CoreTools/Tools/GitTools.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.CoreTools/Tools/GitTools.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.CoreTools/Utils/ProcessRunner.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.CoreTools/Utils/ProcessRunner.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.DebugTools/DebugTools.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.DebugTools/DebugTools.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.GitHubAppsServer/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.GitHubAppsServer/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.GitHubAppsServer/Tools/AIOrchestrationTools.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.GitHubAppsServer/Tools/AIOrchestrationTools.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.GitHubAppsServer/Tools/CodeRabbitTools.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.GitHubAppsServer/Tools/CodeRabbitTools.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.GitHubAppsServer/Tools/CodecovTools.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.GitHubAppsServer/Tools/CodecovTools.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.GitHubAppsServer/Tools/GeminiCodeAssistTools.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.GitHubAppsServer/Tools/GeminiCodeAssistTools.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.GitHubAppsServer/Tools/JulesTools.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.GitHubAppsServer/Tools/JulesTools.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.HttpServer/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.HttpServer/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.HttpServer/Tools/CiTools.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.HttpServer/Tools/FileSystemTools.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.HttpServer/Tools/GitTools.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.HttpServer/packages.lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.HttpServer/packages.lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.RoslynMetricsServer/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.RoslynMetricsServer/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.ServiceDefaults/Extensions.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.ServiceDefaults/Extensions.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.WorkstationServer/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.WorkstationServer/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.WorkstationServer/Tools/CiTools.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.WorkstationServer/Tools/FileSystemTools.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.WorkstationServer/Tools/GitTools.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ancplua.Mcp.WorkstationServer/packages.lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ancplua.Mcp.WorkstationServer/packages.lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/Ancplua.Mcp.HttpServer.Tests/Ancplua.Mcp.HttpServer.Tests.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Ancplua.Mcp.HttpServer.Tests/Ancplua.Mcp.HttpServer.Tests.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/Ancplua.Mcp.CoreTools.Tests/CommandParserTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Ancplua.Mcp.CoreTools.Tests/CommandParserTests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/Ancplua.Mcp.CoreTools.Tests/FileSystemToolsTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Ancplua.Mcp.CoreTools.Tests/FileSystemToolsTests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/Ancplua.Mcp.CoreTools.Tests/ProcessRunnerTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Ancplua.Mcp.CoreTools.Tests/ProcessRunnerTests.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Ancplua.Mcp.HttpServer.Tests/ToolsTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Ancplua.Mcp.HttpServer.Tests/ToolsTests.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/Ancplua.Mcp.HttpServer.Tests/packages.lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Ancplua.Mcp.HttpServer.Tests/packages.lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/Ancplua.Mcp.WorkstationServer.Tests/Ancplua.Mcp.WorkstationServer.Tests.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Ancplua.Mcp.WorkstationServer.Tests/Ancplua.Mcp.WorkstationServer.Tests.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/Ancplua.Mcp.Testing/McpTestHost.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Ancplua.Mcp.Testing/McpTestHost.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Ancplua.Mcp.WorkstationServer.Tests/ToolsTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Ancplua.Mcp.WorkstationServer.Tests/ToolsTests.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/Ancplua.Mcp.WorkstationServer.Tests/packages.lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Ancplua.Mcp.WorkstationServer.Tests/packages.lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tooling/scripts/local-validate.sh" beforeDir="false" afterPath="$PROJECT_DIR$/tooling/scripts/local-validate.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,25 +113,25 @@
     <option name="openDirectoriesWithSingleClick" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;.NET Launch Settings Profile.Ancplua.Mcp.HttpServer: http.executor&quot;: &quot;Debug&quot;,
-    &quot;.NET Project.Ancplua.Mcp.RoslynMetricsServer.executor&quot;: &quot;Run&quot;,
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;#25 on feature/ai-services-mcp-integration&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;junie.application.models&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    ".NET Launch Settings Profile.Ancplua.Mcp.HttpServer: http.executor": "Debug",
+    ".NET Project.Ancplua.Mcp.RoslynMetricsServer.executor": "Run",
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "Rebasing fix/csharp14-analyzer-compliance",
+    "junie.onboarding.icon.badge.shown": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "junie.application.models",
+    "to.speed.mode.migration.done": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected=".NET Project.Ancplua.Mcp.RoslynMetricsServer">
     <configuration name="Ancplua.Mcp.AIServicesServer" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="" />

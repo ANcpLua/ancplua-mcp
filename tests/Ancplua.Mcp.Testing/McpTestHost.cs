@@ -42,7 +42,7 @@ public class McpTestHost : IAsyncDisposable
         configureServices?.Invoke(builder.Services);
 
         var host = builder.Build();
-        await host.StartAsync();
+        await host.StartAsync().ConfigureAwait(false);
 
         return new McpTestHost(host);
     }
@@ -73,7 +73,7 @@ public class McpTestHost : IAsyncDisposable
         configureServices?.Invoke(builder.Services);
 
         var host = builder.Build();
-        await host.StartAsync();
+        await host.StartAsync().ConfigureAwait(false);
 
         return new McpTestHost(host);
     }
@@ -104,7 +104,7 @@ public class McpTestHost : IAsyncDisposable
     {
         if (!_disposed)
         {
-            await _host.StopAsync();
+            await _host.StopAsync().ConfigureAwait(false);
         }
     }
 
@@ -120,11 +120,11 @@ public class McpTestHost : IAsyncDisposable
 
         _disposed = true;
 
-        await StopAsync();
+        await StopAsync().ConfigureAwait(false);
 
         if (_host is IAsyncDisposable asyncDisposable)
         {
-            await asyncDisposable.DisposeAsync();
+            await asyncDisposable.DisposeAsync().ConfigureAwait(false);
         }
         else
         {
