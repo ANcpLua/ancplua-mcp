@@ -33,7 +33,6 @@
   - Read this `CLAUDE.md`
   - Read `CHANGELOG.md` (current state of changes)
   - Read `docs/ARCHITECTURE.md`
-  - Read `docs/CROSS_REPO_COORDINATION.md` (if present, or reference the plugins repo)
 
 5. **Understand your role:**
   - You build **tools** (Type T)
