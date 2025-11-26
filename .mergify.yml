@@ -10,13 +10,20 @@ queue_rules:
 
       {{ body }}
     merge_conditions:
+      # All CI checks must pass
       - check-success=Build and Test
       - check-success=Code Quality
       - check-success=Analyze (csharp)
       - check-success=Secret Scanning
       - check-success=Security Scan
+
+      # Require at least 1 approval
       - "#approved-reviews-by>=1"
+
+      # No unresolved conversations
       - "#changes-requested-by=0"
+
+      # Branch must be up to date
       - base=main
       - -draft
 
@@ -39,6 +46,7 @@ queue_rules:
       - base=main
 
 pull_request_rules:
+  # Auto-merge for Renovate dependency updates (minor/patch only)
   - name: Auto-merge Renovate minor/patch updates
     conditions:
       - author=renovate[bot]
@@ -50,6 +58,7 @@ pull_request_rules:
       queue:
         name: renovate
 
+  # Auto-merge for Dependabot updates (minor/patch only)
   - name: Auto-merge Dependabot minor/patch updates
     conditions:
       - author=dependabot[bot]
@@ -61,6 +70,7 @@ pull_request_rules:
       queue:
         name: dependabot
 
+  # Auto-merge approved PRs
   - name: Auto-merge approved PRs
     conditions:
       - "#approved-reviews-by>=1"
@@ -76,6 +86,7 @@ pull_request_rules:
       queue:
         name: default
 
+  # Auto-label based on file changes
   - name: Label .NET changes
     conditions:
       - files~=\.cs$

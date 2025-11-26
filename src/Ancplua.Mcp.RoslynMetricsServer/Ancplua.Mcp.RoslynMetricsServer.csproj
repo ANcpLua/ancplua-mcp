@@ -33,6 +33,7 @@
     <PackageReference Include="NuGet.Protocol" ExcludeAssets="runtime"/>
     <PackageReference Include="NuGet.Versioning" ExcludeAssets="runtime"/>
     <PackageReference Include="NuGet.Frameworks" ExcludeAssets="runtime"/>
+    <PackageReference Include="ICSharpCode.Decompiler"/>
   </ItemGroup>
 
   <ItemGroup>

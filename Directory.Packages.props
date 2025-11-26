@@ -68,6 +68,9 @@
     <PackageVersion Include="NuGet.Packaging" Version="7.0.0"/>
     <PackageVersion Include="NuGet.Versioning" Version="7.0.0"/>
   </ItemGroup>
+  <ItemGroup Label="Decompilation">
+    <PackageVersion Include="ICSharpCode.Decompiler" Version="9.1.0.7988"/>
+  </ItemGroup>
   <ItemGroup Label="Roslyn">
     <PackageVersion Include="Microsoft.Build" Version="18.0.2"/>
     <PackageVersion Include="Microsoft.Build.Framework" Version="18.0.2"/>
