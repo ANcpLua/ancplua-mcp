@@ -2,5 +2,7 @@
   <PropertyGroup>
     <!-- Generate packages.lock.json for deterministic builds and CI caching -->
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <!-- Enforce locked restore: CI fails if lock files would change -->
+    <RestoreLockedMode Condition="'$(CI)' == 'true' or '$(ContinuousIntegrationBuild)' == 'true'">true</RestoreLockedMode>
   </PropertyGroup>
 </Project>
