@@ -89,7 +89,8 @@ public static class ProcessRunner
 
         // Register cancellation callback to kill process if token is triggered.
         // This prevents orphan processes when cancellation occurs.
-        using var registration = cancellationToken.Register(() =>
+        // DisposeAsync waits for callback completion if currently executing.
+        await using var registration = cancellationToken.Register(() =>
         {
             try
             {
@@ -102,7 +103,7 @@ public static class ProcessRunner
             {
                 // Process already exited, ignore
             }
-        });
+        }).ConfigureAwait(false);
 
         try
         {
