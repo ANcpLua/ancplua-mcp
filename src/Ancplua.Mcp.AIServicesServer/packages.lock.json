@@ -4,12 +4,12 @@
     "net10.0": {
       "ModelContextProtocol": {
         "type": "Direct",
-        "requested": "[0.4.0-preview.3, )",
-        "resolved": "0.4.0-preview.3",
-        "contentHash": "iwUNEuzePz0+oYapLvi5HssEmyhWcUscfZLA0g2PDf220VZ89KXrdLhraxXtFWXe25OvkW/8eEJLZmvuK+Gmzw==",
+        "requested": "[0.4.1-preview.1, )",
+        "resolved": "0.4.1-preview.1",
+        "contentHash": "t6162Up7NUsHgZtfW4sn7XY/RIWpQIqpcZiHq0R9VRafOB9UiAs3TZY/pC5HdkNeODcpuwh2oNy6wSb/hX1cJw==",
         "dependencies": {
-          "Microsoft.Extensions.Hosting.Abstractions": "10.0.0-rc.2.25502.107",
-          "ModelContextProtocol.Core": "0.4.0-preview.3"
+          "Microsoft.Extensions.Hosting.Abstractions": "10.0.0",
+          "ModelContextProtocol.Core": "0.4.1-preview.1"
         }
       },
       "Microsoft.Extensions.AmbientMetadata.Application": {
@@ -263,9 +263,9 @@
       },
       "Microsoft.Extensions.AI.Abstractions": {
         "type": "CentralTransitive",
-        "requested": "[9.10.0, )",
-        "resolved": "9.10.0",
-        "contentHash": "oBdh3TDNN+F28L2ZKOF1NfobJF3BbKWrpta+HI9dz8OcwIiIkFGvP8n1GNPO92upNQ9gofMX1O+MXtopW6tR1A=="
+        "requested": "[10.0.1, )",
+        "resolved": "10.0.1",
+        "contentHash": "SR78I0BV7ljDovyVsZQqpt2NezdLoDtoIOCNwqAteuPc8f5PEmvDjokOQxKnTwXo/9RBKnmrzuPzbsuvueZcrg=="
       },
       "Microsoft.Extensions.Configuration.Abstractions": {
         "type": "CentralTransitive",
@@ -362,12 +362,12 @@
       },
       "ModelContextProtocol.Core": {
         "type": "CentralTransitive",
-        "requested": "[0.4.0-preview.3, )",
-        "resolved": "0.4.0-preview.3",
-        "contentHash": "r6/cThY2hDnBHB0qrZ195jw7Ks3vN5bi+uqgUa+19OS9E3+/L7OZ267dlrRmIDiBIwcQDqhpe3/p6BgsULkfug==",
+        "requested": "[0.4.1-preview.1, )",
+        "resolved": "0.4.1-preview.1",
+        "contentHash": "4cHAuUeI52I6wDv5tQ5iSeliViby7gPjg3FOiWsnDoztohBCX/ncB/QPVEMSIelpEf1kTDNhwyrNerDDx9wJaw==",
         "dependencies": {
-          "Microsoft.Extensions.AI.Abstractions": "9.10.0",
-          "Microsoft.Extensions.Logging.Abstractions": "10.0.0-rc.2.25502.107"
+          "Microsoft.Extensions.AI.Abstractions": "10.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.0"
         }
       },
       "OpenTelemetry.Api": {
