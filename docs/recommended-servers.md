@@ -34,4 +34,4 @@ This repo is designed to **cooperate** with high-quality external MCP servers, n
 
 ## Example Configuration
 
-See [`examples/`](examples/) for MCP client configs that combine these with ancplua-mcp servers.
+See [`docs/examples/`](examples/) for MCP client configs that combine these with ancplua-mcp servers.

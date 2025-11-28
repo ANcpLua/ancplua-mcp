@@ -22,6 +22,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Closes CodeQL alert: actions/code-injection/critical
 
 ### Changed
+- **README Refactor (2025-11-29):**
+  - Reduced README.md from 527 to 65 lines (88% reduction)
+  - Removed duplicate content (server list 3x, config examples 2x)
+  - Extracted external MCP servers to `docs/recommended-servers.md`
+  - Extracted NuGet/dev workflow to `docs/development.md`
+  - Fixed broken section numbering (5.1 appearing after 6)
+
+- **Claude Workflow Self-Review Skip (2025-11-29):**
+  - Added `check-files` job to detect Claude-only workflow PRs
+  - Claude review skips gracefully (not fails) when self-modifying
+  - Added `skip-notification` job with alternative reviewer guidance
+  - Added explicit permissions to `check-files` job (CodeQL CWE-275)
+
 - **Documentation Path Updates (2025-11-28):**
   - Updated all config files to use new `src/Servers/`, `src/Libraries/`, `src/Infrastructure/` paths
   - Updated Dockerfiles (aiservices, http, workstation) with new paths and DLL names
