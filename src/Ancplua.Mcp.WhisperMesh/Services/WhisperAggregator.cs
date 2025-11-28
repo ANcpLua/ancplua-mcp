@@ -3,6 +3,7 @@ using Ancplua.Mcp.WhisperMesh.Client;
 using Ancplua.Mcp.WhisperMesh.Discoveries;
 using Ancplua.Mcp.WhisperMesh.Models;
 using Microsoft.Extensions.Logging;
+using NATS.Client.Core;
 
 namespace Ancplua.Mcp.WhisperMesh.Services;
 
@@ -147,11 +148,13 @@ public sealed partial class WhisperAggregator
         {
             throw;
         }
-        catch (InvalidOperationException ex)
+#pragma warning disable CA1031 // Do not catch general exception types - aggregation should handle errors gracefully and log them
+        catch (Exception ex) when (ex is JsonException or NatsException or InvalidOperationException or ArgumentException)
         {
             LogAggregationFailed(ex);
             throw;
         }
+#pragma warning restore CA1031
     }
 
     /// <summary>

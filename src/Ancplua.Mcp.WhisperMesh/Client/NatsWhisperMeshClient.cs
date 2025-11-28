@@ -27,6 +27,11 @@ public sealed partial class NatsWhisperMeshClient : IWhisperMeshClient
     /// </summary>
     /// <param name="options">Client configuration options.</param>
     /// <param name="logger">Logger instance.</param>
+    /// <remarks>
+    /// The NATS connection is created lazily - it will connect automatically on first use.
+    /// Check <see cref="IsConnected"/> to verify connection status before critical operations.
+    /// NATS.Client 2.x handles reconnection automatically based on the configured options.
+    /// </remarks>
     public NatsWhisperMeshClient(
         IOptions<WhisperMeshClientOptions> options,
         ILogger<NatsWhisperMeshClient> logger)
@@ -111,6 +116,11 @@ public sealed partial class NatsWhisperMeshClient : IWhisperMeshClient
 
             return EmitResult.Succeeded(message.MessageId);
         }
+        catch (JsonException ex)
+        {
+            LogEmitFailed(ex, message.MessageId);
+            return EmitResult.Failed($"Serialization failed: {ex.Message}");
+        }
         catch (NatsException ex)
         {
             LogEmitFailed(ex, message.MessageId);
@@ -176,10 +186,11 @@ public sealed partial class NatsWhisperMeshClient : IWhisperMeshClient
         NatsJSMsg<byte[]> msg,
         CancellationToken cancellationToken)
     {
+        WhisperMessage? whisperMessage = null;
         try
         {
             var json = System.Text.Encoding.UTF8.GetString(msg.Data!);
-            var whisperMessage = JsonSerializer.Deserialize<WhisperMessage>(json, _jsonOptions);
+            whisperMessage = JsonSerializer.Deserialize<WhisperMessage>(json, _jsonOptions);
 
             if (whisperMessage is null)
             {
@@ -209,7 +220,8 @@ public sealed partial class NatsWhisperMeshClient : IWhisperMeshClient
         }
         catch (NatsException ex)
         {
-            LogProcessingError(ex, "unknown");
+            var msgId = whisperMessage?.MessageId ?? $"msg-{msg.Subject}";
+            LogProcessingError(ex, msgId);
             // Negative acknowledge to trigger redelivery
             await msg.NakAsync(delay: TimeSpan.FromSeconds(5), cancellationToken: cancellationToken).ConfigureAwait(false);
             return null;
