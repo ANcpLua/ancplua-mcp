@@ -233,6 +233,44 @@ Maintain `docs/tool-contracts.md` with ALL exposed tools:
 
 Same for ADRs.
 
+### 5.4 Dual-Repo Workflow
+
+Both repos often need synchronized changes (e.g., CI workflows, shared configs).
+
+**Repository Locations:**
+```bash
+# Type T (Infrastructure) - .NET MCP servers
+~/ancplua-mcp
+
+# Type A (Application) - Claude plugins/skills
+~/WebstormProjects/ancplua-claude-plugins
+```
+
+**Sync Both Repos:**
+```bash
+# After merging PRs in both repos
+cd ~/ancplua-mcp && git fetch origin && git reset --hard origin/main
+cd ~/WebstormProjects/ancplua-claude-plugins && git fetch origin && git reset --hard origin/main
+```
+
+**Validate Both Repos:**
+```bash
+# Run validation on both
+~/ancplua-mcp/tooling/scripts/local-validate.sh
+~/WebstormProjects/ancplua-claude-plugins/tooling/scripts/local-validate.sh
+
+# Or use the --dual flag (validates sibling repo too)
+./tooling/scripts/local-validate.sh --dual
+```
+
+**Create Matching PRs:**
+When changes affect both repos (e.g., workflow updates):
+1. Create branch with same name in both repos
+2. Make changes in both
+3. Create PRs in both
+4. Merge both (or enable auto-merge)
+5. Sync both repos to main
+
 ---
 
 ## 6. Mandatory Workflow

@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+DUAL_MODE=false
+SIBLING_REPO="$HOME/WebstormProjects/ancplua-claude-plugins"
+
+# Parse arguments
+for arg in "$@"; do
+  case $arg in
+    --dual)
+      DUAL_MODE=true
+      shift
+      ;;
+  esac
+done
+
 echo "🔍 Running ancplua-mcp local validation..."
 
 # Tooling sanity: show SDK info and ensure we're on the pinned SDK
@@ -62,3 +75,18 @@ else
 fi
 
 echo "✅ ancplua-mcp local validation completed."
+
+# Dual-repo validation
+if [ "$DUAL_MODE" = true ]; then
+  echo ""
+  echo "═══════════════════════════════════════════════════════════"
+  echo "🔗 DUAL-REPO MODE: Validating sibling repository..."
+  echo "═══════════════════════════════════════════════════════════"
+
+  if [ -d "$SIBLING_REPO" ] && [ -x "$SIBLING_REPO/tooling/scripts/local-validate.sh" ]; then
+    "$SIBLING_REPO/tooling/scripts/local-validate.sh"
+  else
+    echo "⚠️  Sibling repo not found at: $SIBLING_REPO"
+    echo "   Expected: ancplua-claude-plugins with tooling/scripts/local-validate.sh"
+  fi
+fi
