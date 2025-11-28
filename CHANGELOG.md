@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **WhisperMesh NATS 2.x Migration**: Complete migration to NATS.Client 2.x API
+  - Updated `NatsWhisperMeshClient` to use NATS.Client 2.5.1 API patterns
+  - Fixed `NatsOpts`, `StreamConfig`, and `ConsumerConfig` for 2.x compatibility
+  - Added `ConfigureAwait(false)` throughout async methods (CA2007)
+  - Added `ArgumentNullException.ThrowIfNull()` for parameter validation (CA1062)
+  - Implemented `LoggerMessage` source generators for high-performance logging (CA1848)
+  - Made `NatsWhisperMeshClient` partial class for LoggerMessage support
+  - WhisperMesh now builds and passes all unit tests (14 tests)
+  - Updated Testcontainers to 4.9.0 with new wait strategy API
+
 ### Changed
 - **NuGet Supply-Chain Hardening**: Comprehensive cleanup and hardening of build infrastructure
   - All projects now use Central Package Management (CPM) without inline version attributes

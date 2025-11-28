@@ -8,6 +8,17 @@
         "resolved": "6.0.4",
         "contentHash": "lkhqpF8Pu2Y7IiN7OntbsTtdbpR1syMsm2F3IgX6ootA4ffRqWL5jF7XipHuZQTdVuWG/gVAAcf8mjk8Tz0xPg=="
       },
+      "Microsoft.Extensions.Logging": {
+        "type": "Direct",
+        "requested": "[10.0.0, )",
+        "resolved": "10.0.0",
+        "contentHash": "BStFkd5CcnEtarlcgYDBcFzGYCuuNMzPs02wN3WBsOFoYIEmYoUdAiU+au6opzoqfTYJsMTW00AeqDdnXH2CvA==",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection": "10.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.0",
+          "Microsoft.Extensions.Options": "10.0.0"
+        }
+      },
       "Microsoft.NET.Test.Sdk": {
         "type": "Direct",
         "requested": "[18.0.1, )",
@@ -16,6 +27,19 @@
         "dependencies": {
           "Microsoft.CodeCoverage": "18.0.1",
           "Microsoft.TestPlatform.TestHost": "18.0.1"
+        }
+      },
+      "Testcontainers": {
+        "type": "Direct",
+        "requested": "[4.9.0, )",
+        "resolved": "4.9.0",
+        "contentHash": "OmU6x91OozhCRVOt7ISQDdaHACaKQImrN6fWDJJnvMAwMv/iJ95Q4cr7K1FU+nAYLDDIMDbSS8SOCzKkERsoIw==",
+        "dependencies": {
+          "Docker.DotNet.Enhanced": "3.130.0",
+          "Docker.DotNet.Enhanced.X509": "3.130.0",
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
+          "SSH.NET": "2025.1.0",
+          "SharpZipLib": "1.4.2"
         }
       },
       "xunit": {
@@ -34,6 +58,27 @@
         "requested": "[3.1.5, )",
         "resolved": "3.1.5",
         "contentHash": "tKi7dSTwP4m5m9eXPM2Ime4Kn7xNf4x4zT9sdLO/G4hZVnQCRiMTWoSZqI/pYTVeI27oPPqHBKYI/DjJ9GsYgA=="
+      },
+      "BouncyCastle.Cryptography": {
+        "type": "Transitive",
+        "resolved": "2.6.2",
+        "contentHash": "7oWOcvnntmMKNzDLsdxAYqApt+AjpRpP2CShjMfIa3umZ42UQMvH0tl1qAliYPNYO6vTdcGMqnRrCPmsfzTI1w=="
+      },
+      "Docker.DotNet.Enhanced": {
+        "type": "Transitive",
+        "resolved": "3.130.0",
+        "contentHash": "LQpn/tmB4TPInO9ILgFg98ivcr5QsLBm6sUltqOjgU/FKDU4SW3mbR9QdmYgBJlE6PtKmSffDdSyVYMyUYyEjA==",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3"
+        }
+      },
+      "Docker.DotNet.Enhanced.X509": {
+        "type": "Transitive",
+        "resolved": "3.130.0",
+        "contentHash": "stAlaM/h5u8bIqqXQVR4tgJgsN8CDC0ynjmCYZFy4alXs2VJdIoRZwJJmgmmYYrAdMwWJC8lWWe0ilxPqc8Wkg==",
+        "dependencies": {
+          "Docker.DotNet.Enhanced": "3.130.0"
+        }
       },
       "Microsoft.CodeCoverage": {
         "type": "Transitive",
@@ -140,16 +185,6 @@
         "dependencies": {
           "Microsoft.Extensions.Http": "10.0.0",
           "Microsoft.Extensions.Telemetry": "10.0.0"
-        }
-      },
-      "Microsoft.Extensions.Logging": {
-        "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "BStFkd5CcnEtarlcgYDBcFzGYCuuNMzPs02wN3WBsOFoYIEmYoUdAiU+au6opzoqfTYJsMTW00AeqDdnXH2CvA==",
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection": "10.0.0",
-          "Microsoft.Extensions.Logging.Abstractions": "10.0.0",
-          "Microsoft.Extensions.Options": "10.0.0"
         }
       },
       "Microsoft.Extensions.Logging.Configuration": {
@@ -301,6 +336,20 @@
           "System.Threading.RateLimiting": "8.0.0"
         }
       },
+      "SharpZipLib": {
+        "type": "Transitive",
+        "resolved": "1.4.2",
+        "contentHash": "yjj+3zgz8zgXpiiC3ZdF/iyTBbz2fFvMxZFEBPUcwZjIvXOf37Ylm+K58hqMfIBt5JgU/Z2uoUS67JmTLe973A=="
+      },
+      "SSH.NET": {
+        "type": "Transitive",
+        "resolved": "2025.1.0",
+        "contentHash": "jrnbtf0ItVaXAe6jE8X/kSLa6uC+0C+7W1vepcnRQB/rD88qy4IxG7Lf1FIbWmkoc4iVXv0pKrz+Wc6J4ngmHw==",
+        "dependencies": {
+          "BouncyCastle.Cryptography": "2.6.2",
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3"
+        }
+      },
       "System.Threading.RateLimiting": {
         "type": "Transitive",
         "resolved": "8.0.0",
@@ -362,10 +411,17 @@
         "type": "Project",
         "dependencies": {
           "Ancplua.Mcp.ServiceDefaults": "[1.0.0, )",
+          "ModelContextProtocol": "[0.4.0-preview.3, )",
           "NATS.Client.Core": "[2.5.1, )",
           "NATS.Client.JetStream": "[2.5.1, )",
           "OpenTelemetry.Api": "[1.14.0, )"
         }
+      },
+      "Microsoft.Extensions.AI.Abstractions": {
+        "type": "CentralTransitive",
+        "requested": "[9.10.0, )",
+        "resolved": "9.10.0",
+        "contentHash": "oBdh3TDNN+F28L2ZKOF1NfobJF3BbKWrpta+HI9dz8OcwIiIkFGvP8n1GNPO92upNQ9gofMX1O+MXtopW6tR1A=="
       },
       "Microsoft.Extensions.Configuration.Abstractions": {
         "type": "CentralTransitive",
@@ -447,6 +503,26 @@
         "dependencies": {
           "Microsoft.Extensions.Http": "10.0.0",
           "Microsoft.Extensions.ServiceDiscovery.Abstractions": "10.0.0"
+        }
+      },
+      "ModelContextProtocol": {
+        "type": "CentralTransitive",
+        "requested": "[0.4.0-preview.3, )",
+        "resolved": "0.4.0-preview.3",
+        "contentHash": "iwUNEuzePz0+oYapLvi5HssEmyhWcUscfZLA0g2PDf220VZ89KXrdLhraxXtFWXe25OvkW/8eEJLZmvuK+Gmzw==",
+        "dependencies": {
+          "Microsoft.Extensions.Hosting.Abstractions": "10.0.0-rc.2.25502.107",
+          "ModelContextProtocol.Core": "0.4.0-preview.3"
+        }
+      },
+      "ModelContextProtocol.Core": {
+        "type": "CentralTransitive",
+        "requested": "[0.4.0-preview.3, )",
+        "resolved": "0.4.0-preview.3",
+        "contentHash": "r6/cThY2hDnBHB0qrZ195jw7Ks3vN5bi+uqgUa+19OS9E3+/L7OZ267dlrRmIDiBIwcQDqhpe3/p6BgsULkfug==",
+        "dependencies": {
+          "Microsoft.Extensions.AI.Abstractions": "9.10.0",
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.0-rc.2.25502.107"
         }
       },
       "NATS.Client.Core": {

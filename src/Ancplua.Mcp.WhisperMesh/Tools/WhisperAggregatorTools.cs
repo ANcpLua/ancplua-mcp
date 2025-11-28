@@ -27,23 +27,26 @@ public static class WhisperAggregatorTools
         [Description("Aggregation request")] AggregationRequestDto request,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(aggregator);
+        ArgumentNullException.ThrowIfNull(request);
+
         // Convert DTO to internal model
         var internalRequest = new AggregationRequest
         {
-            Tiers = request.Tiers.Select(ParseTier).ToArray(),
-            TopicPatterns = request.TopicPatterns,
+            Tiers = [.. request.Tiers.Select(ParseTier)],
+            TopicPatterns = [.. request.TopicPatterns],
             TimeWindowMinutes = request.TimeWindowMinutes,
             MinSeverity = request.MinSeverity,
             MaxDiscoveries = request.MaxDiscoveries
         };
 
         // Perform aggregation
-        var report = await aggregator.AggregateDiscoveriesAsync(internalRequest, cancellationToken);
+        var report = await aggregator.AggregateDiscoveriesAsync(internalRequest, cancellationToken).ConfigureAwait(false);
 
         // Convert to DTO
         return new AggregatedWhisperReportDto
         {
-            Discoveries = report.Discoveries.Select(ConvertToDto).ToList(),
+            Discoveries = [.. report.Discoveries.Select(ConvertToDto)],
             TotalCount = report.TotalCount,
             DeduplicatedCount = report.DeduplicatedCount,
             LightningCount = report.LightningCount,
@@ -61,19 +64,27 @@ public static class WhisperAggregatorTools
     /// <summary>
     /// Parses a tier string to WhisperTier enum.
     /// </summary>
+    /// <remarks>
+    /// Uses case-insensitive comparison via Enum.TryParse with ignoreCase.
+    /// </remarks>
     private static WhisperTier ParseTier(string tierString)
     {
-        return tierString.ToLowerInvariant() switch
+        if (Enum.TryParse<WhisperTier>(tierString, ignoreCase: true, out var tier))
         {
-            "lightning" => WhisperTier.Lightning,
-            "storm" => WhisperTier.Storm,
-            _ => throw new ArgumentException($"Invalid tier: {tierString}. Must be 'lightning' or 'storm'.")
-        };
+            return tier;
+        }
+
+        throw new ArgumentException($"Invalid tier: {tierString}. Must be 'lightning' or 'storm'.");
     }
 
     /// <summary>
     /// Converts WhisperMessage to DTO for JSON serialization.
     /// </summary>
+    /// <remarks>
+    /// Uses lowercase tier names as per protocol specification.
+    /// CA1308 is suppressed because lowercase is required for protocol compliance.
+    /// </remarks>
+#pragma warning disable CA1308 // Normalize strings to uppercase - protocol requires lowercase
     private static WhisperMessageDto ConvertToDto(WhisperMessage message)
     {
         return new WhisperMessageDto
@@ -91,6 +102,7 @@ public static class WhisperAggregatorTools
             ExpiresAt = message.ExpiresAt
         };
     }
+#pragma warning restore CA1308
 }
 
 /// <summary>
@@ -103,14 +115,14 @@ public sealed record AggregationRequestDto
     /// Example: ["lightning", "storm"]
     /// </summary>
     [Description("Tiers to aggregate from (lightning, storm, or both)")]
-    public required string[] Tiers { get; init; }
+    public required IReadOnlyList<string> Tiers { get; init; }
 
     /// <summary>
     /// Topic patterns to subscribe to (supports NATS wildcards: * and >).
     /// Example: ["security.*", "code-quality", "architecture"]
     /// </summary>
     [Description("Topic patterns to subscribe to (supports NATS wildcards)")]
-    public required string[] TopicPatterns { get; init; }
+    public required IReadOnlyList<string> TopicPatterns { get; init; }
 
     /// <summary>
     /// Time window in minutes to collect discoveries.
@@ -124,7 +136,7 @@ public sealed record AggregationRequestDto
     /// Default: 0.0 (include all).
     /// </summary>
     [Description("Minimum severity threshold 0.0-1.0 (default: 0.0)")]
-    public double MinSeverity { get; init; } = 0.0;
+    public double MinSeverity { get; init; }
 
     /// <summary>
     /// Maximum number of discoveries to collect.
@@ -142,7 +154,7 @@ public sealed record AggregatedWhisperReportDto
     /// <summary>
     /// Deduplicated and sorted discoveries.
     /// </summary>
-    public required List<WhisperMessageDto> Discoveries { get; init; }
+    public required IReadOnlyList<WhisperMessageDto> Discoveries { get; init; }
 
     /// <summary>
     /// Total number of discoveries collected (before deduplication).

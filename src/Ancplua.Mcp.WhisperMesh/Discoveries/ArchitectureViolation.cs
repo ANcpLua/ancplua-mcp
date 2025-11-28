@@ -20,8 +20,13 @@ public sealed record ArchitectureViolation
     /// Discovery type identifier (always "ArchitectureViolation").
     /// Required by WhisperMesh Protocol Specification v1.0 §4.1.
     /// </summary>
+    /// <remarks>
+    /// CA1822 is suppressed because this property must be instance-based for JSON serialization.
+    /// </remarks>
     [JsonPropertyName("type")]
+#pragma warning disable CA1822 // Mark members as static - must be instance for JSON serialization
     public string Type => "ArchitectureViolation";
+#pragma warning restore CA1822
 
     /// <summary>
     /// Location of the violation in source code.
