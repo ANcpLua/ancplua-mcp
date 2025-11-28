@@ -572,13 +572,13 @@ dotnet test
 ### Run Servers
 ```bash
 # Workstation (stdio)
-dotnet run --project src/Ancplua.Mcp.WorkstationServer
+dotnet run --project src/Servers/Stdio/Workstation
 
 # HTTP
-dotnet run --project src/Ancplua.Mcp.HttpServer
+dotnet run --project src/Servers/Http/Gateway
 
 # AI Services
-dotnet run --project src/Ancplua.Mcp.AIServicesServer
+dotnet run --project src/Servers/Stdio/AIServices
 ```
 
 ### Key Files

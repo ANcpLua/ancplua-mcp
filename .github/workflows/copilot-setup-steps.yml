@@ -49,14 +49,14 @@ jobs:
       - name: Build WorkstationServer
         run: |
           dotnet build \
-            src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj \
+            src/Servers/Stdio/Workstation/Ancplua.Mcp.Servers.Stdio.Workstation.csproj \
             --no-restore \
             --configuration Release
 
       - name: Build AIServicesServer
         run: |
           dotnet build \
-            src/Ancplua.Mcp.AIServicesServer/Ancplua.Mcp.AIServicesServer.csproj \
+            src/Servers/Stdio/AIServices/Ancplua.Mcp.Servers.Stdio.AIServices.csproj \
             --no-restore \
             --configuration Release
 
@@ -65,7 +65,7 @@ jobs:
         run: |
           # Quick smoke test to ensure servers load
           timeout 5s dotnet run \
-            --project src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj \
+            --project src/Servers/Stdio/Workstation/Ancplua.Mcp.Servers.Stdio.Workstation.csproj \
             --no-build \
             --configuration Release \
             || [ $? -eq 124 ]  # timeout exits with 124, which is expected
@@ -73,7 +73,7 @@ jobs:
           echo "✅ WorkstationServer can start"
 
           timeout 5s dotnet run \
-            --project src/Ancplua.Mcp.AIServicesServer/Ancplua.Mcp.AIServicesServer.csproj \
+            --project src/Servers/Stdio/AIServices/Ancplua.Mcp.Servers.Stdio.AIServices.csproj \
             --no-build \
             --configuration Release \
             || [ $? -eq 124 ]
@@ -86,8 +86,8 @@ jobs:
           echo "🎉 Copilot setup completed successfully!"
           echo ""
           echo "Available MCP servers:"
-          echo "  • Ancplua.Mcp.WorkstationServer (Git, Filesystem, CI tools)"
-          echo "  • Ancplua.Mcp.AIServicesServer (AI service orchestration)"
+          echo "  • Ancplua.Mcp.Servers.Stdio.Workstation (Git, Filesystem, CI tools)"
+          echo "  • Ancplua.Mcp.Servers.Stdio.AIServices (AI service orchestration)"
           echo ""
           echo "Secrets configured:"
           echo "  • GITHUB_TOKEN: $([ -n "$GITHUB_TOKEN" ] && echo '✅ Set' || echo '❌ Missing')"
