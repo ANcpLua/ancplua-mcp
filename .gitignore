@@ -54,3 +54,8 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# IDE / OS artifacts
+.idea/
+*.DS_Store
+.DS_Store

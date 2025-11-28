@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **NuGet Supply-Chain Hardening**: Comprehensive cleanup and hardening of build infrastructure
+  - All projects now use Central Package Management (CPM) without inline version attributes
+  - Added `Testcontainers` and `Microsoft.Extensions.Logging` to `Directory.Packages.props`
+  - Removed inline `Version="3.11.0"` from WhisperMesh.Tests (now centralized)
+  - CI workflow explicitly uses `--locked-mode` restore and `ContinuousIntegrationBuild=true`
+  - Added Renovate grouping for OpenTelemetry, Roslyn tooling, and NATS packages
+  - Added `.idea/` and `*.DS_Store` to `.gitignore`
+
 ### Added
 - **Deterministic NuGet Restore**: Enabled locked restore mode for CI enforcement
   - Added `RestoreLockedMode` to `Directory.Build.props` (conditional on CI environment)

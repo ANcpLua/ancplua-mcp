@@ -15,6 +15,24 @@
       "groupName": "MCP SDK"
     },
     {
+      "description": "Group OpenTelemetry packages",
+      "matchDatasources": ["nuget"],
+      "matchPackagePatterns": ["^OpenTelemetry.*"],
+      "groupName": "OpenTelemetry"
+    },
+    {
+      "description": "Group Roslyn/Microsoft.CodeAnalysis packages",
+      "matchDatasources": ["nuget"],
+      "matchPackagePatterns": ["^Microsoft\\.CodeAnalysis.*", "^Microsoft\\.Build.*"],
+      "groupName": "Roslyn tooling"
+    },
+    {
+      "description": "Group NATS packages",
+      "matchDatasources": ["nuget"],
+      "matchPackagePatterns": ["^NATS\\..*"],
+      "groupName": "NATS messaging"
+    },
+    {
       "description": "Auto-merge minor and patch updates that pass CI",
       "matchUpdateTypes": ["minor", "patch"],
       "matchCurrentVersion": "!/^0/",
