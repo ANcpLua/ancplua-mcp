@@ -341,30 +341,7 @@
           "xunit.extensibility.core": "[2.9.3]"
         }
       },
-      "ancplua.mcp.coretools": {
-        "type": "Project",
-        "dependencies": {
-          "ModelContextProtocol": "[0.4.1-preview.1, )"
-        }
-      },
-      "ancplua.mcp.debugtools": {
-        "type": "Project",
-        "dependencies": {
-          "ModelContextProtocol": "[0.4.1-preview.1, )"
-        }
-      },
-      "ancplua.mcp.httpserver": {
-        "type": "Project",
-        "dependencies": {
-          "Ancplua.Mcp.CoreTools": "[1.0.0, )",
-          "Ancplua.Mcp.DebugTools": "[1.0.0, )",
-          "Ancplua.Mcp.ServiceDefaults": "[1.0.0, )",
-          "Microsoft.AspNetCore.OpenApi": "[10.0.0, )",
-          "ModelContextProtocol": "[0.4.1-preview.1, )",
-          "ModelContextProtocol.AspNetCore": "[0.4.1-preview.1, )"
-        }
-      },
-      "ancplua.mcp.servicedefaults": {
+      "ancplua.mcp.infrastructure.servicedefaults": {
         "type": "Project",
         "dependencies": {
           "Microsoft.Extensions.Http.Resilience": "[10.0.0, )",
@@ -374,6 +351,29 @@
           "OpenTelemetry.Instrumentation.AspNetCore": "[1.14.0, )",
           "OpenTelemetry.Instrumentation.Http": "[1.14.0, )",
           "OpenTelemetry.Instrumentation.Runtime": "[1.14.0, )"
+        }
+      },
+      "ancplua.mcp.libraries.coretools": {
+        "type": "Project",
+        "dependencies": {
+          "ModelContextProtocol": "[0.4.1-preview.1, )"
+        }
+      },
+      "ancplua.mcp.libraries.debugtools": {
+        "type": "Project",
+        "dependencies": {
+          "ModelContextProtocol": "[0.4.1-preview.1, )"
+        }
+      },
+      "ancplua.mcp.servers.http.gateway": {
+        "type": "Project",
+        "dependencies": {
+          "Ancplua.Mcp.Infrastructure.ServiceDefaults": "[1.0.0, )",
+          "Ancplua.Mcp.Libraries.CoreTools": "[1.0.0, )",
+          "Ancplua.Mcp.Libraries.DebugTools": "[1.0.0, )",
+          "Microsoft.AspNetCore.OpenApi": "[10.0.0, )",
+          "ModelContextProtocol": "[0.4.1-preview.1, )",
+          "ModelContextProtocol.AspNetCore": "[0.4.1-preview.1, )"
         }
       },
       "Microsoft.AspNetCore.OpenApi": {

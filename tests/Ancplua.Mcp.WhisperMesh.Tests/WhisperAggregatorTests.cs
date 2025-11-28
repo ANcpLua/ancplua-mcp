@@ -1,9 +1,9 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using Ancplua.Mcp.WhisperMesh.Client;
-using Ancplua.Mcp.WhisperMesh.Discoveries;
-using Ancplua.Mcp.WhisperMesh.Models;
-using Ancplua.Mcp.WhisperMesh.Services;
+using Ancplua.Mcp.Libraries.WhisperMesh.Client;
+using Ancplua.Mcp.Libraries.WhisperMesh.Discoveries;
+using Ancplua.Mcp.Libraries.WhisperMesh.Models;
+using Ancplua.Mcp.Libraries.WhisperMesh.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ancplua.Mcp.WhisperMesh.Tests;

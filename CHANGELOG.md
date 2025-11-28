@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Project Restructure**: Reorganized src/ directory by project type
+  - `src/Servers/Stdio/` - Stdio MCP servers (Workstation, AIServices, GitHubApps, RoslynMetrics)
+  - `src/Servers/Http/` - HTTP MCP servers (Gateway)
+  - `src/Libraries/` - Shared libraries (CoreTools, DebugTools, WhisperMesh)
+  - `src/Infrastructure/` - Infrastructure (ServiceDefaults)
+  - New namespaces: `Ancplua.Mcp.{Servers.Stdio|Servers.Http|Libraries|Infrastructure}.*`
+  - Path = Namespace for better AI discoverability
 - **MCP SDK Upgrade**: Updated to v0.4.1-preview.1 with .NET 10.0.0 GA dependencies
   - ModelContextProtocol packages updated from 0.4.0-preview.3 to 0.4.1-preview.1
   - Microsoft.Extensions.AI packages updated from 9.10.0 to 10.0.1

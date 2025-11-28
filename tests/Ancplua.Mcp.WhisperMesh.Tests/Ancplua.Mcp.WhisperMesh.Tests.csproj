@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Ancplua.Mcp.WhisperMesh\Ancplua.Mcp.WhisperMesh.csproj" />
+    <ProjectReference Include="..\..\src\Libraries\WhisperMesh\Ancplua.Mcp.Libraries.WhisperMesh.csproj" />
   </ItemGroup>
 
 </Project>

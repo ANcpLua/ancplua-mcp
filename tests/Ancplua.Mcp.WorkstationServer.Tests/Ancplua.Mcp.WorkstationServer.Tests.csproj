@@ -20,8 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Ancplua.Mcp.WorkstationServer\Ancplua.Mcp.WorkstationServer.csproj" />
-    <ProjectReference Include="..\..\src\Ancplua.Mcp.CoreTools\Ancplua.Mcp.CoreTools.csproj" />
+    <ProjectReference Include="..\..\src\Servers\Stdio\Workstation\Ancplua.Mcp.Servers.Stdio.Workstation.csproj" />
+    <ProjectReference Include="..\..\src\Libraries\CoreTools\Ancplua.Mcp.Libraries.CoreTools.csproj" />
   </ItemGroup>
 
 </Project>

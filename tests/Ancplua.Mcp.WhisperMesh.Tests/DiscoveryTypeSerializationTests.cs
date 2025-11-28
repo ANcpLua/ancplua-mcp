@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Ancplua.Mcp.WhisperMesh.Discoveries;
+using Ancplua.Mcp.Libraries.WhisperMesh.Discoveries;
 
 namespace Ancplua.Mcp.WhisperMesh.Tests;
 
