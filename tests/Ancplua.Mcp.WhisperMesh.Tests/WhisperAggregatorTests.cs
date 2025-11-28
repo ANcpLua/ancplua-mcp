@@ -12,6 +12,7 @@ namespace Ancplua.Mcp.WhisperMesh.Tests;
 /// Unit tests for WhisperAggregator (without NATS).
 /// Tests deduplication and sorting logic using a mock WhisperMeshClient.
 /// </summary>
+#pragma warning disable CA2000 // Test cleanup handled by xUnit
 public class WhisperAggregatorTests
 {
     [Fact]
@@ -297,7 +298,7 @@ internal sealed class MockWhisperMeshClient : IWhisperMeshClient
             yield return message;
         }
 
-        await Task.CompletedTask;
+        await Task.CompletedTask.ConfigureAwait(false);
     }
 
     public ValueTask DisposeAsync()

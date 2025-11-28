@@ -25,10 +25,10 @@ public sealed class NatsWhisperMeshClientIntegrationTests : IAsyncLifetime
             .WithImage("nats:latest")
             .WithPortBinding(4222, true)
             .WithCommand("--jetstream", "--store_dir=/data")
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(4222))
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged("Server is ready"))
             .Build();
 
-        await _natsContainer.StartAsync();
+        await _natsContainer.StartAsync().ConfigureAwait(false);
 
         // Get mapped port
         var mappedPort = _natsContainer.GetMappedPublicPort(4222);
@@ -39,8 +39,8 @@ public sealed class NatsWhisperMeshClientIntegrationTests : IAsyncLifetime
     {
         if (_natsContainer != null)
         {
-            await _natsContainer.StopAsync();
-            await _natsContainer.DisposeAsync();
+            await _natsContainer.StopAsync().ConfigureAwait(false);
+            await _natsContainer.DisposeAsync().ConfigureAwait(false);
         }
     }
 

@@ -47,7 +47,7 @@
     <PackageVersion Include="coverlet.collector" Version="6.0.4"/>
     <PackageVersion Include="Moq" Version="4.20.72"/>
     <PackageVersion Include="FluentAssertions" Version="8.8.0"/>
-    <PackageVersion Include="Testcontainers" Version="3.11.0"/>
+    <PackageVersion Include="Testcontainers" Version="4.9.0"/>
   </ItemGroup>
   <ItemGroup Label="OpenTelemetry – Stable 1.14.0 (released 12.11.2025)">
     <PackageVersion Include="OpenTelemetry.Api" Version="1.14.0"/>
