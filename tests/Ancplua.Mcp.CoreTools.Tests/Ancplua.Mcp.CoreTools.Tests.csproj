@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Ancplua.Mcp.CoreTools\Ancplua.Mcp.CoreTools.csproj" />
+    <ProjectReference Include="..\..\src\Libraries\CoreTools\Ancplua.Mcp.Libraries.CoreTools.csproj" />
   </ItemGroup>
 
 </Project>

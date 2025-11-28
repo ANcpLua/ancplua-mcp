@@ -121,7 +121,7 @@
           "xunit.extensibility.core": "[2.9.3]"
         }
       },
-      "ancplua.mcp.coretools": {
+      "ancplua.mcp.libraries.coretools": {
         "type": "Project",
         "dependencies": {
           "ModelContextProtocol": "[0.4.1-preview.1, )"

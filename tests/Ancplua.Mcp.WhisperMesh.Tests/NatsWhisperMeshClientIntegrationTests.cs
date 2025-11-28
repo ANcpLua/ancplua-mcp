@@ -1,7 +1,7 @@
 using System.Text.Json;
-using Ancplua.Mcp.WhisperMesh.Client;
-using Ancplua.Mcp.WhisperMesh.Discoveries;
-using Ancplua.Mcp.WhisperMesh.Models;
+using Ancplua.Mcp.Libraries.WhisperMesh.Client;
+using Ancplua.Mcp.Libraries.WhisperMesh.Discoveries;
+using Ancplua.Mcp.Libraries.WhisperMesh.Models;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using DotNet.Testcontainers.Builders;

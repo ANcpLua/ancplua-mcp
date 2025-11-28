@@ -1,5 +1,5 @@
 #pragma warning disable CA1707
-using Ancplua.Mcp.CoreTools.Tools;
+using Ancplua.Mcp.Libraries.CoreTools.Tools;
 
 namespace Ancplua.Mcp.CoreTools.Tests;
 

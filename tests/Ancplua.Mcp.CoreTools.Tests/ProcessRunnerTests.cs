@@ -1,6 +1,6 @@
 #pragma warning disable CA1707
 #pragma warning disable CA2007
-using Ancplua.Mcp.CoreTools.Utils;
+using Ancplua.Mcp.Libraries.CoreTools.Utils;
 
 namespace Ancplua.Mcp.CoreTools.Tests;
 
