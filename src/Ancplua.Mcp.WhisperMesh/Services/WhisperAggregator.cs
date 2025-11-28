@@ -10,15 +10,23 @@ namespace Ancplua.Mcp.WhisperMesh.Services;
 /// Aggregates and deduplicates WhisperMesh discoveries from multiple agents.
 /// Used by Dolphin Pod orchestrator to synthesize findings from ARCH, IMPL, and Security agents.
 /// </summary>
-public sealed class WhisperAggregator
+public sealed partial class WhisperAggregator
 {
     private readonly IWhisperMeshClient _client;
     private readonly ILogger<WhisperAggregator> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WhisperAggregator"/> class.
+    /// </summary>
+    /// <param name="client">WhisperMesh client for pub/sub operations.</param>
+    /// <param name="logger">Logger instance.</param>
     public WhisperAggregator(
         IWhisperMeshClient client,
         ILogger<WhisperAggregator> logger)
     {
+        ArgumentNullException.ThrowIfNull(client);
+        ArgumentNullException.ThrowIfNull(logger);
+
         _client = client;
         _logger = logger;
     }
@@ -33,12 +41,13 @@ public sealed class WhisperAggregator
         AggregationRequest request,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(request);
+
         var startTime = DateTimeOffset.UtcNow;
         var discoveries = new List<WhisperMessage>();
         var agentCounts = new Dictionary<string, int>();
 
-        _logger.LogInformation(
-            "Starting aggregation: tiers={Tiers}, topics={Topics}, window={WindowMinutes}min, minSeverity={MinSeverity}",
+        LogStartingAggregation(
             string.Join(",", request.Tiers),
             string.Join(",", request.TopicPatterns),
             request.TimeWindowMinutes,
@@ -51,7 +60,7 @@ public sealed class WhisperAggregator
             {
                 foreach (var topicPattern in request.TopicPatterns)
                 {
-                    await foreach (var message in _client.SubscribeAsync(tier, topicPattern, cancellationToken))
+                    await foreach (var message in _client.SubscribeAsync(tier, topicPattern, cancellationToken).ConfigureAwait(false))
                     {
                         // Apply time window filter
                         var age = DateTimeOffset.UtcNow - message.Timestamp;
@@ -69,7 +78,7 @@ public sealed class WhisperAggregator
                         discoveries.Add(message);
 
                         // Track per-agent counts
-                        if (!agentCounts.ContainsKey(message.Agent))
+                        if (!agentCounts.TryGetValue(message.Agent, out _))
                         {
                             agentCounts[message.Agent] = 0;
                         }
@@ -78,14 +87,14 @@ public sealed class WhisperAggregator
                         // Stop if we've collected enough or exceeded time window
                         if (discoveries.Count >= request.MaxDiscoveries)
                         {
-                            _logger.LogDebug("Reached max discoveries limit: {MaxDiscoveries}", request.MaxDiscoveries);
+                            LogMaxDiscoveriesReached(request.MaxDiscoveries);
                             break;
                         }
 
                         var elapsed = DateTimeOffset.UtcNow - startTime;
                         if (elapsed.TotalMinutes >= request.TimeWindowMinutes)
                         {
-                            _logger.LogDebug("Reached time window limit: {TimeWindowMinutes}min", request.TimeWindowMinutes);
+                            LogTimeWindowReached(request.TimeWindowMinutes);
                             break;
                         }
                     }
@@ -111,8 +120,7 @@ public sealed class WhisperAggregator
             var mediumCount = sorted.Count(d => d.Severity >= 0.4 && d.Severity < 0.6);
             var lowCount = sorted.Count(d => d.Severity < 0.4);
 
-            _logger.LogInformation(
-                "Aggregation complete: total={Total}, deduplicated={Deduplicated}, lightning={Lightning}, storm={Storm}, critical={Critical}",
+            LogAggregationComplete(
                 discoveries.Count,
                 sorted.Count,
                 lightningCount,
@@ -135,9 +143,13 @@ public sealed class WhisperAggregator
                 TimeWindowMinutes = request.TimeWindowMinutes
             };
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
         {
-            _logger.LogError(ex, "Aggregation failed");
+            throw;
+        }
+        catch (InvalidOperationException ex)
+        {
+            LogAggregationFailed(ex);
             throw;
         }
     }
@@ -153,7 +165,7 @@ public sealed class WhisperAggregator
         foreach (var discovery in discoveries)
         {
             var key = BuildDeduplicationKey(discovery);
-            if (key == null)
+            if (key is null)
             {
                 // Cannot deduplicate without location, keep it
                 deduplicationKeys[$"unique-{discovery.MessageId}"] = discovery;
@@ -166,11 +178,7 @@ public sealed class WhisperAggregator
                 if (discovery.Severity > existing.Severity)
                 {
                     deduplicationKeys[key] = discovery;
-                    _logger.LogDebug(
-                        "Replaced duplicate discovery at {Key}: old severity={OldSeverity}, new severity={NewSeverity}",
-                        key,
-                        existing.Severity,
-                        discovery.Severity);
+                    LogReplacedDuplicate(key, existing.Severity, discovery.Severity);
                 }
             }
             else
@@ -179,7 +187,7 @@ public sealed class WhisperAggregator
             }
         }
 
-        return deduplicationKeys.Values.ToList();
+        return [.. deduplicationKeys.Values];
     }
 
     /// <summary>
@@ -189,36 +197,28 @@ public sealed class WhisperAggregator
     /// </summary>
     private string? BuildDeduplicationKey(WhisperMessage message)
     {
-        try
+        // Try to extract CodeLocation from discovery
+        if (message.Discovery?.ValueKind != JsonValueKind.Object)
         {
-            // Try to extract CodeLocation from discovery
-            if (message.Discovery?.ValueKind != JsonValueKind.Object)
-            {
-                return null;
-            }
-
-            var location = ExtractCodeLocation(message.Discovery.Value);
-            if (location == null)
-            {
-                return null;
-            }
-
-            // Extract category from discovery type
-            var category = ExtractCategory(message.Discovery.Value);
-
-            return $"{location.File}:{location.Line}:{category}";
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to build deduplication key for message: {MessageId}", message.MessageId);
             return null;
         }
+
+        var location = ExtractCodeLocation(message.Discovery.Value);
+        if (location is null)
+        {
+            return null;
+        }
+
+        // Extract category from discovery type
+        var category = ExtractCategory(message.Discovery.Value);
+
+        return $"{location.File}:{location.Line}:{category}";
     }
 
     /// <summary>
     /// Extracts CodeLocation from a discovery JsonElement.
     /// </summary>
-    private CodeLocation? ExtractCodeLocation(JsonElement discovery)
+    private static CodeLocation? ExtractCodeLocation(JsonElement discovery)
     {
         if (!discovery.TryGetProperty("location", out var locationElement))
         {
@@ -229,7 +229,7 @@ public sealed class WhisperAggregator
         {
             return JsonSerializer.Deserialize<CodeLocation>(locationElement.GetRawText());
         }
-        catch
+        catch (JsonException)
         {
             return null;
         }
@@ -240,7 +240,7 @@ public sealed class WhisperAggregator
     /// For ArchitectureViolation: uses "rule"
     /// For ImplementationIssue: uses "category"
     /// </summary>
-    private string ExtractCategory(JsonElement discovery)
+    private static string ExtractCategory(JsonElement discovery)
     {
         if (!discovery.TryGetProperty("type", out var typeElement))
         {
@@ -248,14 +248,37 @@ public sealed class WhisperAggregator
         }
 
         var type = typeElement.GetString();
+        if (type is null)
+        {
+            return "unknown";
+        }
 
         return type switch
         {
             "ArchitectureViolation" when discovery.TryGetProperty("rule", out var rule) => rule.GetString() ?? "unknown",
             "ImplementationIssue" when discovery.TryGetProperty("category", out var cat) => cat.GetString() ?? "unknown",
-            _ => type ?? "unknown"
+            _ => type
         };
     }
+
+    // LoggerMessage delegates for high-performance logging (CA1848)
+    [LoggerMessage(Level = LogLevel.Information, Message = "Starting aggregation: tiers={Tiers}, topics={Topics}, window={WindowMinutes}min, minSeverity={MinSeverity}")]
+    private partial void LogStartingAggregation(string tiers, string topics, int windowMinutes, double minSeverity);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Reached max discoveries limit: {MaxDiscoveries}")]
+    private partial void LogMaxDiscoveriesReached(int maxDiscoveries);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Reached time window limit: {TimeWindowMinutes}min")]
+    private partial void LogTimeWindowReached(int timeWindowMinutes);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Aggregation complete: total={Total}, deduplicated={Deduplicated}, lightning={Lightning}, storm={Storm}, critical={Critical}")]
+    private partial void LogAggregationComplete(int total, int deduplicated, int lightning, int storm, int critical);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Aggregation failed")]
+    private partial void LogAggregationFailed(Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Replaced duplicate discovery at {Key}: old severity={OldSeverity}, new severity={NewSeverity}")]
+    private partial void LogReplacedDuplicate(string key, double oldSeverity, double newSeverity);
 }
 
 /// <summary>

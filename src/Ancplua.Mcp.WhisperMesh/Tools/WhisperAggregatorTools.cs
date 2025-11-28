@@ -38,12 +38,12 @@ public static class WhisperAggregatorTools
         };
 
         // Perform aggregation
-        var report = await aggregator.AggregateDiscoveriesAsync(internalRequest, cancellationToken);
+        var report = await aggregator.AggregateDiscoveriesAsync(internalRequest, cancellationToken).ConfigureAwait(false);
 
         // Convert to DTO
         return new AggregatedWhisperReportDto
         {
-            Discoveries = report.Discoveries.Select(ConvertToDto).ToList(),
+            Discoveries = [.. report.Discoveries.Select(ConvertToDto)],
             TotalCount = report.TotalCount,
             DeduplicatedCount = report.DeduplicatedCount,
             LightningCount = report.LightningCount,
@@ -61,19 +61,27 @@ public static class WhisperAggregatorTools
     /// <summary>
     /// Parses a tier string to WhisperTier enum.
     /// </summary>
+    /// <remarks>
+    /// Uses case-insensitive comparison via Enum.TryParse with ignoreCase.
+    /// </remarks>
     private static WhisperTier ParseTier(string tierString)
     {
-        return tierString.ToLowerInvariant() switch
+        if (Enum.TryParse<WhisperTier>(tierString, ignoreCase: true, out var tier))
         {
-            "lightning" => WhisperTier.Lightning,
-            "storm" => WhisperTier.Storm,
-            _ => throw new ArgumentException($"Invalid tier: {tierString}. Must be 'lightning' or 'storm'.")
-        };
+            return tier;
+        }
+
+        throw new ArgumentException($"Invalid tier: {tierString}. Must be 'lightning' or 'storm'.");
     }
 
     /// <summary>
     /// Converts WhisperMessage to DTO for JSON serialization.
     /// </summary>
+    /// <remarks>
+    /// Uses lowercase tier names as per protocol specification.
+    /// CA1308 is suppressed because lowercase is required for protocol compliance.
+    /// </remarks>
+#pragma warning disable CA1308 // Normalize strings to uppercase - protocol requires lowercase
     private static WhisperMessageDto ConvertToDto(WhisperMessage message)
     {
         return new WhisperMessageDto
@@ -91,6 +99,7 @@ public static class WhisperAggregatorTools
             ExpiresAt = message.ExpiresAt
         };
     }
+#pragma warning restore CA1308
 }
 
 /// <summary>

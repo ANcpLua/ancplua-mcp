@@ -33,8 +33,14 @@ public sealed record WhisperMessage
     /// Dot-separated category for routing (e.g., "code-quality", "security.cve").
     /// Lowercase alphanumeric with dots, dashes, underscores. Max 128 chars.
     /// </summary>
+    /// <remarks>
+    /// Uses lowercase per protocol specification.
+    /// CA1308 is suppressed because lowercase is required for protocol compliance.
+    /// </remarks>
     [JsonPropertyName("topic")]
+#pragma warning disable CA1308 // Normalize strings to uppercase - protocol requires lowercase
     public required string Topic { get; init => field = value.Trim().ToLowerInvariant(); }
+#pragma warning restore CA1308
 
     /// <summary>
     /// Normalized urgency score (0.0 = informational, 1.0 = critical).
