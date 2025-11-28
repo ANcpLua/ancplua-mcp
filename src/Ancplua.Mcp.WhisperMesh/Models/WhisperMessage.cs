@@ -7,6 +7,11 @@ namespace Ancplua.Mcp.WhisperMesh.Models;
 /// Represents a whisper message in the WhisperMesh protocol.
 /// Conforms to WhisperMesh Protocol Specification v1.0.
 /// </summary>
+/// <remarks>
+/// CA1062 is suppressed for init properties because validation happens in the Validate() method.
+/// The 'required' modifier ensures non-null at construction time.
+/// </remarks>
+#pragma warning disable CA1062 // Validate arguments of public methods - required modifier ensures non-null, Validate() handles validation
 public sealed record WhisperMessage
 {
     /// <summary>
@@ -147,7 +152,7 @@ public sealed record WhisperMessage
 
         return errors.Count == 0
             ? ValidationResult.Success()
-            : ValidationResult.Failure(errors);
+            : ValidationResult.Failure(errors.AsReadOnly());
     }
 }
 
@@ -157,8 +162,9 @@ public sealed record WhisperMessage
 public sealed record ValidationResult
 {
     public bool IsValid { get; init; }
-    public IReadOnlyList<string> Errors { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Errors { get; init; } = [];
 
     public static ValidationResult Success() => new() { IsValid = true };
-    public static ValidationResult Failure(List<string> errors) => new() { IsValid = false, Errors = errors };
+    public static ValidationResult Failure(IReadOnlyList<string> errors) => new() { IsValid = false, Errors = errors };
 }
+#pragma warning restore CA1062

@@ -14,7 +14,12 @@ public sealed class WhisperMeshClientOptions
     /// NATS server URL.
     /// Default: nats://localhost:4222
     /// </summary>
+    /// <remarks>
+    /// CA1056 is suppressed because NATS.Client library expects a string URL, not Uri.
+    /// </remarks>
+#pragma warning disable CA1056 // URI properties should not be strings - NATS library expects string
     public string NatsUrl { get; set; } = "nats://localhost:4222";
+#pragma warning restore CA1056
 
     /// <summary>
     /// Optional NATS authentication token.

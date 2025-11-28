@@ -195,7 +195,7 @@ public sealed partial class WhisperAggregator
     /// Format: {file}:{line}:{category}
     /// Returns null if discovery doesn't have sufficient location info.
     /// </summary>
-    private string? BuildDeduplicationKey(WhisperMessage message)
+    private static string? BuildDeduplicationKey(WhisperMessage message)
     {
         // Try to extract CodeLocation from discovery
         if (message.Discovery?.ValueKind != JsonValueKind.Object)
@@ -289,13 +289,13 @@ public sealed record AggregationRequest
     /// <summary>
     /// Tiers to aggregate from (Lightning, Storm, or both).
     /// </summary>
-    public required WhisperTier[] Tiers { get; init; }
+    public required IReadOnlyList<WhisperTier> Tiers { get; init; }
 
     /// <summary>
     /// Topic patterns to subscribe to (supports NATS wildcards: * and >).
     /// Example: ["security.*", "code-quality"]
     /// </summary>
-    public required string[] TopicPatterns { get; init; }
+    public required IReadOnlyList<string> TopicPatterns { get; init; }
 
     /// <summary>
     /// Time window in minutes to collect discoveries.
@@ -309,7 +309,7 @@ public sealed record AggregationRequest
     /// Discoveries below this threshold are filtered out.
     /// Default: 0.0 (include all).
     /// </summary>
-    public double MinSeverity { get; init; } = 0.0;
+    public double MinSeverity { get; init; }
 
     /// <summary>
     /// Maximum number of discoveries to collect.

@@ -27,11 +27,14 @@ public static class WhisperAggregatorTools
         [Description("Aggregation request")] AggregationRequestDto request,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(aggregator);
+        ArgumentNullException.ThrowIfNull(request);
+
         // Convert DTO to internal model
         var internalRequest = new AggregationRequest
         {
-            Tiers = request.Tiers.Select(ParseTier).ToArray(),
-            TopicPatterns = request.TopicPatterns,
+            Tiers = [.. request.Tiers.Select(ParseTier)],
+            TopicPatterns = [.. request.TopicPatterns],
             TimeWindowMinutes = request.TimeWindowMinutes,
             MinSeverity = request.MinSeverity,
             MaxDiscoveries = request.MaxDiscoveries
@@ -112,14 +115,14 @@ public sealed record AggregationRequestDto
     /// Example: ["lightning", "storm"]
     /// </summary>
     [Description("Tiers to aggregate from (lightning, storm, or both)")]
-    public required string[] Tiers { get; init; }
+    public required IReadOnlyList<string> Tiers { get; init; }
 
     /// <summary>
     /// Topic patterns to subscribe to (supports NATS wildcards: * and >).
     /// Example: ["security.*", "code-quality", "architecture"]
     /// </summary>
     [Description("Topic patterns to subscribe to (supports NATS wildcards)")]
-    public required string[] TopicPatterns { get; init; }
+    public required IReadOnlyList<string> TopicPatterns { get; init; }
 
     /// <summary>
     /// Time window in minutes to collect discoveries.
@@ -133,7 +136,7 @@ public sealed record AggregationRequestDto
     /// Default: 0.0 (include all).
     /// </summary>
     [Description("Minimum severity threshold 0.0-1.0 (default: 0.0)")]
-    public double MinSeverity { get; init; } = 0.0;
+    public double MinSeverity { get; init; }
 
     /// <summary>
     /// Maximum number of discoveries to collect.
@@ -151,7 +154,7 @@ public sealed record AggregatedWhisperReportDto
     /// <summary>
     /// Deduplicated and sorted discoveries.
     /// </summary>
-    public required List<WhisperMessageDto> Discoveries { get; init; }
+    public required IReadOnlyList<WhisperMessageDto> Discoveries { get; init; }
 
     /// <summary>
     /// Total number of discoveries collected (before deduplication).

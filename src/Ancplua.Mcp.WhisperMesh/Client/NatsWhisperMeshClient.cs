@@ -44,12 +44,13 @@ public sealed partial class NatsWhisperMeshClient : IWhisperMeshClient
         };
 
         // Configure NATS connection (NATS.Client 2.x API)
+        var authOpts = BuildAuthOpts();
         var natsOpts = new NatsOpts
         {
             Url = _options.NatsUrl,
             ConnectTimeout = TimeSpan.FromSeconds(_options.ConnectionTimeoutSeconds),
             MaxReconnectRetry = _options.MaxReconnectAttempts,
-            AuthOpts = BuildAuthOpts(),
+            AuthOpts = authOpts ?? NatsAuthOpts.Default,
             Name = "WhisperMeshClient"
         };
 
