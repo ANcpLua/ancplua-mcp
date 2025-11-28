@@ -7,7 +7,7 @@ This repo is designed to **cooperate** with high-quality external MCP servers, n
 | Server | Purpose | Repo |
 |--------|---------|------|
 | .NET Types Explorer | Reflect over assemblies, NuGet packages | [V0v1kkk/DotNetMetadataMcpServer](https://github.com/V0v1kkk/DotNetMetadataMcpServer) |
-| ContextKeeper | Long-lived workspace memory + Roslyn nav | [chasecuppdev/contextkeeper-mcp](https://github.com/chasecuppdev/contextkeeper-mcp) |
+| ContextKeeper | Long-lived workspace memory + Roslyn navigation | [chasecuppdev/contextkeeper-mcp](https://github.com/chasecuppdev/contextkeeper-mcp) |
 | Roslyn MCP | Semantic validation, diagnostics | [egorpavlikhin/roslyn-mcp](https://github.com/egorpavlikhin/roslyn-mcp) |
 | NuGet Context | NuGet metadata & dependency graphs | [plucked/nuget-context-server](https://github.com/plucked/nuget-context-server) |
 

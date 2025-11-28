@@ -7,7 +7,7 @@ C#/.NET MCP servers for real dev workflows. Stdio + HTTP servers built on the of
 | Server | Transport | Purpose |
 |--------|-----------|---------|
 | WorkstationServer | stdio | Filesystem, git, CI, Roslyn tools |
-| HttpServer | HTTP | Remote/multi-tenant hosting |
+| Gateway | HTTP | Remote/multi-tenant hosting |
 | AIServicesServer | stdio | Multi-AI orchestration |
 | GitHubAppsServer | stdio | GitHub App integrations |
 | RoslynMetricsServer | stdio | Code metrics and analysis |
@@ -39,6 +39,8 @@ dotnet run --project src/Servers/Stdio/AIServices/Ancplua.Mcp.Servers.Stdio.AISe
 Example MCP client configs: [`docs/examples/`](docs/examples/)
 
 Machine-readable server inventory: [`docs/servers.json`](docs/servers.json)
+
+Active repository config: [`.mcp.json`](.mcp.json)
 
 ## Multi-AI Code Review
 
