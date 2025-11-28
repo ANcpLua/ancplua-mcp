@@ -100,8 +100,8 @@ jobs:
           echo ""
           echo "Copilot is ready to work! 🚀"
         env:
-          # These are made available from the 'copilot' environment
-          GITHUB_TOKEN: ${{ secrets.COPILOT_MCP_GITHUB_TOKEN }}
-          GEMINI_API_KEY: ${{ secrets.COPILOT_MCP_GEMINI_API_KEY }}
-          JULES_API_KEY: ${{ secrets.COPILOT_MCP_JULES_API_KEY }}
-          CODECOV_TOKEN: ${{ secrets.COPILOT_MCP_CODECOV_TOKEN }}
+          # Use repo-level secrets (not environment-specific prefixes)
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
