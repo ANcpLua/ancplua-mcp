@@ -1,29 +1,30 @@
-# Multi-stage build for Ancplua.Mcp.WorkstationServer
+# Multi-stage build for Ancplua.Mcp.Servers.Stdio.Workstation
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy global.json and Directory.Packages.props for version control
 COPY global.json ./
 COPY Directory.Packages.props ./
+COPY Directory.Build.props ./
 
 # Copy project files (including dependencies)
-COPY src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj ./src/Ancplua.Mcp.WorkstationServer/
-COPY src/Ancplua.Mcp.ServiceDefaults/Ancplua.Mcp.ServiceDefaults.csproj ./src/Ancplua.Mcp.ServiceDefaults/
-COPY src/Ancplua.Mcp.DebugTools/Ancplua.Mcp.DebugTools.csproj ./src/Ancplua.Mcp.DebugTools/
-COPY src/Ancplua.Mcp.CoreTools/Ancplua.Mcp.CoreTools.csproj ./src/Ancplua.Mcp.CoreTools/
+COPY src/Servers/Stdio/Workstation/Ancplua.Mcp.Servers.Stdio.Workstation.csproj ./src/Servers/Stdio/Workstation/
+COPY src/Infrastructure/ServiceDefaults/Ancplua.Mcp.Infrastructure.ServiceDefaults.csproj ./src/Infrastructure/ServiceDefaults/
+COPY src/Libraries/DebugTools/Ancplua.Mcp.Libraries.DebugTools.csproj ./src/Libraries/DebugTools/
+COPY src/Libraries/CoreTools/Ancplua.Mcp.Libraries.CoreTools.csproj ./src/Libraries/CoreTools/
 # WhisperMesh temporarily excluded pending NATS 2.x API migration
 
 # Restore dependencies
-RUN dotnet restore src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj
+RUN dotnet restore src/Servers/Stdio/Workstation/Ancplua.Mcp.Servers.Stdio.Workstation.csproj
 
 # Copy source code (including dependencies)
-COPY src/Ancplua.Mcp.WorkstationServer/ ./src/Ancplua.Mcp.WorkstationServer/
-COPY src/Ancplua.Mcp.ServiceDefaults/ ./src/Ancplua.Mcp.ServiceDefaults/
-COPY src/Ancplua.Mcp.DebugTools/ ./src/Ancplua.Mcp.DebugTools/
-COPY src/Ancplua.Mcp.CoreTools/ ./src/Ancplua.Mcp.CoreTools/
+COPY src/Servers/Stdio/Workstation/ ./src/Servers/Stdio/Workstation/
+COPY src/Infrastructure/ServiceDefaults/ ./src/Infrastructure/ServiceDefaults/
+COPY src/Libraries/DebugTools/ ./src/Libraries/DebugTools/
+COPY src/Libraries/CoreTools/ ./src/Libraries/CoreTools/
 
 # Build and publish
-WORKDIR /src/src/Ancplua.Mcp.WorkstationServer
+WORKDIR /src/src/Servers/Stdio/Workstation
 RUN dotnet publish -c Release -o /app/publish --no-restore
 
 # Runtime stage
@@ -36,4 +37,4 @@ RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 COPY --from=build /app/publish .
 
 # MCP servers typically use stdio transport
-ENTRYPOINT ["dotnet", "Ancplua.Mcp.WorkstationServer.dll"]
+ENTRYPOINT ["dotnet", "Ancplua.Mcp.Servers.Stdio.Workstation.dll"]

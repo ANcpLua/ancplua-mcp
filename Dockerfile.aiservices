@@ -1,24 +1,25 @@
-# Multi-stage build for Ancplua.Mcp.AIServicesServer
+# Multi-stage build for Ancplua.Mcp.Servers.Stdio.AIServices
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy global.json and Directory.Packages.props for version control
 COPY global.json ./
 COPY Directory.Packages.props ./
+COPY Directory.Build.props ./
 
-# Copy project files (AIServicesServer + ServiceDefaults)
-COPY src/Ancplua.Mcp.AIServicesServer/Ancplua.Mcp.AIServicesServer.csproj ./src/Ancplua.Mcp.AIServicesServer/
-COPY src/Ancplua.Mcp.ServiceDefaults/Ancplua.Mcp.ServiceDefaults.csproj ./src/Ancplua.Mcp.ServiceDefaults/
+# Copy project files (AIServices + ServiceDefaults)
+COPY src/Servers/Stdio/AIServices/Ancplua.Mcp.Servers.Stdio.AIServices.csproj ./src/Servers/Stdio/AIServices/
+COPY src/Infrastructure/ServiceDefaults/Ancplua.Mcp.Infrastructure.ServiceDefaults.csproj ./src/Infrastructure/ServiceDefaults/
 
 # Restore dependencies
-RUN dotnet restore src/Ancplua.Mcp.AIServicesServer/Ancplua.Mcp.AIServicesServer.csproj
+RUN dotnet restore src/Servers/Stdio/AIServices/Ancplua.Mcp.Servers.Stdio.AIServices.csproj
 
 # Copy source code
-COPY src/Ancplua.Mcp.AIServicesServer/ ./src/Ancplua.Mcp.AIServicesServer/
-COPY src/Ancplua.Mcp.ServiceDefaults/ ./src/Ancplua.Mcp.ServiceDefaults/
+COPY src/Servers/Stdio/AIServices/ ./src/Servers/Stdio/AIServices/
+COPY src/Infrastructure/ServiceDefaults/ ./src/Infrastructure/ServiceDefaults/
 
 # Build and publish
-WORKDIR /src/src/Ancplua.Mcp.AIServicesServer
+WORKDIR /src/src/Servers/Stdio/AIServices
 RUN dotnet publish -c Release -o /app/publish --no-restore
 
 # Runtime stage
@@ -48,4 +49,4 @@ LABEL mcp.server.type="stdio" \
       mcp.server.version="1.0.0"
 
 # MCP servers use stdio transport by default
-ENTRYPOINT ["dotnet", "Ancplua.Mcp.AIServicesServer.dll"]
+ENTRYPOINT ["dotnet", "Ancplua.Mcp.Servers.Stdio.AIServices.dll"]

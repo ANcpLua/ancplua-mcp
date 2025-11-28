@@ -1,28 +1,29 @@
-# Multi-stage build for Ancplua.Mcp.HttpServer
+# Multi-stage build for Ancplua.Mcp.Servers.Http.Gateway
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy global.json and Directory.Packages.props for version control
 COPY global.json ./
 COPY Directory.Packages.props ./
+COPY Directory.Build.props ./
 
 # Copy project files (including dependencies)
-COPY src/Ancplua.Mcp.HttpServer/Ancplua.Mcp.HttpServer.csproj ./src/Ancplua.Mcp.HttpServer/
-COPY src/Ancplua.Mcp.ServiceDefaults/Ancplua.Mcp.ServiceDefaults.csproj ./src/Ancplua.Mcp.ServiceDefaults/
-COPY src/Ancplua.Mcp.DebugTools/Ancplua.Mcp.DebugTools.csproj ./src/Ancplua.Mcp.DebugTools/
-COPY src/Ancplua.Mcp.CoreTools/Ancplua.Mcp.CoreTools.csproj ./src/Ancplua.Mcp.CoreTools/
+COPY src/Servers/Http/Gateway/Ancplua.Mcp.Servers.Http.Gateway.csproj ./src/Servers/Http/Gateway/
+COPY src/Infrastructure/ServiceDefaults/Ancplua.Mcp.Infrastructure.ServiceDefaults.csproj ./src/Infrastructure/ServiceDefaults/
+COPY src/Libraries/DebugTools/Ancplua.Mcp.Libraries.DebugTools.csproj ./src/Libraries/DebugTools/
+COPY src/Libraries/CoreTools/Ancplua.Mcp.Libraries.CoreTools.csproj ./src/Libraries/CoreTools/
 
 # Restore dependencies
-RUN dotnet restore src/Ancplua.Mcp.HttpServer/Ancplua.Mcp.HttpServer.csproj
+RUN dotnet restore src/Servers/Http/Gateway/Ancplua.Mcp.Servers.Http.Gateway.csproj
 
 # Copy source code (including dependencies)
-COPY src/Ancplua.Mcp.HttpServer/ ./src/Ancplua.Mcp.HttpServer/
-COPY src/Ancplua.Mcp.ServiceDefaults/ ./src/Ancplua.Mcp.ServiceDefaults/
-COPY src/Ancplua.Mcp.DebugTools/ ./src/Ancplua.Mcp.DebugTools/
-COPY src/Ancplua.Mcp.CoreTools/ ./src/Ancplua.Mcp.CoreTools/
+COPY src/Servers/Http/Gateway/ ./src/Servers/Http/Gateway/
+COPY src/Infrastructure/ServiceDefaults/ ./src/Infrastructure/ServiceDefaults/
+COPY src/Libraries/DebugTools/ ./src/Libraries/DebugTools/
+COPY src/Libraries/CoreTools/ ./src/Libraries/CoreTools/
 
 # Build and publish
-WORKDIR /src/src/Ancplua.Mcp.HttpServer
+WORKDIR /src/src/Servers/Http/Gateway
 RUN dotnet publish -c Release -o /app/publish --no-restore
 
 # Runtime stage
@@ -41,4 +42,4 @@ EXPOSE 5000 5001
 ENV ASPNETCORE_URLS=http://+:5000;https://+:5001
 ENV ASPNETCORE_ENVIRONMENT=Production
 
-ENTRYPOINT ["dotnet", "Ancplua.Mcp.HttpServer.dll"]
+ENTRYPOINT ["dotnet", "Ancplua.Mcp.Servers.Http.Gateway.dll"]

@@ -26,7 +26,7 @@ This document describes the architecture of the **ancplua-mcp** repository and h
 
 ---
 
-## 2. Repository layout (target)
+## 2. Repository layout
 
 ```text
 ancplua-mcp/
@@ -35,58 +35,51 @@ ancplua-mcp/
 ├── CHANGELOG.md
 │
 ├── src/
-│   ├── Ancplua.Mcp.WorkstationServer/
-│   │   ├── Ancplua.Mcp.WorkstationServer.csproj
-│   │   ├── Program.cs
-│   │   └── Tools/
-│   │       ├── FileSystemTools.cs
-│   │       ├── GitTools.cs
-│   │       ├── CiTools.cs
-│   │       ├── NuGetTools.cs
-│   │       ├── RoslynTools.cs
-│   │       ├── RoslynMetricsTools.cs
-│   │       └── ArchitectureTools.cs
+│   ├── Infrastructure/
+│   │   └── ServiceDefaults/           # Shared OpenTelemetry, health, resilience
+│   │       ├── Ancplua.Mcp.Infrastructure.ServiceDefaults.csproj
+│   │       └── Extensions.cs
 │   │
-│   ├── Ancplua.Mcp.HttpServer/
-│   │   ├── Ancplua.Mcp.HttpServer.csproj
-│   │   ├── Program.cs
-│   │   └── Tools/        # Optional HTTP-only tools
+│   ├── Libraries/
+│   │   ├── CoreTools/                 # Shared tool implementations
+│   │   │   └── Ancplua.Mcp.Libraries.CoreTools.csproj
+│   │   ├── DebugTools/                # Debug introspection tools
+│   │   │   └── Ancplua.Mcp.Libraries.DebugTools.csproj
+│   │   └── WhisperMesh/               # NATS-based agent-to-agent communication
+│   │       └── Ancplua.Mcp.Libraries.WhisperMesh.csproj
 │   │
-│   ├── Ancplua.Mcp.AIServicesServer/
-│   │   ├── Ancplua.Mcp.AIServicesServer.csproj
-│   │   ├── Program.cs
-│   │   ├── Tools/
-│   │   │   └── ServiceDiscoveryTools.cs
-│   │   ├── Models/
-│   │   └── Config/
-│   │       └── ai-services.json
-│   │
-│   ├── Ancplua.Mcp.GitHubAppsServer/
-│   │   ├── Ancplua.Mcp.GitHubAppsServer.csproj
-│   │   └── Tools/
-│   │
-│   └── Ancplua.Mcp.ServiceDefaults/
-│       ├── Ancplua.Mcp.ServiceDefaults.csproj
-│       └── Extensions.cs
+│   └── Servers/
+│       ├── Http/
+│       │   └── Gateway/               # HTTP MCP server
+│       │       └── Ancplua.Mcp.Servers.Http.Gateway.csproj
+│       │
+│       └── Stdio/
+│           ├── AIServices/            # AI service orchestration
+│           │   └── Ancplua.Mcp.Servers.Stdio.AIServices.csproj
+│           ├── GitHubApps/            # GitHub App integrations
+│           │   └── Ancplua.Mcp.Servers.Stdio.GitHubApps.csproj
+│           ├── RoslynMetrics/         # Code metrics via Roslyn
+│           │   └── Ancplua.Mcp.Servers.Stdio.RoslynMetrics.csproj
+│           └── Workstation/           # Local dev tools (filesystem, git, CI)
+│               └── Ancplua.Mcp.Servers.Stdio.Workstation.csproj
 │
 ├── tests/
-│   ├── Ancplua.Mcp.WorkstationServer.Tests/
+│   ├── Ancplua.Mcp.CoreTools.Tests/
 │   ├── Ancplua.Mcp.HttpServer.Tests/
-│   └── Ancplua.Mcp.AIServicesServer.Tests/
+│   ├── Ancplua.Mcp.WhisperMesh.Tests/
+│   ├── Ancplua.Mcp.WorkstationServer.Tests/
+│   └── Ancplua.Mcp.Testing/           # Shared test utilities
 │
 ├── docs/
 │   ├── ARCHITECTURE.md
 │   ├── specs/
 │   │   ├── spec-template.md
 │   │   └── spec-*.md
-│   └── decisions/
-│       ├── adr-template.md
-│       └── adr-*.md
-│
-├── docs/examples/
-│   ├── claude-workstation.mcp.json
-│   ├── claude-http.mcp.json
-│   └── rider-workstation.mcp.json
+│   ├── decisions/
+│   │   ├── adr-template.md
+│   │   └── adr-*.md
+│   └── examples/
+│       └── *.mcp.json
 │
 ├── tooling/
 │   └── scripts/
@@ -95,10 +88,13 @@ ancplua-mcp/
 └── .github/
     └── workflows/
         ├── ci.yml
-        └── dependabot.yml
+        ├── claude.yml
+        ├── claude-code-review.yml
+        ├── jules-auto-review.yml
+        └── auto-merge.yml
 ```
 
-If the actual filesystem differs, treat this as the **north star**. Refactor toward it incrementally. 
+**Namespace Convention**: Path = Namespace. `src/Servers/Stdio/Workstation/` → `Ancplua.Mcp.Servers.Stdio.Workstation`. 
 
 ---
 
@@ -131,7 +127,7 @@ Prompts and resources (optional):
 
 ## 4. ServiceDefaults (shared infrastructure)
 
-**Project**: `src/Ancplua.Mcp.ServiceDefaults/`
+**Project**: `src/Infrastructure/ServiceDefaults/`
 
 Responsibilities:
 

@@ -22,6 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Closes CodeQL alert: actions/code-injection/critical
 
 ### Changed
+- **Documentation Path Updates (2025-11-28):**
+  - Updated all config files to use new `src/Servers/`, `src/Libraries/`, `src/Infrastructure/` paths
+  - Updated Dockerfiles (aiservices, http, workstation) with new paths and DLL names
+  - Updated .mcp.json, docs/servers.json, docs/examples/*.mcp.json
+  - Updated docs/ARCHITECTURE.md with new directory tree
+  - Updated README.md, CLAUDE.md, copilot-setup-steps.yml
+  - Removed tracked `ancplua-mcp.sln.DotSettings.user` (IDE user settings)
+
 - **Project Restructure**: Reorganized src/ directory by project type
   - `src/Servers/Stdio/` - Stdio MCP servers (Workstation, AIServices, GitHubApps, RoslynMetrics)
   - `src/Servers/Http/` - HTTP MCP servers (Gateway)

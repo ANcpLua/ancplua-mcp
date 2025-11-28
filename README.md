@@ -101,7 +101,7 @@ Or use the local validation script (mirrors CI):
 ### 4.2 Run WorkstationServer (stdio)
 
 ```bash
-dotnet run --project src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj
+dotnet run --project src/Servers/Stdio/Workstation/Ancplua.Mcp.Servers.Stdio.Workstation.csproj
 ```
 
 Configure Claude Desktop / Claude Code or other clients to use this as an MCP server.
@@ -109,7 +109,7 @@ Configure Claude Desktop / Claude Code or other clients to use this as an MCP se
 ### 4.3 Run HttpServer (HTTP MCP)
 
 ```bash
-dotnet run --project src/Ancplua.Mcp.HttpServer/Ancplua.Mcp.HttpServer.csproj
+dotnet run --project src/Servers/Http/Gateway/Ancplua.Mcp.Servers.Http.Gateway.csproj
 ```
 
 Defaults to `https://localhost:5001` / `http://localhost:5000` unless overridden. 
@@ -117,7 +117,7 @@ Defaults to `https://localhost:5001` / `http://localhost:5000` unless overridden
 ### 4.4 Run AIServicesServer
 
 ```bash
-dotnet run --project src/Ancplua.Mcp.AIServicesServer/Ancplua.Mcp.AIServicesServer.csproj
+dotnet run --project src/Servers/Stdio/AIServices/Ancplua.Mcp.Servers.Stdio.AIServices.csproj
 ```
 
 Or via Docker (if Dockerfiles are present):
@@ -186,7 +186,7 @@ For Claude Desktop / Claude Code (`claude.mcp` or `.mcp.json`):
         "run",
         "--no-build",
         "--project",
-        "src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj"
+        "src/Servers/Stdio/Workstation/Ancplua.Mcp.Servers.Stdio.Workstation.csproj"
       ]
     },
     "ancplua-http": {
@@ -196,7 +196,7 @@ For Claude Desktop / Claude Code (`claude.mcp` or `.mcp.json`):
         "run",
         "--no-build",
         "--project",
-        "src/Ancplua.Mcp.HttpServer/Ancplua.Mcp.HttpServer.csproj"
+        "src/Servers/Http/Gateway/Ancplua.Mcp.Servers.Http.Gateway.csproj"
       ]
     },
     "ancplua-ai-services": {
@@ -206,7 +206,7 @@ For Claude Desktop / Claude Code (`claude.mcp` or `.mcp.json`):
         "run",
         "--no-build",
         "--project",
-        "src/Ancplua.Mcp.AIServicesServer/Ancplua.Mcp.AIServicesServer.csproj"
+        "src/Servers/Stdio/AIServices/Ancplua.Mcp.Servers.Stdio.AIServices.csproj"
       ]
     },
 
@@ -277,7 +277,7 @@ To use these servers with **GitHub Copilot Coding Agent** (in repository setting
       "args": [
         "run",
         "--project",
-        "src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj"
+        "src/Servers/Stdio/Workstation/Ancplua.Mcp.Servers.Stdio.Workstation.csproj"
       ],
       "tools": ["*"]
     },
@@ -287,7 +287,7 @@ To use these servers with **GitHub Copilot Coding Agent** (in repository setting
       "args": [
         "run",
         "--project",
-        "src/Ancplua.Mcp.AIServicesServer/Ancplua.Mcp.AIServicesServer.csproj"
+        "src/Servers/Stdio/AIServices/Ancplua.Mcp.Servers.Stdio.AIServices.csproj"
       ],
       "tools": ["*"],
       "env": {
@@ -350,7 +350,7 @@ You can drop this JSON into `docs/servers.json` or similar for agents to parse:
         "run",
         "--no-build",
         "--project",
-        "src/Ancplua.Mcp.WorkstationServer/Ancplua.Mcp.WorkstationServer.csproj"
+        "src/Servers/Stdio/Workstation/Ancplua.Mcp.Servers.Stdio.Workstation.csproj"
       ]
     }
   },
@@ -367,7 +367,7 @@ You can drop this JSON into `docs/servers.json` or similar for agents to parse:
         "run",
         "--no-build",
         "--project",
-        "src/Ancplua.Mcp.HttpServer/Ancplua.Mcp.HttpServer.csproj"
+        "src/Servers/Http/Gateway/Ancplua.Mcp.Servers.Http.Gateway.csproj"
       ]
     }
   },
@@ -384,7 +384,7 @@ You can drop this JSON into `docs/servers.json` or similar for agents to parse:
         "run",
         "--no-build",
         "--project",
-        "src/Ancplua.Mcp.AIServicesServer/Ancplua.Mcp.AIServicesServer.csproj"
+        "src/Servers/Stdio/AIServices/Ancplua.Mcp.Servers.Stdio.AIServices.csproj"
       ]
     }
   },
