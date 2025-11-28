@@ -17,6 +17,7 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
+  id-token: write  # Added for OIDC token exchange
 
 jobs:
   jules-review:
@@ -26,7 +27,8 @@ jobs:
       github.event.pull_request.user.login != 'dependabot[bot]' &&
       github.event.pull_request.user.login != 'renovate[bot]' &&
       !startsWith(github.event.pull_request.head.ref, 'jules/') &&
-      !startsWith(github.event.pull_request.head.ref, 'copilot/')
+      !startsWith(github.event.pull_request.head.ref, 'copilot/') &&
+      !startsWith(github.event.pull_request.head.ref, 'claude/')
     runs-on: ubuntu-latest
 
     steps:

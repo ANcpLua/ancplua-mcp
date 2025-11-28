@@ -2,56 +2,104 @@ name: Claude Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize]
-    # Optional: Only run on specific file changes
-    # paths:
-    #   - "src/**/*.ts"
-    #   - "src/**/*.tsx"
-    #   - "src/**/*.js"
-    #   - "src/**/*.jsx"
+    types: [ opened, synchronize, ready_for_review ]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to review'
+        required: true
+        type: number
 
 jobs:
   claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
+    # Skip draft PRs and bot PRs to prevent review loops
+    if: |
+      !github.event.pull_request.draft &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'renovate[bot]' &&
+      !startsWith(github.event.pull_request.head.ref, 'claude/') &&
+      !startsWith(github.event.pull_request.head.ref, 'copilot/') &&
+      !startsWith(github.event.pull_request.head.ref, 'jules/')
 
     runs-on: ubuntu-latest
     permissions:
-      contents: write        # Required for merge operations
-      pull-requests: write   # Required for merge and comments
+      contents: write
+      pull-requests: write
       issues: read
       id-token: write
+      actions: read  # Required for Claude to read CI status
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          additional_permissions: |
+            actions: read
+
           prompt: |
-            REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
+            # Code Review Task
 
-            Please review this pull request and provide feedback on:
-            - Code quality and best practices
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
-            - Test coverage
+            **Repository:** ${{ github.repository }}
+            **PR Number:** ${{ github.event.pull_request.number || inputs.pr_number }}
+            **Author:** ${{ github.event.pull_request.user.login }}
+            **Branch:** ${{ github.event.pull_request.head.ref }}
 
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+            ## Instructions
 
-            Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
+            You are an autonomous code reviewer. Perform a thorough review and submit a formal GitHub review.
 
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
-          claude_args: '--model claude-opus-4-5-20251101 --allowed-tools "Bash(gh pr merge:*),Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+            ### Review Checklist (Type T Repository - MCP Servers)
 
+            1. **Correctness** - Logic errors, null handling, race conditions, edge cases
+            2. **Security** - OWASP compliance: path traversal, injection, secrets exposure
+            3. **Performance** - `ConfigureAwait(false)`, `CancellationToken` propagation, disposal patterns
+            4. **CA Compliance** - CA1002, CA1062, CA1305, CA1307, CA1812, CA1822, CA1848, CA2007
+            5. **MCP Protocol** - Tool signatures, `[McpServerTool]` attributes, structured DTO returns
+            6. **C# 14/.NET 10** - Modern patterns: `field` keyword, collection expressions, primary constructors
+            7. **Documentation** - CHANGELOG.md updated, XML docs present, specs/ADRs if architectural
+
+            ### Steps
+
+            1. Run `gh pr diff ${{ github.event.pull_request.number || inputs.pr_number }}` to see changes
+            2. Read CLAUDE.md for repository conventions
+            3. Analyze the changes against the checklist
+            4. Submit a formal review using `gh pr review`
+
+            ### Submit Review
+
+            Use this exact command format:
+
+            ```bash
+            gh pr review ${{ github.event.pull_request.number || inputs.pr_number }} \
+              --approve|--request-changes|--comment \
+              --body "## Claude Code Review (Opus 4.5)
+
+            **Verdict:** ✅ APPROVED | ⚠️ CHANGES REQUESTED | 💬 COMMENT
+
+            ### Summary
+            [Brief description of what this PR does]
+
+            ### Findings
+            [Issues found, categorized by severity]
+
+            ### Strengths
+            [What was done well]
+
+            ---
+            *Autonomous review by Claude Opus 4.5*"
+            ```
+
+            **Decision Guide:**
+            - `--approve`: No blocking issues, code is good
+            - `--request-changes`: Has bugs, security issues, or missing tests
+            - `--comment`: Suggestions only, nothing blocking
+
+          claude_args: '--model claude-opus-4-5-20251101 --allowed-tools "Bash(gh pr merge:*),Bash(gh pr review:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(gh pr edit:*),Bash(gh pr ready:*),Bash(gh issue view:*),Bash(gh issue list:*),Bash(gh search:*),Bash(cat:*),Bash(head:*),Bash(tail:*),Bash(grep:*),Bash(find:*),Bash(ls:*)"'
