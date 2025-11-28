@@ -68,7 +68,7 @@ public sealed class FileSystemToolsTests : IDisposable
     {
         // Arrange
         var testFile = Path.Combine(_testDir, "test.txt");
-        var expectedContent = "Test content";
+        const string expectedContent = "Test content";
         await File.WriteAllTextAsync(testFile, expectedContent);
 
         // Act
@@ -83,7 +83,7 @@ public sealed class FileSystemToolsTests : IDisposable
     {
         // Arrange
         var testFile = Path.Combine(_testDir, "newfile.txt");
-        var content = "Test content";
+        const string content = "Test content";
 
         // Act
         await FileSystemTools.WriteFileAsync(testFile, content);
