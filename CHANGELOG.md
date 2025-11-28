@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- **Fixed bot comment cascade in claude.yml (2025-11-28):**
+  - Added bot filtering to prevent workflow cascade from AI reviewer comments
+  - Filters `user.type != 'Bot'` and explicit bot logins (copilot, coderabbitai, gemini, github-actions)
+  - Applied to all event types: issue_comment, pull_request_review_comment, pull_request_review, issues
+  - Prevents 12+ pending "Action required" runs from single AI review
+
 - **Fixed code injection vulnerability in auto-merge.yml (2025-11-28):**
   - Moved `github.event.pull_request.head.ref` from inline script to `env:` block (CWE-94, CWE-95)
   - Prevents malicious branch names from executing arbitrary code

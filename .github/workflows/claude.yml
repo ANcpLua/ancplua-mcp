@@ -12,11 +12,40 @@ on:
 
 jobs:
   claude:
+    # Skip bot comments/reviews to prevent workflow cascade from AI reviewers
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      (
+        github.event_name == 'issue_comment' &&
+        contains(github.event.comment.body, '@claude') &&
+        github.event.comment.user.type != 'Bot' &&
+        github.event.comment.user.login != 'copilot[bot]' &&
+        github.event.comment.user.login != 'coderabbitai[bot]' &&
+        github.event.comment.user.login != 'gemini-code-assist[bot]' &&
+        github.event.comment.user.login != 'github-actions[bot]'
+      ) ||
+      (
+        github.event_name == 'pull_request_review_comment' &&
+        contains(github.event.comment.body, '@claude') &&
+        github.event.comment.user.type != 'Bot' &&
+        github.event.comment.user.login != 'copilot[bot]' &&
+        github.event.comment.user.login != 'coderabbitai[bot]' &&
+        github.event.comment.user.login != 'gemini-code-assist[bot]' &&
+        github.event.comment.user.login != 'github-actions[bot]'
+      ) ||
+      (
+        github.event_name == 'pull_request_review' &&
+        contains(github.event.review.body, '@claude') &&
+        github.event.review.user.type != 'Bot' &&
+        github.event.review.user.login != 'copilot[bot]' &&
+        github.event.review.user.login != 'coderabbitai[bot]' &&
+        github.event.review.user.login != 'gemini-code-assist[bot]' &&
+        github.event.review.user.login != 'github-actions[bot]'
+      ) ||
+      (
+        github.event_name == 'issues' &&
+        (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')) &&
+        github.event.issue.user.type != 'Bot'
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: write        # Required for merge operations
