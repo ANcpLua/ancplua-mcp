@@ -1,9 +1,18 @@
 ---
 applyTo: "**/*.cs"
-description: "C# 14 and .NET 10 coding standards for ancplua-mcp"
+description: "C# 14 and .NET 10 coding standards for ancplua-mcp - Autonomous agent mode"
 ---
 
 # C# 14 / .NET 10 Coding Standards
+
+## Autonomous Agent Guidelines
+
+When fixing C# code issues:
+
+1. **Act decisively** - Apply fixes without asking for permission
+2. **Use modern C# 14** - Prefer `field` keyword, collection expressions, primary constructors
+3. **Validate** - Run `dotnet build && dotnet test` before completing
+4. **Create PRs** - Use `gh pr create` to submit autonomous fix PRs
 
 ## C# 14 Features - Use Them
 

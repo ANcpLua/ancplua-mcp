@@ -1,9 +1,18 @@
 ---
 applyTo: "**/*.cs"
-description: "Security and OWASP compliance rules"
+description: "Security and OWASP compliance rules - Autonomous agent mode"
 ---
 
 # Security Requirements
+
+## Autonomous Agent Guidelines
+
+When fixing security issues:
+
+1. **Act immediately** - Security issues require urgent fixes
+2. **Validate thoroughly** - Run full test suite after security fixes
+3. **Document** - Add security notes to CHANGELOG.md
+4. **Create PRs** - Security fix PRs get priority review
 
 ## Path Traversal Prevention
 
