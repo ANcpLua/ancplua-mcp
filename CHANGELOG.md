@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **Fixed code injection vulnerability in auto-merge.yml (2025-11-28):**
+  - Moved `github.event.pull_request.head.ref` from inline script to `env:` block (CWE-94, CWE-95)
+  - Prevents malicious branch names from executing arbitrary code
+  - Quoted all `$GITHUB_OUTPUT` references (SC2086)
+  - Closes CodeQL alert: actions/code-injection/critical
+
 ### Changed
 - **Project Restructure**: Reorganized src/ directory by project type
   - `src/Servers/Stdio/` - Stdio MCP servers (Workstation, AIServices, GitHubApps, RoslynMetrics)

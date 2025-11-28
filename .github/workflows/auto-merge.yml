@@ -103,23 +103,25 @@ jobs:
     steps:
       - name: Identify AI agent
         id: agent
+        env:
+          BRANCH_REF: ${{ github.event.pull_request.head.ref }}
         run: |
-          BRANCH="${{ github.event.pull_request.head.ref }}"
-          if [[ "$BRANCH" == copilot/* ]]; then
-            echo "agent=Copilot" >> $GITHUB_OUTPUT
-          elif [[ "$BRANCH" == jules/* ]]; then
-            echo "agent=Jules" >> $GITHUB_OUTPUT
-          elif [[ "$BRANCH" == claude/* ]]; then
-            echo "agent=Claude" >> $GITHUB_OUTPUT
+          if [[ "$BRANCH_REF" == copilot/* ]]; then
+            echo "agent=Copilot" >> "$GITHUB_OUTPUT"
+          elif [[ "$BRANCH_REF" == jules/* ]]; then
+            echo "agent=Jules" >> "$GITHUB_OUTPUT"
+          elif [[ "$BRANCH_REF" == claude/* ]]; then
+            echo "agent=Claude" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Auto-approve AI agent PRs
-        run: |
-          echo "Auto-approving ${{ steps.agent.outputs.agent }} PR"
-          gh pr review --approve "$PR_URL" --body "✅ Auto-approved: ${{ steps.agent.outputs.agent }} autonomous fix PR"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AGENT_NAME: ${{ steps.agent.outputs.agent }}
+        run: |
+          echo "Auto-approving $AGENT_NAME PR"
+          gh pr review --approve "$PR_URL" --body "Auto-approved: $AGENT_NAME autonomous fix PR"
 
       - name: Enable auto-merge for AI agent PRs
         run: gh pr merge --auto --squash "$PR_URL"
