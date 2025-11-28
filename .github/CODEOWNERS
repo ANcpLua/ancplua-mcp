@@ -35,3 +35,6 @@ Directory.Packages.props @ANcpLua
 # Security and sensitive configurations
 /.github/workflows/ci.yml @ANcpLua
 /.github/workflows/pr-review.yml @ANcpLua
+
+# Claude workflow files - require human approval (Claude can't self-review)
+/.github/workflows/claude*.yml @ANcpLua
