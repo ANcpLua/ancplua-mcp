@@ -1,11 +1,11 @@
-# Jules Automatic PR Review
+# Jules Automatic PR Review - Fully Autonomous Mode
 #
 # Triggers Jules AI review automatically on every PR.
-# Works alongside Claude Code Review for dual-AI validation.
+# Works alongside Claude Code Review and Copilot for tri-AI validation.
 # Required secret: JULES_API_KEY
 #
 # Jules creates PRs with fixes, NOT review comments.
-# Human approval required for Jules plans before execution.
+# Set requirePlanApproval: false for fully autonomous operation.
 
 name: Jules Auto Review
 
@@ -14,17 +14,19 @@ on:
     types: [opened, synchronize, ready_for_review]
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
   issues: write
 
 jobs:
   jules-review:
-    # Skip draft PRs and bot PRs
+    # Skip draft PRs and bot PRs to prevent loops
     if: |
       !github.event.pull_request.draft &&
       github.event.pull_request.user.login != 'dependabot[bot]' &&
-      github.event.pull_request.user.login != 'renovate[bot]'
+      github.event.pull_request.user.login != 'renovate[bot]' &&
+      !startsWith(github.event.pull_request.head.ref, 'jules/') &&
+      !startsWith(github.event.pull_request.head.ref, 'copilot/')
     runs-on: ubuntu-latest
 
     steps:
@@ -65,6 +67,7 @@ jobs:
           TITLE="Auto-Review PR #${PR_NUMBER}: $(echo "$PR_TITLE" | cut -c 1-50)"
           TITLE_JSON=$(echo "$TITLE" | jq -Rsa .)
 
+          # Fully autonomous mode - no plan approval required
           RESPONSE=$(curl -s -w "\n%{http_code}" \
             'https://jules.googleapis.com/v1alpha/sessions' \
             -X POST \
@@ -80,7 +83,7 @@ jobs:
                 }
               },
               \"automationMode\": \"AUTO_CREATE_PR\",
-              \"requirePlanApproval\": true,
+              \"requirePlanApproval\": false,
               \"title\": $TITLE_JSON
             }")
 
@@ -99,7 +102,7 @@ jobs:
 
       - name: Post Jules Session Link
         if: steps.check_key.outputs.has_key == 'true' && steps.jules.outputs.success == 'true'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v7
         with:
           script: |
             const sessionId = '${{ steps.jules.outputs.session_id }}';
@@ -110,16 +113,16 @@ jobs:
               issue_number: prNumber,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## 🔮 Jules AI Review Started
+              body: `## 🔮 Jules AI Review Started (Autonomous Mode)
 
             **Session:** [View in Jules](${julesUrl})
 
             Jules is analyzing this PR for bugs, security issues, and improvements.
 
-            - **Plan approval required** before any changes
+            - **Fully autonomous** - fixes will be created automatically
             - If issues found, Jules will create a fix PR
-            - Review the plan at the link above
+            - Monitor progress at the link above
 
             ---
-            *Dual-AI review: Jules + Claude working in parallel*`
+            *Tri-AI autonomous review: Jules + Claude + Copilot*`
             });

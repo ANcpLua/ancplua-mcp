@@ -1,9 +1,18 @@
 ---
 applyTo: "**/Tools/**/*.cs, **/Program.cs"
-description: "MCP Server development patterns using C# SDK"
+description: "MCP Server development patterns using C# SDK - Autonomous agent mode"
 ---
 
 # MCP Server Development
+
+## Autonomous Agent Guidelines
+
+When developing or modifying MCP tools:
+
+1. **Act decisively** - Implement fixes without asking for permission
+2. **Validate** - Run `dotnet build && dotnet test` before completing
+3. **Document** - Update CHANGELOG.md and XML docs for new tools
+4. **Create PRs** - Use `gh pr create` to submit autonomous fix PRs
 
 ## Tool Definition
 

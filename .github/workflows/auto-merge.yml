@@ -1,12 +1,13 @@
-# Auto-merge workflow for trusted PRs
+# Auto-merge workflow for trusted PRs - Maximum Autonomy
 #
 # Tiers:
-# 1. Dependabot PRs: Auto-approve + auto-merge when CI passes
-# 2. CodeRabbit approved PRs: Auto-merge when CI passes + CodeRabbit approves
+# 1. Dependabot/Renovate PRs: Auto-approve + auto-merge when CI passes
+# 2. Copilot/Jules fix PRs: Auto-merge when CI passes
+# 3. CodeRabbit approved PRs: Auto-merge when CI passes
 #
 # Requirements:
 # - Repo setting "Allow auto-merge" must be enabled
-# - Branch protection with required status checks recommended
+# - Branch protection bypass for bot accounts
 
 name: Auto-merge
 
@@ -68,7 +69,47 @@ jobs:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Tier 2: Auto-merge PRs approved by CodeRabbit
+  # Tier 1b: Auto-merge Renovate PRs
+  renovate-auto-merge:
+    name: Renovate auto-merge
+    runs-on: ubuntu-latest
+    if: github.actor == 'renovate[bot]'
+
+    steps:
+      - name: Auto-approve Renovate PRs
+        run: gh pr review --approve "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable auto-merge for Renovate
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Tier 2: Auto-merge Copilot and Jules fix PRs
+  ai-agent-auto-merge:
+    name: AI Agent auto-merge
+    runs-on: ubuntu-latest
+    if: |
+      startsWith(github.event.pull_request.head.ref, 'copilot/') ||
+      startsWith(github.event.pull_request.head.ref, 'jules/')
+
+    steps:
+      - name: Auto-approve AI agent PRs
+        run: gh pr review --approve "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable auto-merge for AI agent PRs
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Tier 3: Auto-merge PRs approved by CodeRabbit
   coderabbit-auto-merge:
     name: CodeRabbit auto-merge
     runs-on: ubuntu-latest

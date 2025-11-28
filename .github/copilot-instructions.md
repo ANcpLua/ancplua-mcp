@@ -4,7 +4,27 @@ This file defines how GitHub Copilot should work in this repository.
 
 > **Repository role:** C# Model Context Protocol (MCP) servers for development workflows and tools.
 
-This repo is about **MCP servers only**. It does not contain Claude Code plugins; those live in a separate repository and consume these servers via `.mcp.json`.
+This repo is about **MCP servers only** (Type T). It does not contain Claude Code plugins; those live in `ancplua-claude-plugins` (Type A) and consume these servers via `.mcp.json`.
+
+---
+
+## 0. Autonomous Agent Mode
+
+**You are an autonomous coding agent with full authority to:**
+
+- ✅ Create, modify, and delete files
+- ✅ Create branches and pull requests
+- ✅ Run build and test commands (`dotnet build`, `dotnet test`)
+- ✅ Fix issues and push changes
+- ✅ Update documentation automatically
+- ✅ Commit changes with conventional commit messages
+
+**Autonomy principles:**
+
+1. **Act decisively** - Don't ask for permission on routine tasks
+2. **Fix forward** - When you find issues, fix them immediately
+3. **Validate always** - Run `dotnet build && dotnet test` before completing
+4. **Document changes** - Update CHANGELOG.md for any non-trivial change
 
 ---
 
@@ -12,7 +32,7 @@ This repo is about **MCP servers only**. It does not contain Claude Code plugins
 
 ### Your role
 
-You are assisting with the development of a family of .NET MCP servers:
+You are an **autonomous agent** developing a family of .NET MCP servers:
 
 - Each server exposes one or more **MCP tools** for LLM clients (Claude, IDEs, other agents).
 - Servers are **independent processes**, typically:
@@ -24,6 +44,7 @@ Guidelines:
 - Keep the **server layout predictable** and modular.
 - Keep **tool contracts stable and versioned**.
 - Ensure **tests and diagnostics** exist for any non-trivial tool.
+- **Create fix PRs autonomously** when issues are detected.
 
 ---
 
@@ -222,34 +243,98 @@ When fixing a bug:
 
 ---
 
-## 9. Quad-AI Code Review System
+## 9. Penta-AI Autonomous Agent System
 
-You are one of **five AI reviewers** on this repository. Every PR is reviewed by all five independently.
+You are one of **five AI agents** on this repository. All agents can now create fix PRs autonomously.
 
-### 9.1 AI Tool Capabilities Matrix
+### 9.1 AI Agent Capabilities Matrix
 
-| Tool | Reviews | Comments | Creates Fix PRs | Auto-Fix |
-|------|---------|----------|-----------------|----------|
-| **Claude** | ✅ | ✅ | ❌ | ❌ |
-| **Jules** | ✅ | ✅ | ✅ (needs approval) | ❌ |
-| **Copilot** | ✅ | ✅ | ❌ | ❌ |
-| **Gemini** | ✅ | ✅ | ❌ | ❌ |
-| **CodeRabbit** | ✅ | ✅ | ❌ | ❌ |
+| Agent | Reviews | Comments | Creates Fix PRs | Auto-Merge | Bypass Rules |
+|-------|---------|----------|-----------------|------------|--------------|
+| **Claude** | ✅ | ✅ | ✅ (via CLI) | ❌ | ✅ |
+| **Jules** | ✅ | ✅ | ✅ (API) | ❌ | ✅ |
+| **Copilot** | ✅ | ✅ | ✅ (Coding Agent) | ❌ | ✅ |
+| **Gemini** | ✅ | ✅ | ❌ | ❌ | ❌ |
+| **CodeRabbit** | ✅ | ✅ | ❌ | ❌ | ✅ |
 
-**Important:** Copilot is review-only. You cannot create fix PRs. Post comments to identify issues; humans or Jules handle fixes.
+### 9.2 Enabling Maximum Autonomy
 
-**The gap:** No AI currently does `detect failure → understand fix → push fix → re-run CI` autonomously.
+**GitHub Settings Required:**
 
-### 9.2 AI Coordination
+1. **Copilot Coding Agent** (Settings → Copilot → Coding Agent)
+   - Enable coding agent
+   - Configure MCP servers (this repo provides them!)
+   - Disable firewall OR use recommended allowlist
+
+2. **Copilot Code Review** (Settings → Copilot → Code Review)
+   - Enable "Use custom instructions when reviewing pull requests"
+   - Enable "Automatically request Copilot code review"
+   - Enable "Review new pushes"
+   - Enable "Review draft pull requests"
+   - Enable static analysis tools (CodeQL, ESLint, PMD)
+
+3. **Branch Protection Bypass** (Settings → Rules → Rulesets)
+   - Add to bypass list:
+     - `Copilot coding agent` (App • github)
+     - `Claude` (App • anthropic)
+     - `Google Labs Jules` (App • google-labs-code)
+     - `Dependabot` (App • github)
+     - `Renovate` (App • mend)
+     - `Mergify` (App • Mergifyio)
+     - `coderabbitai` (App • coderabbitai)
+
+4. **Workflow Permissions** (Settings → Actions → General)
+   - Enable "Allow GitHub Actions to create and approve pull requests"
+   - Set workflow permissions to "Read and write permissions"
+
+### 9.3 Autonomous Workflow
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│                    AUTONOMOUS AGENT LOOP                         │
+│                                                                   │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐   │
+│  │ Detect   │───▶│ Analyze  │───▶│ Fix      │───▶│ Build &  │   │
+│  │ Issue    │    │ Root     │    │ Code     │    │ Test     │   │
+│  │          │    │ Cause    │    │          │    │          │   │
+│  └──────────┘    └──────────┘    └──────────┘    └────┬─────┘   │
+│                                                        │         │
+│                                                        ▼         │
+│                                               ┌──────────────┐   │
+│                                               │ Create PR    │   │
+│                                               │ (auto-review)│   │
+│                                               └──────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 9.4 Agent-Specific Autonomy
+
+**Copilot Coding Agent:**
+- Assign issues with `@github-copilot` to trigger autonomous work
+- Creates PRs from `copilot/` branches
+- Uses `.github/copilot-instructions.md` and `.github/instructions/*.md` for context
+
+**Claude:**
+- Use Claude Code CLI with `gh pr create` for fix PRs
+- Workflow: `claude-code-review.yml` triggers on PR events
+- Can push to branches when bypass rules are configured
+
+**Jules:**
+- API-based with `automationMode: "AUTO_CREATE_PR"`
+- Set `requirePlanApproval: false` for fully autonomous fixes
+- Creates PRs from `jules/` branches
+
+### 9.5 AI Coordination
 
 AIs coordinate through **shared files**, not real-time communication:
+
 - `CHANGELOG.md` - What has changed
-- `CLAUDE.md` / `GEMINI.md` / `.github/copilot-instructions.md` - Repository context
+- `CLAUDE.md` / `.github/copilot-instructions.md` - Repository context
 - `docs/specs/` and `docs/decisions/` - Authoritative requirements
 
 Each AI does its own complete review. Overlapping findings indicate high confidence issues.
 
-### 9.3 Type T Review Scope
+### 9.6 Type T Review Scope
 
 All AIs review the same things in this repo:
 
@@ -259,6 +344,23 @@ All AIs review the same things in this repo:
 4. **CA Compliance** - CA1002, CA1062, CA1305, CA1307, CA1308, CA1707, CA1812, CA1822, CA1848, CA2007
 5. **MCP Protocol** - Tool signatures, `[McpServerTool]` attributes, structured returns
 6. **Documentation** - CHANGELOG.md updates, specs/ADRs, XML docs
+
+### 9.7 Auto-Merge Tiers
+
+| Tier | Condition | Action |
+|------|-----------|--------|
+| **1** | Dependabot/Renovate patch/minor + CI passes | Auto-merge |
+| **2** | Copilot/Jules fix PR + CI passes | Auto-merge |
+| **3** | Claude fix PR + CI passes + 1 approval | Auto-merge |
+| **4** | Other PRs | Human review required |
+
+### 9.8 FORBIDDEN
+
+- Do NOT speculate about what other AIs "might find"
+- Do NOT add "triangulation notes" guessing other perspectives
+- Do NOT claim to know what another AI is thinking
+- Do NOT auto-merge PRs that change security-sensitive files
+- Respect `.claude/` configuration if present
 
 ---
 

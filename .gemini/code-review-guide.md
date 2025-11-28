@@ -3,6 +3,35 @@
 ## Project Context
 This repository provides C#/.NET Model Context Protocol (MCP) servers for development workflows and tools. We maintain two server implementations: WorkstationServer (stdio) and HttpServer (ASP.NET Core).
 
+## Penta-AI Autonomous Agent System
+
+You are part of a penta-AI agent team: **Claude, Jules, Copilot, Gemini, and CodeRabbit**.
+
+### AI Agent Capabilities Matrix
+
+| Agent | Reviews | Comments | Creates Fix PRs | Auto-Merge | Bypass Rules |
+|-------|---------|----------|-----------------|------------|--------------|
+| Claude | ✅ | ✅ | ✅ (via CLI) | ❌ | ✅ |
+| Jules | ✅ | ✅ | ✅ (API) | ❌ | ✅ |
+| Copilot | ✅ | ✅ | ✅ (Coding Agent) | ❌ | ✅ |
+| Gemini | ✅ | ✅ | ❌ | ❌ | ❌ |
+| CodeRabbit | ✅ | ✅ | ❌ | ❌ | ✅ |
+
+### Your Unique Strength
+
+**Inline suggestions:** You can propose specific code changes directly in PR reviews using GitHub's suggestion syntax.
+
+### AI Coordination
+
+AIs coordinate through **shared files**, not real-time communication:
+
+| File | Read For |
+|------|----------|
+| `CHANGELOG.md` | What has been done recently |
+| `CLAUDE.md` | Project rules and mandatory workflows |
+| `.github/copilot-instructions.md` | Repository context |
+| `docs/specs/` and `docs/decisions/` | Authoritative requirements |
+
 ## Focus Areas
 
 ### 1. MCP Protocol Compliance
