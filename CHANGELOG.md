@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **MCP SDK Upgrade**: Updated to v0.4.1-preview.1 with .NET 10.0.0 GA dependencies
+  - ModelContextProtocol packages updated from 0.4.0-preview.3 to 0.4.1-preview.1
+  - Microsoft.Extensions.AI packages updated from 9.10.0 to 10.0.1
+  - No more RC2 transitive dependencies - all Microsoft.Extensions.* align to 10.0.0 GA
+  - Simplified Directory.Packages.props comments (RC2 workaround no longer needed)
+
 ### Added
 - **WhisperMesh NATS 2.x Migration**: Complete migration to NATS.Client 2.x API
   - Updated `NatsWhisperMeshClient` to use NATS.Client 2.5.1 API patterns
