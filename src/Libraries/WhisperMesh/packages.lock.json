@@ -14,9 +14,9 @@
       },
       "NATS.Client.Core": {
         "type": "Direct",
-        "requested": "[2.5.1, )",
-        "resolved": "2.5.1",
-        "contentHash": "GdB947m17zgPPoTYSnsre1Nq1Dp0pCJ0iVq9NvgXIdm0d+oT/HqkD57DYErjlPscRLMe7cZ53BlJ5UEaXH6eAQ==",
+        "requested": "[2.6.11, )",
+        "resolved": "2.6.11",
+        "contentHash": "iVXewDiZkII/Nx9M8ahm4plVxbh/UZ4BNAOJJJNn648p+8VRuY0vo0MxfnA1Cha4IHHHMYAr8yGTYGFBoxAXbg==",
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "6.0.1",
           "Microsoft.Extensions.Primitives": "6.0.0"
@@ -24,11 +24,11 @@
       },
       "NATS.Client.JetStream": {
         "type": "Direct",
-        "requested": "[2.5.1, )",
-        "resolved": "2.5.1",
-        "contentHash": "u2XEaNiW4mCeinIMHTke1UlgtDX8fu7b/YYZC5kI9XcFnwPseOwFY5ZHl98ScEAk38Ba6MMHhkyg4ll03M2j+Q==",
+        "requested": "[2.6.11, )",
+        "resolved": "2.6.11",
+        "contentHash": "tn/7xEVmTOh8PBau+nKOKelTAPeqUmfhwG9gddTUluGFHjut9auMthOmdhb0iYmiMYlBS2fv7frnV7NbDxPiww==",
         "dependencies": {
-          "NATS.Client.Core": "2.5.1"
+          "NATS.Client.Core": "2.6.11"
         }
       },
       "OpenTelemetry.Api": {
