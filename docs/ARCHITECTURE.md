@@ -43,10 +43,8 @@ ancplua-mcp/
 │   ├── Libraries/
 │   │   ├── CoreTools/                 # Shared tool implementations
 │   │   │   └── Ancplua.Mcp.Libraries.CoreTools.csproj
-│   │   ├── DebugTools/                # Debug introspection tools
-│   │   │   └── Ancplua.Mcp.Libraries.DebugTools.csproj
-│   │   └── WhisperMesh/               # NATS-based agent-to-agent communication
-│   │       └── Ancplua.Mcp.Libraries.WhisperMesh.csproj
+│   │   └── DebugTools/                # Debug introspection tools
+│   │       └── Ancplua.Mcp.Libraries.DebugTools.csproj
 │   │
 │   └── Servers/
 │       ├── Http/
@@ -66,7 +64,6 @@ ancplua-mcp/
 ├── tests/
 │   ├── Ancplua.Mcp.CoreTools.Tests/
 │   ├── Ancplua.Mcp.HttpServer.Tests/
-│   ├── Ancplua.Mcp.WhisperMesh.Tests/
 │   ├── Ancplua.Mcp.WorkstationServer.Tests/
 │   └── Ancplua.Mcp.Testing/           # Shared test utilities
 │

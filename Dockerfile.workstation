@@ -12,7 +12,6 @@ COPY src/Servers/Stdio/Workstation/Ancplua.Mcp.Servers.Stdio.Workstation.csproj 
 COPY src/Infrastructure/ServiceDefaults/Ancplua.Mcp.Infrastructure.ServiceDefaults.csproj ./src/Infrastructure/ServiceDefaults/
 COPY src/Libraries/DebugTools/Ancplua.Mcp.Libraries.DebugTools.csproj ./src/Libraries/DebugTools/
 COPY src/Libraries/CoreTools/Ancplua.Mcp.Libraries.CoreTools.csproj ./src/Libraries/CoreTools/
-# WhisperMesh temporarily excluded pending NATS 2.x API migration
 
 # Restore dependencies
 RUN dotnet restore src/Servers/Stdio/Workstation/Ancplua.Mcp.Servers.Stdio.Workstation.csproj
