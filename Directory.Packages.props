@@ -55,10 +55,6 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0"/>
     <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="1.14.0-beta.2"/>
   </ItemGroup>
-  <ItemGroup Label="Messaging (NATS)">
-    <PackageVersion Include="NATS.Client.Core" Version="2.6.11"/>
-    <PackageVersion Include="NATS.Client.JetStream" Version="2.6.11"/>
-  </ItemGroup>
   <!-- Note: System.Text.Json is in-box in .NET 10 - no PackageVersion needed -->
   <ItemGroup Label="NuGet">
     <PackageVersion Include="NuGet.Protocol" Version="7.0.0"/>
