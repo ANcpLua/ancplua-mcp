@@ -265,9 +265,8 @@ internal sealed class PackageInspector
         var bindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | (includePrivate ? BindingFlags.NonPublic : 0);
         var apiTypes = new List<ApiTypeInfo>();
 
-        foreach (var path in assemblyPaths)
+        foreach (var path in assemblyPaths.Where(IsManagedAssembly))
         {
-            if (!IsManagedAssembly(path)) continue;
             try
             {
                 var types = mlc.LoadFromAssemblyPath(path).GetExportedTypes();
@@ -319,9 +318,8 @@ internal sealed class PackageInspector
         var result = new List<TypeComparisonInfo>();
         var bindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
 
-        foreach (var path in assemblyPaths)
+        foreach (var path in assemblyPaths.Where(IsManagedAssembly))
         {
-            if (!IsManagedAssembly(path)) continue;
             try
             {
                 var types = mlc.LoadFromAssemblyPath(path).GetExportedTypes();
@@ -365,7 +363,7 @@ internal sealed class PackageInspector
             await resource.CopyNupkgToStreamAsync(packageId, version, packageStream, cache, NullLogger.Instance, ct).ConfigureAwait(false);
             packageStream.Seek(0, SeekOrigin.Begin);
 
-            using var reader = new PackageArchiveReader(packageStream, leaveStreamOpen: true);
+            using var reader = new PackageArchiveReader(packageStream, leaveStreamOpen: false);
             var dllEntries = reader.GetFiles()
                 .Where(f => f.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) && f.Contains("/net", StringComparison.OrdinalIgnoreCase))
                 .GroupBy(Path.GetFileNameWithoutExtension)
