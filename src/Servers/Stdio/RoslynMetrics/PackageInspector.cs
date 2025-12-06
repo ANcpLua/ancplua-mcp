@@ -360,27 +360,67 @@ internal sealed class PackageInspector
         string packageId, NuGetVersion version, CancellationToken ct)
     {
         var packageStream = new MemoryStream();
-        await resource.CopyNupkgToStreamAsync(packageId, version, packageStream, cache, NullLogger.Instance, ct).ConfigureAwait(false);
-        packageStream.Seek(0, SeekOrigin.Begin);
-
-        using var reader = new PackageArchiveReader(packageStream, leaveStreamOpen: true);
-        var dllEntries = reader.GetFiles()
-            .Where(f => f.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) && f.Contains("/net", StringComparison.OrdinalIgnoreCase))
-            .GroupBy(Path.GetFileNameWithoutExtension)
-            .Select(g => g.OrderByDescending(TfmPriority).First())
-            .ToList();
-
-        if (dllEntries.Count == 0) return [];
-
-        var tempDir = Path.Combine(Path.GetTempPath(), "pkg-inspector", Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(tempDir);
-
-        var assemblyPaths = new List<string>();
-        foreach (var entry in dllEntries)
+        await using (packageStream.ConfigureAwait(false))
         {
-            ct.ThrowIfCancellationRequested();
-            var dest = Path.Combine(tempDir, Path.GetFileName(entry));
-            var entryStream = reader.GetStream(entry);
+            await resource.CopyNupkgToStreamAsync(packageId, version, packageStream, cache, NullLogger.Instance, ct).ConfigureAwait(false);
+            packageStream.Seek(0, SeekOrigin.Begin);
+
+            using var reader = new PackageArchiveReader(packageStream, leaveStreamOpen: true);
+            var dllEntries = reader.GetFiles()
+                .Where(f => f.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) && f.Contains("/net", StringComparison.OrdinalIgnoreCase))
+                .GroupBy(Path.GetFileNameWithoutExtension)
+                .Select(g => g.OrderByDescending(TfmPriority).First())
+                .ToList();
+
+            if (dllEntries.Count == 0) return [];
+
+            var tempDir = Path.Combine(Path.GetTempPath(), "pkg-inspector", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDir);
+
+            var assemblyPaths = new List<string>();
+            foreach (var entry in dllEntries)
+            {
+                ct.ThrowIfCancellationRequested();
+                var dest = Path.Combine(tempDir, Path.GetFileName(entry));
+                var entryStream = reader.GetStream(entry);
+                await using (entryStream.ConfigureAwait(false))
+                {
+                    var fileStream = File.Create(dest);
+                    await using (fileStream.ConfigureAwait(false))
+                    {
+                        await entryStream.CopyToAsync(fileStream, ct).ConfigureAwait(false);
+                    }
+                }
+                assemblyPaths.Add(dest);
+            }
+
+            return assemblyPaths;
+        }
+    }
+
+    private static async Task<string?> DownloadPrimaryAssemblyAsync(
+        FindPackageByIdResource resource, SourceCacheContext cache,
+        string packageId, NuGetVersion version, CancellationToken ct)
+    {
+        var packageStream = new MemoryStream();
+        await using (packageStream.ConfigureAwait(false))
+        {
+            await resource.CopyNupkgToStreamAsync(packageId, version, packageStream, cache, NullLogger.Instance, ct).ConfigureAwait(false);
+            packageStream.Seek(0, SeekOrigin.Begin);
+
+            using var reader = new PackageArchiveReader(packageStream, leaveStreamOpen: true);
+            var dllEntry = reader.GetFiles()
+                .Where(f => f.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) && f.Contains("/net", StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(TfmPriority)
+                .FirstOrDefault();
+
+            if (dllEntry is null) return null;
+
+            var tempDir = Path.Combine(Path.GetTempPath(), "pkg-inspector", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDir);
+            var dest = Path.Combine(tempDir, Path.GetFileName(dllEntry));
+
+            var entryStream = reader.GetStream(dllEntry);
             await using (entryStream.ConfigureAwait(false))
             {
                 var fileStream = File.Create(dest);
@@ -389,43 +429,9 @@ internal sealed class PackageInspector
                     await entryStream.CopyToAsync(fileStream, ct).ConfigureAwait(false);
                 }
             }
-            assemblyPaths.Add(dest);
+
+            return dest;
         }
-
-        return assemblyPaths;
-    }
-
-    private static async Task<string?> DownloadPrimaryAssemblyAsync(
-        FindPackageByIdResource resource, SourceCacheContext cache,
-        string packageId, NuGetVersion version, CancellationToken ct)
-    {
-        var packageStream = new MemoryStream();
-        await resource.CopyNupkgToStreamAsync(packageId, version, packageStream, cache, NullLogger.Instance, ct).ConfigureAwait(false);
-        packageStream.Seek(0, SeekOrigin.Begin);
-
-        using var reader = new PackageArchiveReader(packageStream, leaveStreamOpen: true);
-        var dllEntry = reader.GetFiles()
-            .Where(f => f.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) && f.Contains("/net", StringComparison.OrdinalIgnoreCase))
-            .OrderByDescending(TfmPriority)
-            .FirstOrDefault();
-
-        if (dllEntry is null) return null;
-
-        var tempDir = Path.Combine(Path.GetTempPath(), "pkg-inspector", Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(tempDir);
-        var dest = Path.Combine(tempDir, Path.GetFileName(dllEntry));
-
-        var entryStream = reader.GetStream(dllEntry);
-        await using (entryStream.ConfigureAwait(false))
-        {
-            var fileStream = File.Create(dest);
-            await using (fileStream.ConfigureAwait(false))
-            {
-                await entryStream.CopyToAsync(fileStream, ct).ConfigureAwait(false);
-            }
-        }
-
-        return dest;
     }
 
     private static async Task<(bool isMetaPackage, List<string> dependencies)> CheckIfMetaPackageAsync(
@@ -435,20 +441,23 @@ internal sealed class PackageInspector
         try
         {
             var packageStream = new MemoryStream();
-            await resource.CopyNupkgToStreamAsync(packageId, version, packageStream, cache, NullLogger.Instance, ct).ConfigureAwait(false);
-            packageStream.Seek(0, SeekOrigin.Begin);
+            await using (packageStream.ConfigureAwait(false))
+            {
+                await resource.CopyNupkgToStreamAsync(packageId, version, packageStream, cache, NullLogger.Instance, ct).ConfigureAwait(false);
+                packageStream.Seek(0, SeekOrigin.Begin);
 
-            using var reader = new PackageArchiveReader(packageStream, leaveStreamOpen: true);
-            var hasLibDlls = reader.GetFiles().Any(f =>
-                f.StartsWith("lib/", StringComparison.OrdinalIgnoreCase) &&
-                f.EndsWith(".dll", StringComparison.OrdinalIgnoreCase));
+                using var reader = new PackageArchiveReader(packageStream, leaveStreamOpen: true);
+                var hasLibDlls = reader.GetFiles().Any(f =>
+                    f.StartsWith("lib/", StringComparison.OrdinalIgnoreCase) &&
+                    f.EndsWith(".dll", StringComparison.OrdinalIgnoreCase));
 
-            if (hasLibDlls) return (false, []);
+                if (hasLibDlls) return (false, []);
 
-            var deps = reader.NuspecReader.GetDependencyGroups()
-                .SelectMany(g => g.Packages).Select(p => p.Id).Distinct().ToList();
+                var deps = reader.NuspecReader.GetDependencyGroups()
+                    .SelectMany(g => g.Packages).Select(p => p.Id).Distinct().ToList();
 
-            return (true, deps);
+                return (true, deps);
+            }
         }
         catch (InvalidOperationException) { return (false, []); }
         catch (IOException) { return (false, []); }
