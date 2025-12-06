@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- **WhisperMesh Protocol Removed (2025-12-02):**
+  - Removed entire `src/Libraries/WhisperMesh/` library (NATS-based agent-to-agent communication)
+  - Removed `tests/Ancplua.Mcp.WhisperMesh.Tests/` test project
+  - Removed WhisperMesh documentation:
+    - `docs/decisions/ADR-0107-whispermesh-protocol-adoption.md`
+    - `docs/specs/spec-0110-whispermesh-phase1-implementation.md`
+    - `docs/specs/spec-whispermesh-protocol.md`
+  - Removed NATS.Client.Core and NATS.Client.JetStream package references from Directory.Packages.props
+  - Cleaned up WhisperMesh configuration from Workstation server appsettings.json
+  - **Reason**: Protocol idea was abandoned in favor of simpler alternatives
+
 ### Security
 
 - **Fixed bot comment cascade in claude.yml (2025-11-28):**
@@ -55,7 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Project Restructure**: Reorganized src/ directory by project type
   - `src/Servers/Stdio/` - Stdio MCP servers (Workstation, AIServices, GitHubApps, RoslynMetrics)
   - `src/Servers/Http/` - HTTP MCP servers (Gateway)
-  - `src/Libraries/` - Shared libraries (CoreTools, DebugTools, WhisperMesh)
+  - `src/Libraries/` - Shared libraries (CoreTools, DebugTools)
   - `src/Infrastructure/` - Infrastructure (ServiceDefaults)
   - New namespaces: `Ancplua.Mcp.{Servers.Stdio|Servers.Http|Libraries|Infrastructure}.*`
   - Path = Namespace for better AI discoverability
@@ -65,24 +77,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - No more RC2 transitive dependencies - all Microsoft.Extensions.* align to 10.0.0 GA
   - Simplified Directory.Packages.props comments (RC2 workaround no longer needed)
 
-### Added
-- **WhisperMesh NATS 2.x Migration**: Complete migration to NATS.Client 2.x API
-  - Updated `NatsWhisperMeshClient` to use NATS.Client 2.5.1 API patterns
-  - Fixed `NatsOpts`, `StreamConfig`, and `ConsumerConfig` for 2.x compatibility
-  - Added `ConfigureAwait(false)` throughout async methods (CA2007)
-  - Added `ArgumentNullException.ThrowIfNull()` for parameter validation (CA1062)
-  - Implemented `LoggerMessage` source generators for high-performance logging (CA1848)
-  - Made `NatsWhisperMeshClient` partial class for LoggerMessage support
-  - WhisperMesh now builds and passes all unit tests (14 tests)
-  - Updated Testcontainers to 4.9.0 with new wait strategy API
-
 ### Changed
 - **NuGet Supply-Chain Hardening**: Comprehensive cleanup and hardening of build infrastructure
   - All projects now use Central Package Management (CPM) without inline version attributes
   - Added `Testcontainers` and `Microsoft.Extensions.Logging` to `Directory.Packages.props`
-  - Removed inline `Version="3.11.0"` from WhisperMesh.Tests (now centralized)
   - CI workflow explicitly uses `--locked-mode` restore and `ContinuousIntegrationBuild=true`
-  - Added Renovate grouping for OpenTelemetry, Roslyn tooling, and NATS packages
+  - Added Renovate grouping for OpenTelemetry and Roslyn tooling packages
   - Added `.idea/` and `*.DS_Store` to `.gitignore`
 
 ### Added
@@ -97,13 +97,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - AI capability matrix documented in CLAUDE.md, README.md, GEMINI.md, copilot-instructions.md
   - Type T review scope: Correctness, Security, Performance, CA Compliance, MCP Protocol, Documentation
   - AIs coordinate via shared files (CHANGELOG.md, specs, ADRs), not real-time communication
-- **WhisperMesh Protocol Foundations**: Established ambient multi-agent intelligence infrastructure
-  - ADR-0107: WhisperMesh Protocol Adoption (decision to adopt NATS-based agent-to-agent communication)
-  - Implemented `WhisperTier` enum (Lightning/Storm dual-tier system)
-  - Implemented `WhisperMetadata` record (traceability context with OpenTelemetry support)
-  - Fixed build errors in `Ancplua.Mcp.WhisperMesh` project (now compiles successfully)
-  - Protocol spec: [spec-whispermesh-protocol.md](docs/specs/spec-whispermesh-protocol.md) (1062 lines, v1.0)
-  - **Note**: WhisperMesh is currently 5% implemented (data model only, no client/server yet)
 - **Ancplua.Mcp.CoreTools**: New shared library consolidating tools from HttpServer and WorkstationServer
   - Implements ADR-006 (Core Tools Consolidation) and spec-006
   - Eliminates code duplication between servers
@@ -132,8 +125,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Directory.Packages.props**: Reorganized Microsoft Extensions packages
   - Removed in-box packages that don't need explicit references
   - Added explicit pins for abstractions packages to override MCP's RC2 dependencies
-  - Added NATS.Client packages for WhisperMesh central version management
-  - Added OpenTelemetry.Api for WhisperMesh
 - **DebugTools.csproj**: Added explicit `FrameworkReference` for `Microsoft.AspNetCore.App`
   (required for `IHttpContextAccessor` in non-web SDK projects)
 - **Testing.csproj**: Retained `Microsoft.Extensions.Hosting` PackageReference
@@ -208,7 +199,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Structure**: Reorganized repository into `src/` with "Insight Spine" architecture.
 
 ### Code Ergonomics (C# 14)
-- **`field` Keyword**: Adopted C# 14 `field` keyword in `AIServiceInfo` and `WhisperMessage` for cleaner property definitions.
+- **`field` Keyword**: Adopted C# 14 `field` keyword in `AIServiceInfo` for cleaner property definitions.
 - **Extensions**: Utilized C# 14 `extension` types for cleaner `IHostApplicationBuilder` extensions (e.g., `IsDevelopment` property).
 - **Performance**: Prepared codebase for .NET 10 JIT Loop Inversion and stack-allocated delegates.
 

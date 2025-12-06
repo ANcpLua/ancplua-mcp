@@ -4,9 +4,9 @@
     "net10.0": {
       "Basic.Reference.Assemblies.NetStandard20": {
         "type": "Direct",
-        "requested": "[1.8.0, )",
-        "resolved": "1.8.0",
-        "contentHash": "DydPGY+i+W0TDdbseRGmxBNOwje/5D+A5KyUPzuBhxamHyaYcbjosT8pWGl7A9q9QWHaWSM6J5myAP7Rb1OpBw==",
+        "requested": "[1.8.4, )",
+        "resolved": "1.8.4",
+        "contentHash": "YeoFLjT5Nghwhy4YmUZBvJ5KSixJb6VwX1s4cy2lrlA+7FQ9+EgwEN/aZeisePaOlDkKOtvjxugDDPg8oRrpPg==",
         "dependencies": {
           "Microsoft.CodeAnalysis.Common": "4.11.0"
         }
@@ -39,9 +39,9 @@
       },
       "Microsoft.Build.Locator": {
         "type": "Direct",
-        "requested": "[1.11.1, )",
-        "resolved": "1.11.1",
-        "contentHash": "22UJmwINBXtbrE783z2K6NaGS9PK3zsUIeg6oDiWBU7LOJOglw3tCLR7jTG7sn/rvzGmxbiK5XVtLbx9ZjSMSg=="
+        "requested": "[1.11.2, )",
+        "resolved": "1.11.2",
+        "contentHash": "tY+/S54G29CGsbL3slVu4vqtpciwVnb3fKOmrhgzEQmu/VziFaWmD/E1e/2KH7cDucuycGSkWsSXndBs5Uawow=="
       },
       "Microsoft.Build.Tasks.Core": {
         "type": "Direct",
@@ -173,9 +173,9 @@
       },
       "NuGet.Frameworks": {
         "type": "Direct",
-        "requested": "[7.0.0, )",
-        "resolved": "7.0.0",
-        "contentHash": "y63Mw1UhQ2Qkwj8LBAk9t+ciFd74biaVpFMQywBrCQC7Y53k41qTI5DJKPtnveH65uA2bnj5h30gMI6lMp7Wcg=="
+        "requested": "[7.0.1, )",
+        "resolved": "7.0.1",
+        "contentHash": "dUDwg8VYTyT+ZbLdC7hUUHFF530HeRl4jcxclKJY0o96f3nv0eZvojXwjRkq2HKzuyRCcVD4T24aEF83CUmBzA=="
       },
       "NuGet.Packaging": {
         "type": "Direct",
@@ -200,9 +200,9 @@
       },
       "NuGet.Versioning": {
         "type": "Direct",
-        "requested": "[7.0.0, )",
-        "resolved": "7.0.0",
-        "contentHash": "vMEhpystjAmHzWARE09PjYMWOiGgM+f9rJYMcXGs8soz9/url4qmU9O9Y+hy22kPuqozCMoGcJt0JzKRZ1woZg=="
+        "requested": "[7.0.1, )",
+        "resolved": "7.0.1",
+        "contentHash": "tu68LnZqiLM/VyLQzPRqedopMi/M+5/6JqwB2Xkd0AWXRpUWewkVv77asVB7wgjMPVzQFK2sBy7AuxV49UzuvQ=="
       },
       "Humanizer.Core": {
         "type": "Transitive",
