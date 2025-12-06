@@ -1,0 +1,29 @@
+{
+  "mcpServers": {
+    "workstation": {
+      "type": "stdio",
+      "command": "dotnet",
+      "args": ["run", "--project", "src/Servers/Stdio/Workstation/Ancplua.Mcp.Servers.Stdio.Workstation.csproj"]
+    },
+    "ai-services": {
+      "type": "stdio",
+      "command": "dotnet",
+      "args": ["run", "--project", "src/Servers/Stdio/AIServices/Ancplua.Mcp.Servers.Stdio.AIServices.csproj"]
+    },
+    "github-apps": {
+      "type": "stdio",
+      "command": "dotnet",
+      "args": ["run", "--project", "src/Servers/Stdio/GitHubApps/Ancplua.Mcp.Servers.Stdio.GitHubApps.csproj"]
+    },
+    "roslyn-metrics": {
+      "type": "stdio",
+      "command": "dotnet",
+      "args": ["run", "--project", "src/Servers/Stdio/RoslynMetrics/Ancplua.Mcp.Servers.Stdio.RoslynMetrics.csproj"]
+    },
+    "http-gateway": {
+      "type": "sse",
+      "url": "http://localhost:5000/sse",
+      "note": "Start gateway first: dotnet run --project src/Servers/Http/Gateway --urls http://localhost:5000"
+    }
+  }
+}

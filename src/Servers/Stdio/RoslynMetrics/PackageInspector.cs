@@ -53,13 +53,12 @@ internal sealed class PackageInspector
             changes.IsMetaPackage = isMetaPackage;
             if (isMetaPackage) changes.MetaDependencies.AddRange(dependencies);
 
-            var oldTypes = await LoadTypesAsync(resource, cache, packageId, oldVer, ct).ConfigureAwait(false);
-            var newTypes = await LoadTypesAsync(resource, cache, packageId, newVer, ct).ConfigureAwait(false);
+            // Use DTOs that capture data while MLC is still valid
+            var oldTypes = await LoadTypesForComparisonAsync(resource, cache, packageId, oldVer, ct).ConfigureAwait(false);
+            var newTypes = await LoadTypesForComparisonAsync(resource, cache, packageId, newVer, ct).ConfigureAwait(false);
 
-            var oldTypeDict = oldTypes.Where(t => t.FullName is not null)
-                .GroupBy(t => t.FullName!).ToDictionary(g => g.Key, g => g.First());
-            var newTypeDict = newTypes.Where(t => t.FullName is not null)
-                .GroupBy(t => t.FullName!).ToDictionary(g => g.Key, g => g.First());
+            var oldTypeDict = oldTypes.GroupBy(t => t.FullName).ToDictionary(g => g.Key, g => g.First());
+            var newTypeDict = newTypes.GroupBy(t => t.FullName).ToDictionary(g => g.Key, g => g.First());
 
             foreach (var (typeName, oldType) in oldTypeDict)
             {
@@ -68,7 +67,7 @@ internal sealed class PackageInspector
                     changes.RemovedTypes.Add(typeName);
                     continue;
                 }
-                CompareTypeMembers(oldType, newType, changes);
+                CompareTypeInfo(oldType, newType, changes);
             }
 
             foreach (var typeName in newTypeDict.Keys.Where(k => !oldTypeDict.ContainsKey(k)))
@@ -94,29 +93,7 @@ internal sealed class PackageInspector
         using var cache = new SourceCacheContext();
 
         var ver = NuGetVersion.Parse(version);
-        var types = await LoadTypesAsync(resource, cache, packageId, ver, ct).ConfigureAwait(false);
-
-        var bindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | (includePrivate ? BindingFlags.NonPublic : 0);
-        var apiTypes = types
-            .Where(t => t.FullName is not null && (includePrivate || t.IsPublic))
-            .Select(t => new ApiTypeInfo(
-                FullName: t.FullName!,
-                Namespace: t.Namespace,
-                Name: t.Name,
-                Kind: GetTypeKind(t),
-                IsPublic: t.IsPublic,
-                BaseType: t.BaseType?.FullName,
-                Interfaces: [.. t.GetInterfaces().Select(i => i.FullName).OfType<string>()],
-                Methods: [.. t.GetMethods(bindingFlags)
-                    .Where(m => !m.IsSpecialName)
-                    .Select(m => new ApiMethodInfo(
-                        m.Name, m.ReturnType.FullName ?? "void", m.IsStatic,
-                        m.GetCustomAttribute<ObsoleteAttribute>()?.Message,
-                        [.. m.GetParameters().Select(p => new ApiParameterInfo(p.Name ?? "arg", p.ParameterType.FullName ?? "object", p.HasDefaultValue))]))],
-                Properties: [.. t.GetProperties(bindingFlags)
-                    .Select(p => new ApiPropertyInfo(p.Name, p.PropertyType.FullName ?? "object", p.CanRead, p.CanWrite))],
-                ObsoleteMessage: t.GetCustomAttribute<ObsoleteAttribute>()?.Message))
-            .ToArray();
+        var apiTypes = await LoadAndExtractTypesAsync(resource, cache, packageId, ver, includePrivate, ct).ConfigureAwait(false);
 
         return new ApiSurfaceResult(packageId, version, apiTypes);
     }
@@ -164,58 +141,55 @@ internal sealed class PackageInspector
         catch (BadImageFormatException ex) { return new DecompileResult(packageId, version, typeName, null, ex.Message); }
     }
 
-    private static void CompareTypeMembers(Type oldType, Type newType, ApiChanges changes)
+    /// <summary>
+    /// Compares two TypeComparisonInfo DTOs (data already extracted from MLC).
+    /// </summary>
+    private static void CompareTypeInfo(TypeComparisonInfo oldType, TypeComparisonInfo newType, ApiChanges changes)
     {
-        var newObsolete = newType.GetCustomAttribute<ObsoleteAttribute>();
-        if (newObsolete is not null)
-            changes.ObsoleteTypes.Add(string.IsNullOrEmpty(newObsolete.Message) ? newType.Name : $"{newType.Name}: {newObsolete.Message}");
+        if (newType.ObsoleteMessage is not null)
+            changes.ObsoleteTypes.Add(string.IsNullOrEmpty(newType.ObsoleteMessage) ? newType.Name : $"{newType.Name}: {newType.ObsoleteMessage}");
 
         if (!string.Equals(oldType.Namespace, newType.Namespace, StringComparison.Ordinal))
             changes.NamespaceChanges.Add($"{oldType.FullName} → {newType.FullName}");
 
-        var oldInterfaces = oldType.GetInterfaces().Select(i => i.Name).ToHashSet();
-        var newInterfaces = newType.GetInterfaces().Select(i => i.Name).ToHashSet();
+        var oldInterfaces = oldType.InterfaceNames.ToHashSet();
+        var newInterfaces = newType.InterfaceNames.ToHashSet();
         foreach (var removed in oldInterfaces.Except(newInterfaces))
             changes.RemovedInterfaces.Add($"{oldType.Name} no longer implements {removed}");
         foreach (var added in newInterfaces.Except(oldInterfaces))
             changes.AddedInterfaces.Add($"{oldType.Name} now implements {added}");
 
-        var oldBase = oldType.BaseType?.Name;
-        var newBase = newType.BaseType?.Name;
-        if (!string.Equals(oldBase, newBase, StringComparison.Ordinal) && oldBase is not null && newBase is not null)
-            changes.BaseClassChanges.Add($"{oldType.Name}: {oldBase} → {newBase}");
+        if (!string.Equals(oldType.BaseTypeName, newType.BaseTypeName, StringComparison.Ordinal) &&
+            oldType.BaseTypeName is not null && newType.BaseTypeName is not null)
+            changes.BaseClassChanges.Add($"{oldType.Name}: {oldType.BaseTypeName} → {newType.BaseTypeName}");
 
-        var oldMethods = GetMethodSignatures(oldType);
-        var newMethods = GetMethodSignatures(newType);
-        var oldMethodInfos = oldType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
-            .Where(m => !m.IsSpecialName).ToList();
-        var newMethodInfos = newType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
-            .Where(m => !m.IsSpecialName).ToList();
+        var oldMethods = oldType.Methods.Select(m => m.Signature).ToHashSet();
+        var newMethods = newType.Methods.Select(m => m.Signature).ToHashSet();
 
-        foreach (var old in oldMethods.Where(o => !newMethods.Contains(o)))
+        foreach (var oldSig in oldMethods.Where(o => !newMethods.Contains(o)))
         {
-            changes.RemovedMethods.Add($"{oldType.Name}.{old}");
-            var oldMethod = oldMethodInfos.FirstOrDefault(m => string.Equals(GetMethodSignature(m), old, StringComparison.Ordinal));
-            if (oldMethod is not null && !IsAsyncMethod(oldMethod))
+            changes.RemovedMethods.Add($"{oldType.Name}.{oldSig}");
+            var oldMethod = oldType.Methods.FirstOrDefault(m => string.Equals(m.Signature, oldSig, StringComparison.Ordinal));
+            if (oldMethod is not null && !oldMethod.IsAsync)
             {
                 var asyncName = oldMethod.Name + "Async";
-                if (newMethodInfos.Any(m => string.Equals(m.Name, asyncName, StringComparison.Ordinal) && IsAsyncMethod(m)))
+                if (newType.Methods.Any(m => string.Equals(m.Name, asyncName, StringComparison.Ordinal) && m.IsAsync))
                     changes.AsyncChanges.Add($"{oldType.Name}.{oldMethod.Name} → {asyncName} (sync to async)");
             }
         }
 
-        foreach (var newMethod in newMethods.Where(n => !oldMethods.Contains(n)))
-            changes.AddedMethods.Add($"{newType.Name}.{newMethod}");
+        foreach (var newSig in newMethods.Where(n => !oldMethods.Contains(n)))
+            changes.AddedMethods.Add($"{newType.Name}.{newSig}");
 
-        foreach (var method in newMethodInfos)
+        foreach (var method in newType.Methods.Where(m => m.ObsoleteMessage is not null))
         {
-            var obsolete = method.GetCustomAttribute<ObsoleteAttribute>();
-            if (obsolete is not null)
-                changes.ObsoleteMethods.Add(string.IsNullOrEmpty(obsolete.Message) ? $"{newType.Name}.{method.Name}" : $"{newType.Name}.{method.Name}: {obsolete.Message}");
+            changes.ObsoleteMethods.Add(string.IsNullOrEmpty(method.ObsoleteMessage)
+                ? $"{newType.Name}.{method.Name}"
+                : $"{newType.Name}.{method.Name}: {method.ObsoleteMessage}");
         }
 
-        var oldProps = GetPropertyNames(oldType);
-        var newProps = GetPropertyNames(newType);
+        var oldProps = oldType.PropertyNames.ToHashSet();
+        var newProps = newType.PropertyNames.ToHashSet();
         foreach (var old in oldProps.Where(o => !newProps.Contains(o)))
             changes.RemovedProperties.Add($"{oldType.Name}.{old}");
         foreach (var newProp in newProps.Where(n => !oldProps.Contains(n)))
@@ -223,18 +197,43 @@ internal sealed class PackageInspector
     }
 
     private static bool IsAsyncMethod(MethodInfo method) =>
-        method.ReturnType == typeof(Task) ||
-        (method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition() == typeof(Task<>));
+        method.ReturnType.FullName == "System.Threading.Tasks.Task" ||
+        (method.ReturnType.IsGenericType && method.ReturnType.FullName?.StartsWith("System.Threading.Tasks.Task`1", StringComparison.Ordinal) == true);
 
     private static string GetMethodSignature(MethodInfo m) =>
         string.Create(CultureInfo.InvariantCulture, $"{m.Name}({string.Join(",", m.GetParameters().Select(p => p.ParameterType.Name))})");
 
-    private static HashSet<string> GetMethodSignatures(Type type) =>
-        type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
-            .Where(m => !m.IsSpecialName).Select(GetMethodSignature).ToHashSet();
+    /// <summary>
+    /// Gets obsolete message using GetCustomAttributesData() which works with MetadataLoadContext.
+    /// GetCustomAttribute&lt;T&gt;() throws InvalidOperationException on MLC-loaded types.
+    /// </summary>
+    private static string? GetObsoleteMessage(MemberInfo member)
+    {
+        try
+        {
+            var obsoleteAttr = member.GetCustomAttributesData()
+                .FirstOrDefault(a => a.AttributeType.FullName == "System.ObsoleteAttribute");
 
-    private static HashSet<string> GetPropertyNames(Type type) =>
-        type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static).Select(p => p.Name).ToHashSet();
+            if (obsoleteAttr is null) return null;
+
+            // ObsoleteAttribute has constructor: ObsoleteAttribute(string? message) or ObsoleteAttribute(string? message, bool error)
+            if (obsoleteAttr.ConstructorArguments.Count > 0)
+            {
+                var msg = obsoleteAttr.ConstructorArguments[0].Value as string;
+                return string.IsNullOrEmpty(msg) ? "(deprecated)" : msg;
+            }
+
+            return "(deprecated)";
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
+        catch (TypeLoadException)
+        {
+            return null;
+        }
+    }
 
     private static string GetTypeKind(Type t) => t switch
     {
@@ -248,18 +247,119 @@ internal sealed class PackageInspector
         _ => "type"
     };
 
-    private static async Task<List<Type>> LoadTypesAsync(
+    /// <summary>
+    /// Loads types from a package and extracts API info while MetadataLoadContext is still valid.
+    /// This is critical - Type objects become invalid after MLC disposal.
+    /// Note: Uses GetCustomAttributesData() since GetCustomAttribute() doesn't work with MLC.
+    /// </summary>
+    private static async Task<ApiTypeInfo[]> LoadAndExtractTypesAsync(
+        FindPackageByIdResource resource, SourceCacheContext cache,
+        string packageId, NuGetVersion version, bool includePrivate, CancellationToken ct)
+    {
+        var assemblyPaths = await DownloadAssembliesAsync(resource, cache, packageId, version, ct).ConfigureAwait(false);
+        if (assemblyPaths.Count == 0) return [];
+
+        var resolver = new PathAssemblyResolver(RuntimeAssemblies.Value.Concat(assemblyPaths));
+        using var mlc = new MetadataLoadContext(resolver);
+
+        var bindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | (includePrivate ? BindingFlags.NonPublic : 0);
+        var apiTypes = new List<ApiTypeInfo>();
+
+        foreach (var path in assemblyPaths)
+        {
+            if (!IsManagedAssembly(path)) continue;
+            try
+            {
+                var types = mlc.LoadFromAssemblyPath(path).GetExportedTypes();
+                foreach (var t in types.Where(t => t.FullName is not null && (includePrivate || t.IsPublic)))
+                {
+                    // Extract ALL data while MLC is valid
+                    // Use GetCustomAttributesData() since GetCustomAttribute<T>() doesn't work with MLC
+                    apiTypes.Add(new ApiTypeInfo(
+                        FullName: t.FullName!,
+                        Namespace: t.Namespace,
+                        Name: t.Name,
+                        Kind: GetTypeKind(t),
+                        IsPublic: t.IsPublic,
+                        BaseType: t.BaseType?.FullName,
+                        Interfaces: [.. t.GetInterfaces().Select(i => i.FullName).OfType<string>()],
+                        Methods: [.. t.GetMethods(bindingFlags)
+                            .Where(m => !m.IsSpecialName)
+                            .Select(m => new ApiMethodInfo(
+                                m.Name, m.ReturnType.FullName ?? "void", m.IsStatic,
+                                GetObsoleteMessage(m),
+                                [.. m.GetParameters().Select(p => new ApiParameterInfo(p.Name ?? "arg", p.ParameterType.FullName ?? "object", p.HasDefaultValue))]))],
+                        Properties: [.. t.GetProperties(bindingFlags)
+                            .Select(p => new ApiPropertyInfo(p.Name, p.PropertyType.FullName ?? "object", p.CanRead, p.CanWrite))],
+                        ObsoleteMessage: GetObsoleteMessage(t)));
+                }
+            }
+            catch (BadImageFormatException) { /* Skip */ }
+            catch (FileLoadException) { /* Skip */ }
+        }
+
+        return [.. apiTypes];
+    }
+
+    /// <summary>
+    /// Loads types and extracts comparison-relevant data while MLC is valid.
+    /// Returns lightweight DTOs for version comparison.
+    /// Note: Uses GetObsoleteMessage() which works with MetadataLoadContext.
+    /// </summary>
+    private static async Task<List<TypeComparisonInfo>> LoadTypesForComparisonAsync(
+        FindPackageByIdResource resource, SourceCacheContext cache,
+        string packageId, NuGetVersion version, CancellationToken ct)
+    {
+        var assemblyPaths = await DownloadAssembliesAsync(resource, cache, packageId, version, ct).ConfigureAwait(false);
+        if (assemblyPaths.Count == 0) return [];
+
+        var resolver = new PathAssemblyResolver(RuntimeAssemblies.Value.Concat(assemblyPaths));
+        using var mlc = new MetadataLoadContext(resolver);
+
+        var result = new List<TypeComparisonInfo>();
+        var bindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
+
+        foreach (var path in assemblyPaths)
+        {
+            if (!IsManagedAssembly(path)) continue;
+            try
+            {
+                var types = mlc.LoadFromAssemblyPath(path).GetExportedTypes();
+                foreach (var t in types.Where(t => t.FullName is not null))
+                {
+                    // Extract all comparison-relevant data while MLC is valid
+                    // Use GetObsoleteMessage() since GetCustomAttribute<T>() doesn't work with MLC
+                    var methods = t.GetMethods(bindingFlags).Where(m => !m.IsSpecialName).ToList();
+                    result.Add(new TypeComparisonInfo(
+                        FullName: t.FullName!,
+                        Name: t.Name,
+                        Namespace: t.Namespace,
+                        BaseTypeName: t.BaseType?.Name,
+                        InterfaceNames: [.. t.GetInterfaces().Select(i => i.Name)],
+                        ObsoleteMessage: GetObsoleteMessage(t),
+                        Methods: [.. methods.Select(m => new MethodComparisonInfo(
+                            Name: m.Name,
+                            Signature: GetMethodSignature(m),
+                            IsAsync: IsAsyncMethod(m),
+                            ObsoleteMessage: GetObsoleteMessage(m)))],
+                        PropertyNames: [.. t.GetProperties(bindingFlags).Select(p => p.Name)]));
+                }
+            }
+            catch (BadImageFormatException) { /* Skip */ }
+            catch (FileLoadException) { /* Skip */ }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Downloads assemblies from a package to temp directory.
+    /// </summary>
+    private static async Task<List<string>> DownloadAssembliesAsync(
         FindPackageByIdResource resource, SourceCacheContext cache,
         string packageId, NuGetVersion version, CancellationToken ct)
     {
         var packageStream = new MemoryStream();
-        await using (packageStream.ConfigureAwait(false))
-        {
-            await resource.CopyNupkgToStreamAsync(packageId, version, packageStream, cache, NullLogger.Instance, ct).ConfigureAwait(false);
-            packageStream.Seek(0, SeekOrigin.Begin);
-        }
-
-        packageStream = new MemoryStream();
         await resource.CopyNupkgToStreamAsync(packageId, version, packageStream, cache, NullLogger.Instance, ct).ConfigureAwait(false);
         packageStream.Seek(0, SeekOrigin.Begin);
 
@@ -292,19 +392,7 @@ internal sealed class PackageInspector
             assemblyPaths.Add(dest);
         }
 
-        var resolver = new PathAssemblyResolver(RuntimeAssemblies.Value.Concat(assemblyPaths));
-        using var mlc = new MetadataLoadContext(resolver);
-
-        var types = new List<Type>();
-        foreach (var path in assemblyPaths)
-        {
-            if (!IsManagedAssembly(path)) continue;
-            try { types.AddRange(mlc.LoadFromAssemblyPath(path).GetExportedTypes()); }
-            catch (BadImageFormatException) { /* Skip */ }
-            catch (FileLoadException) { /* Skip */ }
-        }
-
-        return types;
+        return assemblyPaths;
     }
 
     private static async Task<string?> DownloadPrimaryAssemblyAsync(
@@ -413,6 +501,23 @@ internal sealed record ApiTypeInfo(
 internal sealed record ApiMethodInfo(string Name, string ReturnType, bool IsStatic, string? ObsoleteMessage, ApiParameterInfo[] Parameters);
 internal sealed record ApiPropertyInfo(string Name, string Type, bool CanRead, bool CanWrite);
 internal sealed record ApiParameterInfo(string Name, string Type, bool HasDefault);
+
+// DTOs for version comparison (captures data while MLC is valid)
+internal sealed record TypeComparisonInfo(
+    string FullName,
+    string Name,
+    string? Namespace,
+    string? BaseTypeName,
+    string[] InterfaceNames,
+    string? ObsoleteMessage,
+    MethodComparisonInfo[] Methods,
+    string[] PropertyNames);
+
+internal sealed record MethodComparisonInfo(
+    string Name,
+    string Signature,
+    bool IsAsync,
+    string? ObsoleteMessage);
 
 #pragma warning restore CA1812
 
