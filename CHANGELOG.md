@@ -33,6 +33,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Quoted all `$GITHUB_OUTPUT` references (SC2086)
   - Closes CodeQL alert: actions/code-injection/critical
 
+### Fixed
+- **PackageInspector MetadataLoadContext disposal bug (2025-11-29):**
+  - Fixed `GetObsoleteApis`, `ExtractPackageApi`, and `CompareVersionsAsync` failing with "MetadataLoadContext disposed" error
+  - Root cause: Type objects returned from `LoadTypesAsync` became invalid after MLC disposal
+  - Solution: Extract all type metadata (including ObsoleteAttribute) *inside* the MLC scope before returning
+  - Created new DTOs (`TypeComparisonInfo`, `MethodComparisonInfo`) to capture comparison-relevant data
+  - Used `GetCustomAttributesData()` instead of `GetCustomAttribute<T>()` which doesn't work with MLC-loaded types
+  - All RoslynMetrics package inspection tools now work correctly
+
 ### Changed
 - **README Refactor (2025-11-29):**
   - Reduced README.md from 527 to 65 lines (88% reduction)

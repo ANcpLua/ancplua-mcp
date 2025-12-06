@@ -1,6 +1,13 @@
 using Ancplua.Mcp.Infrastructure.ServiceDefaults;
+using Microsoft.Build.Locator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
+// MSBuildLocator MUST be registered before any code that references Roslyn/MSBuild types
+if (!MSBuildLocator.IsRegistered)
+{
+    MSBuildLocator.RegisterDefaults();
+}
 
 var builder = Host.CreateApplicationBuilder(args);
 

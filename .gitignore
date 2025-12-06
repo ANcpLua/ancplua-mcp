@@ -60,3 +60,4 @@ nunit-*.xml
 *.DS_Store
 .DS_Store
 *.DotSettings.user
+rider.project.*.info
