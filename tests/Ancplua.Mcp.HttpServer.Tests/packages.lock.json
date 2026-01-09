@@ -371,16 +371,16 @@
           "Ancplua.Mcp.Infrastructure.ServiceDefaults": "[1.0.0, )",
           "Ancplua.Mcp.Libraries.CoreTools": "[1.0.0, )",
           "Ancplua.Mcp.Libraries.DebugTools": "[1.0.0, )",
-          "Microsoft.AspNetCore.OpenApi": "[10.0.0, )",
+          "Microsoft.AspNetCore.OpenApi": "[10.0.1, )",
           "ModelContextProtocol": "[0.4.1-preview.1, )",
           "ModelContextProtocol.AspNetCore": "[0.4.1-preview.1, )"
         }
       },
       "Microsoft.AspNetCore.OpenApi": {
         "type": "CentralTransitive",
-        "requested": "[10.0.0, )",
-        "resolved": "10.0.0",
-        "contentHash": "0aqIF1t+sA2T62LIeMtXGSiaV7keGQaJnvwwmu+htQdjCaKYARfXAeqp4nHH9y2etpilyZ/tnQzZg4Ilmo/c4Q==",
+        "requested": "[10.0.1, )",
+        "resolved": "10.0.1",
+        "contentHash": "gMY53EggRIFawhue66GanHcm1Tcd0+QzzMwnMl60LrEoJhGgzA9qAbLx6t/ON3hX4flc2NcEbTK1Z5GCLYHcwA==",
         "dependencies": {
           "Microsoft.OpenApi": "2.0.0"
         }
