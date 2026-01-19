@@ -27,7 +27,7 @@
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.0.0"/>
   </ItemGroup>
   <ItemGroup Label="ASP.NET Core">
-    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1"/>
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2"/>
   </ItemGroup>
   <ItemGroup Label="AI">
     <!-- MCP SDK 0.4.1 targets M.E.AI.Abstractions 10.0.0; we can use 10.0.1 -->
